@@ -1,0 +1,167 @@
+IMPORTANT: IT IS ESSENTIAL THAT YOU BACKUP ALL YOUR OLD
+FILES AND DATABASE BEFORE ATTEMPTING AN UPGRADE. YOU SHOULD ALSO
+KNOW HOW TO RESTORE YOUR BACKUP JUST IN CASE THINGS GO WRONG.
+
+
+Basically, it is possible to upgrade your existing site
+with this new version. Your database will be upgraded
+automatically after uploading the files, when you go
+to your Admin section.
+
+The upload procedure is the same as in previous upgrades.
+
+However, because the header and css files were modified
+in version 2.0 - you would need to merge these files with
+your existing files too.
+
+The changes are too big to list right now.... 
+The script's zip file more than doubled in size!
+
+
+==========================================================
+
+MDS 2.0.15
+
+- License changed to GPL
+- Copyright transferred form Jamit Software to 
+Adam Malinowski (adam@milliondollarscript.com)
+
+MDS 2.0.14
+
+- fix max orders bug
+- fix image upload bug if Safe Mode is on
+- fix bug with package price not updated
+- fixed 'write your ad' button to be enabled when 'Edit Order'is pressed
+- Fix 'Edit Order' button
+
+
+MDS 2.0.13
+
+- delete temp order when a new pixel image gets uploaded
+- adjustements to the javascript in users/select_pixels.php
+- Admin Order's Map: increased height
+- Admin Process Pixels: expired orders publish status set to 'N'
+- users/ Logout: Logout link does not show if logged in
+- Admin: Ad List Sql Query fix
+- Top Advertisers Sql Query Fix
+
+
+MDS 2.0.11
+
+
+- Fix problem with category field types.
+- Fix problem with deleting Advertiser's account form the admin.
+
+===================================================
+
+Million Dollar Script version 1.7.8 - 1.7.9
+Released April 28, 2006 
+
+This version contains some minor bug fixes reported by users.
+There are no major features in this version.
+
+You can upgrade to this version from any older version. No sequence is
+necessary. The latest version will update your database automatically
+to the latest version. Your tables and data will be preserved.
+It is always a good idea to backup your data before the upgrade.
+
+See below for upgrade instructions
+
+
+
+#######################################################
+CHANGES 
+
+Version 1.7.8 & 1.7.9:
+
+- Maintanance release version, includes minor fixes to be compatible with more
+servers & minor reported bugs fixed.
+
+Since Version 1.7.7:
+
+- Fixed SMTP email bug, SMTP email test & seperated SMTP server form POP
+- POP before SMTP setting
+- Localized some strings in the payment module
+- minor bug fixes.
+
+Since Version 1.7.6:
+
+- Seperated POP server & SMTP setting in Main Config
+- Added a Pop-before-smtp option (beta)
+- Updated Authorize.net module
+
+Since Version 1.7.5:
+
+- Added ccAvenue, e-gold, moneybookers and Authorize.net payment modules
+- Added email alert to Admin when pixels are uploaded, admin can approve pixels and
+process the image by email
+- Minor bug fixes all round.
+
+Since Version 1.7.4:
+
+- Fixed bug with displaying confirmed order when using packages.
+- Fixed bug with unlimited max orders in packages. 
+
+Since Version 1.7.3:
+
+- Fixed bug with displaying 'days to expire' of packages
+- Fixed bug with click.php
+- Fixed bug in install.php
+
+Since Version 1.7.2:
+
+- Fixed mouseover bugs
+- Addred transition effects to mouseover
+- Fixed bug with selection image not showing as GIF, when GIF was selected
+
+
+Since Version 1.6.5:
+
+
+- Optimized HTML, saving up to 90% bandwidth in a best case scenario. Grids will load much faster - they will scream!
+- Packages: Prices options can be grouped in a package, the advertiser will be able to select the best price option from the package.
+- Enhanced click tracking & click reports
+- Click on available pixels will take the user to a Admin-defined URL
+- Improvements to the AJAX code 
+- Improvements to Approve URL
+
+
+
+
+#####################################################
+
+Upgrade instructions
+
+Upload all the files with the latest date, except:
+
+- config.php 
+- logo.gif
+- users/header.php 
+- users/footer.php 
+- lang/english.php 
+- main.css
+
+The script will upgrade the database automatically once
+you log into the Admin section.
+
+The script will also update the language file(s) in the lang/ directory.
+The script will warn you if it cannot write to these files.
+
+NOTE: Backup your files and database tables before attempting an upgrade.
+You can backup the database tables by exporting them as SQL in PHPMyAdmin.
+
+NOTE 2: If you have customized any other PHP files, you will need to merge them.
+We recommend this handy tool for the job (free):
+http://www.milliondollarscript.com/win-merge-tutorial.htm
+
+NOTE 3: The html file mouse_overbox.htm was modified in this version and will need
+to be uploaded. (We have added a 'filter: revealtrans();' to the CSS style definition)
+
+#####################################################
+
+
+http://www.milliondollarscript.com/
+
+
+
+Copyright Jamit Software, 2006.

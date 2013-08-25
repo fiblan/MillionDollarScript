@@ -1,0 +1,59 @@
+
+/*
+controls the look and feel of the 'pixels-sold/available' box:
+*/
+.status {	
+		width:134px;
+		height:43;
+		border:0;
+		padding: 5 0 0 0;
+		background: url(s_bg.gif) no-repeat #D7D7D7;
+		font-size: 12px;
+		font-family: Arial;
+		text-align:center;
+		line-height:16px;
+	}
+
+.status_body {
+
+	margin:0px; 
+	background-color: #D7D7D7;
+
+}
+/*
+Table cells (inside tables)
+*/
+	TD {
+
+		font-size: 12px;
+
+
+	}
+/*
+Heading bar
+*/
+	.heading_bar {
+		background: #D7D7D7;
+
+
+	}
+/*
+Menu bar (section at the top where the navigational links are placed)
+*/
+	.menu_bar  {
+	
+		background: #fff  url(grgrad.gif) repeat-x;
+		color: white;
+		font-weight: bold;
+		text-align: center;
+		font-size: 13px;
+
+
+	}
+/*
+Links in the menu bar
+*/
+	A.menu_bar {
+		color: white;
+
+	}
