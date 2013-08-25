@@ -1,15 +1,40 @@
 <?php
+/**
+ * @version		$Id: confirm_order.php 137 2011-04-18 19:48:11Z ryan $
+ * @package		mds
+ * @copyright	(C) Copyright 2010 Ryan Rhode, All rights reserved.
+ * @author		Ryan Rhode, ryan@milliondollarscript.com
+ * @license		This program is free software; you can redistribute it and/or modify
+ *		it under the terms of the GNU General Public License as published by
+ *		the Free Software Foundation; either version 3 of the License, or
+ *		(at your option) any later version.
+ *
+ *		This program is distributed in the hope that it will be useful,
+ *		but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License along
+ *		with this program;  If not, see http://www.gnu.org/licenses/gpl-3.0.html.
+ *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ *		Million Dollar Script
+ *		A pixel script for selling pixels on your website.
+ *
+ *		For instructions see README.txt
+ *
+ *		Visit our website for FAQs, documentation, a list team members,
+ *		to post any bugs or feature requests, and a community forum:
+ * 		http://www.milliondollarscript.com/
+ *
+ */
+
 session_start();
 include ("../config.php");
 require_once ("../include/ads.inc.php");
 
-if ($_REQUEST['BID']!='') {
-	$BID=$_REQUEST['BID'];
-} else {
-$BID = 1; # Banner ID. Change this later & allow users to select multiple banners
-
-}
-
+$BID = $f2->bid($_REQUEST['BID']);
 
 ##############################
 function display_edit_order_button ($order_id) {
@@ -53,10 +78,8 @@ if (mysql_num_rows($order_result)==0) {
 }
 
 
-
+//print_r($order_row);
 // get the banner ID
-
-
 $BID = $order_row['banner_id'];
 
 $b_row = load_banner_constants($BID);
@@ -110,11 +133,8 @@ if ($_SESSION['MDS_ID']=='') {   // not logged in..
 
 		display_signup_form($_REQUEST['FirstName'], $_REQUEST['LastName'], $_REQUEST['CompName'], $_REQUEST['Username'], $_REQUEST['Password'], $_REQUEST['Password2'], $_REQUEST['Email'], $_REQUEST['Newsletter'], $_REQUEST['Notification1'], $_REQUEST['Notification2'], $_REQUEST['lang']);
 	} else {
-
-		
 					
 	}
-
 
 ?></td>
 <td valign=top>
@@ -126,7 +146,7 @@ if ($_SESSION['MDS_ID']=='') {   // not logged in..
 </table>
 <p>&nbsp;</p>
 
-	<?php
+<?php
 
 } else { // The user is singed in
 
@@ -199,7 +219,7 @@ show_nav_status (3);
 		?>
 		<input type="hidden" name="selected_pixels" value="<?php echo $_REQUEST['selected_pixels'];?>">
 		<input type="hidden" name="order_id" value="<?php echo $_REQUEST['order_id'];?>">
-		<input type="hidden" name="BID" value="<?php echo $_REQUEST['BID'];?>">
+		<input type="hidden" name="BID" value="<?php echo $f2->bid($_REQUEST['BID']);?>">
 		<?php
 		display_package_options_table($BID, $_REQUEST['pack'], true);
 		echo "<input class='big_button' type='button' value='".$label['advertiser_pack_prev_button']."' onclick='window.location=\"write_ad.php?&BID=$BID&ad_id=".$order_row['ad_id']."\"' >" ;

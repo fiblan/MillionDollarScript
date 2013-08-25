@@ -1,24 +1,35 @@
-<?php session_start(); ?>
 <?php
-/*
-COPYRIGHT 2008 - see www.milliondollarscript.com for a list of authors
-
-This file is part of the Million Dollar Script.
-
-Million Dollar Script is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-Million Dollar Script is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with the Million Dollar Script.  If not, see <http://www.gnu.org/licenses/>.
-
-*/
+/**
+ * @version		$Id: maintain_codes.php 88 2010-10-12 16:43:19Z ryan $
+ * @package		mds
+ * @copyright	(C) Copyright 2010 Ryan Rhode, All rights reserved.
+ * @author		Ryan Rhode, ryan@milliondollarscript.com
+ * @license		This program is free software; you can redistribute it and/or modify
+ *		it under the terms of the GNU General Public License as published by
+ *		the Free Software Foundation; either version 3 of the License, or
+ *		(at your option) any later version.
+ *
+ *		This program is distributed in the hope that it will be useful,
+ *		but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License along
+ *		with this program;  If not, see http://www.gnu.org/licenses/gpl-3.0.html.
+ *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ *		Million Dollar Script
+ *		A pixel script for selling pixels on your website.
+ *
+ *		For instructions see README.txt
+ *
+ *		Visit our website for FAQs, documentation, a list team members,
+ *		to post any bugs or feature requests, and a community forum:
+ * 		http://www.milliondollarscript.com/
+ *
+ */
+session_start();
 ini_set('max_execution_time', 10000);
 require ('../include/code_functions.php');
 require ('../config.php');
@@ -73,13 +84,8 @@ function can_delete_code ($field_id, $code) {
 
 
 ?>
+<?php echo $f2->get_doc(); ?>
 
-<html>
-
-
-<head>
-
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <style>
 body {
 	background: #fff  url(<?php echo BASE_HTTP_PATH;?>images/grgrad.gif) repeat-x;

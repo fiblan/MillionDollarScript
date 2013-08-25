@@ -1,20 +1,21 @@
 //\/////
 //\  overLIB Shadow Plugin
-//\  This file requires overLIB 4.00 or later.
+//\  This file requires overLIB 4.10 or later.
 //\
-//\  overLIB 4.00 - You may not remove or change this notice.
+//\  overLIB 4.05 - You may not remove or change this notice.
 //\  Copyright Erik Bosrup 1998-2003. All rights reserved.
 //\  Contributors are listed on the homepage.
 //\  See http://www.bosrup.com/web/overlib/ for details.
-//   $Revision: 1.6.4.1 $                $Date: 2004/03/23 16:29:38 $
+//   $Revision: 68 $                $Date: 2010-09-11 21:31:03 -0400 (Sat, 11 Sep 2010) $
 //\/////
-
+//\mini
 
 ////////
 // PRE-INIT
 // Ignore these lines, configuration is below.
 ////////
-if (typeof olInfo == 'undefined' || olInfo.simpleversion < 400) alert('overLIB 4.00 or later is required for the Shadow Plugin.');
+if (typeof olInfo == 'undefined' || typeof olInfo.meets == 'undefined' || !olInfo.meets(4.10)) alert('overLIB 4.10 or later is required for the Shadow Plugin.');
+else {
 registerCommands('shadow,shadowcolor,shadowimage,shadowopacity,shadowx,shadowy');
 
 
@@ -108,7 +109,7 @@ function generateShadow(content) {
 	X = Math.abs(o3_shadowx);
 	Y = Math.abs(o3_shadowy);
 	wd = parseInt(o3_width);
-	if(olHideForm&&!olNs4) ht=over.offsetHeight;
+	ht = (olNs4) ? over.clip.height : over.offsetHeight;
 
 	if (o3_shadowx == 0) {
 		if (o3_shadowy < 0) {
@@ -144,7 +145,7 @@ function generateShadow(content) {
 		}
 	}
 	
-	txt = (olNs4) ? '<div id="backdrop"></div>' : ((olIe55&&olHideForm) ? bckDropSrc(wd+X,ht+Y,zIdx++) : '') + '<div id="backdrop" style="position: absolute;'+posStr[0]+'; width: '+wd+'px; z-index: ' + (zIdx++) + '; ';
+	txt = (olNs4) ? '<div id="backdrop"></div>' : ((olIe55&&olHideForm) ? backDropSource(wd+X,ht+Y,zIdx++) : '') + '<div id="backdrop" style="position: absolute;'+posStr[0]+'; width: '+wd+'px; height: '+ht+'px; z-index: ' + (zIdx++) + '; ';
 
 	if (o3_shadowimage) {
 		bS='background-image: url('+o3_shadowimage+');';
@@ -176,7 +177,7 @@ function generateShadow(content) {
 		dpObj.left = parseInt(aPos[0].split(':')[1]);
 		dpObj.top = parseInt(aPos[1].split(':')[1]);
     
-    		dpObj.bgColor = (bkSet == 1) ? null : o3_shadowcolor;
+    dpObj.bgColor = (bkSet == 1) ? null : o3_shadowcolor;
 		dpObj.background.src = (bkSet==2) ? null : o3_shadowimage;
 		dpObj.zIndex = 0;
 
@@ -195,12 +196,7 @@ function generateShadow(content) {
 			var op = o3_shadowopacity;
 			op = (op <= 100 ? op : 100);
 			
-			if (olIe4 && !isMac) {
-				dpObj.style.filter = 'Beta(Opacity='+op+')';
-				dpObj.filters.Beta.enabled = true;
-			} else {
-				if (typeof(dpObj.style.MozOpacity) == 'string') dpObj.style.MozOpacity = op / 100;
-			}
+			setBrowserOpacity(op,dpObj);
 		}
 	} 
 
@@ -216,11 +212,34 @@ function generateShadow(content) {
 
 // Cleans up opacity settings if any.
 function cleanUpShadowEffects() {
+	if (olNs4 || olOp) return;
+	var dpObj=(olIe4 ? o3_frame.document.all['backdrop'] : o3_frame.document.getElementById('backdrop'));
+	cleanUpBrowserOpacity(dpObj);
+}
+
+// multi browser opacity support
+function setBrowserOpacity(op,lyr){
+	if (olNs4||!op) return;  // if Ns4.x or opacity not given return;
+	lyr=(lyr) ? lyr : over;
+	if (olIe4&&typeof lyr.filters != 'undefined') {
+		lyr.style.filter='Alpha(Opacity='+op+')';
+		lyr.filters.alpha.enabled=true;
+	} else {
+		var sOp=(typeof(lyr.style.MozOpacity)!='undefined') ? 'MozOpacity' : (typeof(lyr.style.KhtmlOpacity)!='undefined' ? 'KhtmlOpacity' : (typeof(lyr.style.opacity)!='undefined' ? 'opacity' : '')); 
+		if (sOp) eval('lyr.style.'+sOp+'=op/100');
+	}
+}
+
+// multi-browser Opacity cleanup
+function cleanUpBrowserOpacity(lyr) {
 	if (olNs4) return;
-	else {
-		var dpObj = (olIe4 ? o3_frame.document.all['backdrop'] : o3_frame.document.getElementById('backdrop'));
-		if (olIe4 && !isMac && dpObj.filters.Beta) dpObj.filters.Beta.enabled = false;
-		else if (typeof(dpObj.style.MozOpacity) == 'string') dpObj.style.MozOpacity= 1.0;
+	lyr=(lyr) ? lyr : over;
+	if (olIe4&&(typeof lyr.filters != 'undefined'&&lyr.filters.alpha.enabled)) {
+		lyr.style.filter='Alpha(Opacity=100)';
+		lyr.filters.alpha.enabled=false;
+	} else {
+		var sOp=(typeof(lyr.style.MozOpacity)!='undefined') ? 'MozOpacity' : (typeof(lyr.style.KhtmlOpacity)!='undefined' ? 'KhtmlOpacity' : (typeof(lyr.style.opacity)!='undefined' ? 'opacity' : '')); 
+		if (sOp) eval('lyr.style.'+sOp+'=1.0');
 	}
 }
 
@@ -244,7 +263,8 @@ registerRunTimeFunction(setShadowVariables);
 registerCmdLineFunction(parseShadowExtras);
 registerHook("cursorOff",shadow_cursorOff,FREPLACE);
 registerHook("hideObject",checkShadowPreHide,FBEFORE);
-registerHook("createPopup",generateShadow,FAFTER,before);
+registerHook("olCreatePopup",generateShadow,FAFTER,before);
+if (olInfo.meets(4.10)) registerNoParameterCommands('shadow');
 
 if (olNs4) shadowAdjust();  // write style rules for proper support of Ns4.x
-//end 
+}

@@ -145,8 +145,8 @@ A {
 .fancy_heading {
 	border-style: solid; 
 	border-color:#99CCCC; 
-	border-width:1; 
-	padding: 3;
+	border-width:1px; 
+	padding: 3px;
 	font-size: 14px;
 	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
 	font-weight: bold;
@@ -352,4 +352,6 @@ Ads list
 
 }
 
-
+.httplabel {
+  float:right;
+}

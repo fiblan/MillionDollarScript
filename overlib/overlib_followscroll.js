@@ -1,20 +1,21 @@
 //\/////
 //\  overLIB Follow Scroll Plugin
-//\  This file requires overLIB 4.00 or later.
+//\  This file requires overLIB 4.10 or later.
 //\
-//\  overLIB 4.00 - You may not remove or change this notice.
+//\  overLIB 4.10 - You may not remove or change this notice.
 //\  Copyright Erik Bosrup 1998-2004. All rights reserved.
 //\  Contributors are listed on the homepage.
 //\  See http://www.bosrup.com/web/overlib/ for details.
-//   $Revision: 1.6.2.1 $                      $Date: 2004/03/23 16:29:38 $
+//   $Revision: 68 $                      $Date: 2010-09-11 21:31:03 -0400 (Sat, 11 Sep 2010) $
 //\/////
-
+//\mini
 
 ////////
 // PRE-INIT
 // Ignore these lines, configuration is below.
 ////////
-if (typeof olInfo == 'undefined' || olInfo.simpleversion < 400) alert('overLIB 4.00 or later is required for the Follow Scroll Plugin.');
+if (typeof olInfo == 'undefined' || typeof olInfo.meets == 'undefined' || !olInfo.meets(4.10)) alert('overLIB 4.10 or later is required for the Follow Scroll Plugin.');
+else {
 registerCommands('followscroll,followscrollrefresh');
 
 
@@ -69,121 +70,29 @@ function parseScrollExtras(pf,i,ar) {
 // Function to support scroll feature (overloads default)
 function scroll_placeLayer() {
 	var placeX, placeY, widthFix = 0;
-	var hasAnchor=(typeof o3_anchor != 'undefined' && o3_anchor);
 	
 	// HORIZONTAL PLACEMENT
-	if (eval('o3_frame.'+docRoot) && eval("typeof o3_frame."+docRoot+".clientWidth=='number'") && eval('o3_frame.'+docRoot+'.clientWidth')) {
-		iwidth = eval('o3_frame.'+docRoot+'.clientWidth');
-	} else if (typeof(o3_frame.innerWidth) == 'number') {
-		widthFix = Math.ceil(1.2*(o3_frame.outerWidth - o3_frame.innerWidth));
-		iwidth = o3_frame.innerWidth;
-	}
+	if (o3_frame.innerWidth) { 
+		widthFix=Math.ceil(1.2*(o3_frame.outerWidth - o3_frame.innerWidth));
+    widthFix = (widthFix > 50) ? 20 : widthFix;
+		iwidth=o3_frame.innerWidth;
+	} else if (eval('o3_frame.'+docRoot)&&eval("typeof o3_frame."+docRoot+".clientWidth=='number'")&&eval('o3_frame.'+docRoot+'.clientWidth')) 
+		iwidth=eval('o3_frame.'+docRoot+'.clientWidth');			
 
-	if (hasAnchor) {
-		placeX = rmrkPosition[0];
-		placeY = rmrkPosition[1];
-	} else {	
-		// Horizontal scroll offset
-		winoffset=(olIe4) ? eval('o3_frame.'+docRoot+'.scrollLeft') : o3_frame.pageXOffset;
-		var parsedWidth = parseInt(o3_width);
+	// Horizontal scroll offset
+	winoffset=(olIe4) ? eval('o3_frame.'+docRoot+'.scrollLeft') : o3_frame.pageXOffset;
+
+	placeX = runHook('horizontalPlacement',FCHAIN,iwidth,winoffset,widthFix);
 	
-		if (o3_fixx > -1 || o3_relx != null) {
-			// Fixed position
-			placeX=(o3_relx != null ? ( o3_relx < 0 ? winoffset +o3_relx+ iwidth - parsedWidth - widthFix : winoffset+o3_relx) : o3_fixx);
-		} else {  
-			// If HAUTO, decide what to use.
-			if (o3_hauto == 1) {
-				if ((o3_x - winoffset) > (iwidth / 2)) {
-					o3_hpos = LEFT;
-				} else {
-					o3_hpos = RIGHT;
-				}
-			}  		
-	
-			// From mouse
-			if (o3_hpos == CENTER) { // Center
-				placeX = o3_x+o3_offsetx-(parsedWidth/2);
-	
-				if (placeX < winoffset) placeX = winoffset;
-			}
-	
-			if (o3_hpos == RIGHT) { // Right
-				placeX = o3_x+o3_offsetx;
-	
-				if ((placeX+parsedWidth) > (winoffset+iwidth - widthFix)) {
-					placeX = iwidth+winoffset - parsedWidth - widthFix;
-					if (placeX < 0) placeX = 0;
-				}
-			}
-			if (o3_hpos == LEFT) { // Left
-				placeX = o3_x-o3_offsetx-parsedWidth;
-				if (placeX < winoffset) placeX = winoffset;
-			}  	
-	
-			// Snapping!
-			if (o3_snapx > 1) {
-				var snapping = placeX % o3_snapx;
-	
-				if (o3_hpos == LEFT) {
-					placeX = placeX - (o3_snapx+snapping);
-				} else {
-					// CENTER and RIGHT
-					placeX = placeX+(o3_snapx - snapping);
-				}
-	
-				if (placeX < winoffset) placeX = winoffset;
-			}
-		}	
-	
-		// VERTICAL PLACEMENT
-		if (eval('o3_frame.'+docRoot) && eval("typeof o3_frame."+docRoot+".clientHeight=='number'") && eval('o3_frame.'+docRoot+'.clientHeight')) {
-			iheight = eval('o3_frame.'+docRoot+'.clientHeight');
-		} else if (typeof(o3_frame.innerHeight)=='number') {
-			iheight = o3_frame.innerHeight;
-		}
-	
-		// Vertical scroll offset
-		scrolloffset=(olIe4) ? eval('o3_frame.'+docRoot+'.scrollTop') : o3_frame.pageYOffset;
-		var parsedHeight=(o3_aboveheight ? parseInt(o3_aboveheight) : (olNs4 ? over.clip.height : over.offsetHeight));
-	
-		if (o3_fixy > -1 || o3_rely != null) {
-			// Fixed position
-			placeY=(o3_rely != null ? (o3_rely < 0 ? scrolloffset+o3_rely+iheight - parsedHeight : scrolloffset+o3_rely) : o3_fixy);
-		} else {
-			// If VAUTO, decide what to use.
-			if (o3_vauto == 1) {  
-				if ((o3_y - scrolloffset) > (iheight/2)) {
-					o3_vpos = ABOVE;
-				} else {
-					o3_vpos = BELOW;
-				}
-			}
-	
-			// From mouse
-			if (o3_vpos == ABOVE) {
-				if (o3_aboveheight == 0) o3_aboveheight = parsedHeight; 
-	
-				placeY = o3_y - (o3_aboveheight+o3_offsety);
-				if (placeY < scrolloffset) placeY = scrolloffset;
-			} else {
-				// BELOW
-				placeY = o3_y+o3_offsety;
-			} 
-	
-			// Snapping!
-			if (o3_snapy > 1) {
-				var snapping = placeY % o3_snapy;  			
-	
-				if (o3_aboveheight > 0 && o3_vpos == ABOVE) {
-					placeY = placeY - (o3_snapy+snapping);
-				} else {
-					placeY = placeY+(o3_snapy - snapping);
-				} 			
-	
-				if (placeY < scrolloffset) placeY = scrolloffset;
-			}
-		}
-	}
+	// VERTICAL PLACEMENT
+	if (o3_frame.innerHeight) iheight=o3_frame.innerHeight;
+	else if (eval('o3_frame.'+docRoot)&&eval("typeof o3_frame."+docRoot+".clientHeight=='number'")&&eval('o3_frame.'+docRoot+'.clientHeight')) 
+		iheight=eval('o3_frame.'+docRoot+'.clientHeight');			
+
+	// Vertical scroll offset
+	scrolloffset=(olIe4) ? eval('o3_frame.'+docRoot+'.scrollTop') : o3_frame.pageYOffset;
+
+	placeY = runHook('verticalPlacement',FCHAIN,iheight,scrolloffset);
 
 	// Actually move the object.
 	repositionTo(over,placeX,placeY);
@@ -262,4 +171,5 @@ registerRunTimeFunction(setScrollVariables);
 registerCmdLineFunction(parseScrollExtras);
 registerHook("hideObject",cancelScroll,FAFTER);
 registerHook("placeLayer",scroll_placeLayer,FREPLACE);
-//end 
+if (olInfo.meets(4.10)) registerNoParameterCommands('followscroll');
+}

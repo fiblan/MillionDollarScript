@@ -2,20 +2,20 @@
 /*
  * sendmail_message.php
  *
- * @(#) $Header: /home/mlemos/cvsroot/mimemessage/sendmail_message.php,v 1.15 2005/02/18 02:46:18 mlemos Exp $
+ * @(#) $Header: /opt2/ena/metal/mimemessage/sendmail_message.php,v 1.19 2011/11/26 09:41:09 mlemos Exp $
  *
  *
  */
 
 /*
-{metadocument}<?xml version="1.0" encoding="ISO-8859-1"?>
+{metadocument}<?xml version="1.0" encoding="UTF-8"?>
 <class>
 
 	<package>net.manuellemos.mimemessage</package>
 
 	<name>sendmail_message_class</name>
-	<version>@(#) $Id: sendmail_message.php,v 1.15 2005/02/18 02:46:18 mlemos Exp $</version>
-	<copyright>Copyright © (C) Manuel Lemos 1999-2004</copyright>
+	<version>@(#) $Id: sendmail_message.php 161 2012-10-11 18:09:12Z ryan $</version>
+	<copyright>Copyright (C) Manuel Lemos 1999-2004</copyright>
 	<title>MIME E-mail message composing and sending using Sendmail</title>
 	<author>Manuel Lemos</author>
 	<authoraddress>mlemos-at-acm.org</authoraddress>
@@ -189,8 +189,6 @@ class sendmail_message_class extends email_message_class
 	</variable>
 {/metadocument}
 */
-	var $delivery_mode=SENDMAIL_DELIVERY_DEFAULT;
-
 	var $bulk_mail_delivery_mode=SENDMAIL_DELIVERY_QUEUE;
 
 /*
@@ -213,7 +211,7 @@ class sendmail_message_class extends email_message_class
 {metadocument}
 	<variable>
 		<name>mailer_delivery</name>
-		<value>sendmail $Revision: 1.15 $</value>
+		<value>sendmail $Revision: 161 $</value>
 		<documentation>
 			<purpose>Specify the text that is used to identify the mail
 				delivery class or sub-class. This text is appended to the
@@ -224,9 +222,9 @@ class sendmail_message_class extends email_message_class
 	</variable>
 {/metadocument}
 */
-	var $mailer_delivery='sendmail $Revision: 1.15 $';
+	var $mailer_delivery='sendmail $Revision: 161 $';
 
-	Function SendMail($to,$subject,$body,$headers,$return_path)
+	Function SendMail($to, $subject, $body, $headers, $return_path)
 	{
 		$command=$this->sendmail_path." -t -i";
 		switch($this->bulk_mail ? $this->bulk_mail_delivery_mode : $this->delivery_mode)
@@ -243,7 +241,7 @@ class sendmail_message_class extends email_message_class
 		if($this->delivery_mode!=SENDMAIL_DELIVERY_DEFAULT)
 			$command.=" -od".$this->delivery_mode;
 		if(strlen($return_path))
-			$command.=" -f '".ereg_replace("'", "'\\''",$return_path)."'";
+			$command.=" -f '".preg_replace("/'/", "'\\''",$return_path)."'";
 		if(strlen($this->sendmail_arguments))
 			$command.=" ".$this->sendmail_arguments;
 		if(!($pipe=@popen($command,"w")))

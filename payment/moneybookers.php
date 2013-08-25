@@ -1,26 +1,37 @@
 <?php
-/*
-COPYRIGHT 2008 - see www.milliondollarscript.com for a list of authors
-
-This file is part of the Million Dollar Script.
-
-Million Dollar Script is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-Million Dollar Script is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with the Million Dollar Script.  If not, see <http://www.gnu.org/licenses/>.
-
-*/
+/**
+ * @version		$Id: moneybookers.php 69 2010-09-12 01:31:15Z ryan $
+ * @package		mds
+ * @copyright	(C) Copyright 2010 Ryan Rhode, All rights reserved.
+ * @author		Ryan Rhode, ryan@milliondollarscript.com
+ * @license		This program is free software; you can redistribute it and/or modify
+ *		it under the terms of the GNU General Public License as published by
+ *		the Free Software Foundation; either version 3 of the License, or
+ *		(at your option) any later version.
+ *
+ *		This program is distributed in the hope that it will be useful,
+ *		but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License along
+ *		with this program;  If not, see http://www.gnu.org/licenses/gpl-3.0.html.
+ *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ *		Million Dollar Script
+ *		A pixel script for selling pixels on your website.
+ *
+ *		For instructions see README.txt
+ *
+ *		Visit our website for FAQs, documentation, a list team members,
+ *		to post any bugs or feature requests, and a community forum:
+ * 		http://www.milliondollarscript.com/
+ *
+ */
 require_once "../config.php";
 
-$_PAYMENT_OBJECTS['moneybookers'] = new moneybookers;//"paypal";
+$_PAYMENT_OBJECTS['moneybookers'] = new moneybookers;
 
 define (IPN_LOGGING, 'Y');
 
@@ -36,13 +47,13 @@ function mb_mail_error($msg) {
 	$headers .= "Date: $date" ."\r\n"; 
 	$headers .= "X-Sender-IP: $REMOTE_ADDR" ."\r\n";
 
-	$entry_line =  "(ccavenue error detected) $msg\r\n "; 
+	$entry_line =  "(moneybookers error detected) $msg\r\n "; 
 	$log_fp = @fopen("logs.txt", "a"); 
 	@fputs($log_fp, $entry_line); 
 	@fclose($log_fp);
 
 
-	@mail(SITE_CONTACT_EMAIL, "Error message from ".SITE_NAME." Jamit ccAvenue script. ", $msg, $headers);
+	@mail(SITE_CONTACT_EMAIL, "Error message from ".SITE_NAME." Moneybookers payment script. ", $msg, $headers);
 
 }
 
@@ -59,8 +70,6 @@ function mb_log_entry ($entry_line) {
 
 
 }
-
-
 
 if ($_POST['merchant_id']!='') { 
 
@@ -259,8 +268,6 @@ class moneybookers {
 <input type="hidden" name="detail1_text" value="<?php echo SITE_NAME; ?>">
 <input type="submit" value="<?php echo $label['pay_by_moneybookers_button'];?>">
 </form>
-
-		
 
 		<?php
 

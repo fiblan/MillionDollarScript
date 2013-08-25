@@ -1,0 +1,150 @@
+<?php
+/**
+ * @version		$Id: CHANGELOG 127 2011-03-21 11:28:07Z ryan $
+ * @package		mds
+ * @copyright	(C) Copyright 2010 Ryan Rhode, All rights reserved.
+ * @author		Ryan Rhode, ryan@milliondollarscript.com
+ * @license		This program is free software; you can redistribute it and/or modify
+ *		it under the terms of the GNU General Public License as published by
+ *		the Free Software Foundation; either version 3 of the License, or
+ *		(at your option) any later version.
+ *
+ *		This program is distributed in the hope that it will be useful,
+ *		but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License along
+ *		with this program;  If not, see http://www.gnu.org/licenses/gpl-3.0.html.
+ *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ *		Million Dollar Script
+ *		A pixel script for selling pixels on your website.
+ *
+ *		For instructions see README.txt
+ *
+ *		Visit our website for FAQs, documentation, a list team members,
+ *		to post any bugs or feature requests, and a community forum:
+ * 		http://www.milliondollarscript.com/
+ *
+ */
+?>
+
+MDS 2.1 alpha
+
+- SECURITY RELEASE - UPGRADED STRONGLY RECOMMENDED
+- Project transferred to new project coordinator: Ryan Rhode (ryan@milliondollarscript.com)
+- Fixed various SQL errors
+- added HTMLPurifier to library - still has to be implemented system-wide
+- added variable filters for significant security improvements
+- converted UTF-8 and XML Transitional 
+- changed FCKEditor to CKEditor
+- update overlib
+- many other miscellaneous fixes / enhancements
+
+MDS 2.0.15
+
+- License changed to GPL
+- Copyright transferred form Jamit Software to 
+Adam Malinowski (adam@milliondollarscript.com)
+
+MDS 2.0.14
+
+- fix max orders bug
+- fix image upload bug if Safe Mode is on
+- fix bug with package price not updated
+- fixed 'write your ad' button to be enabled when 'Edit Order'is pressed
+- Fix 'Edit Order' button
+
+
+MDS 2.0.13
+
+- delete temp order when a new pixel image gets uploaded
+- adjustements to the javascript in users/select_pixels.php
+- Admin Order's Map: increased height
+- Admin Process Pixels: expired orders publish status set to 'N'
+- users/ Logout: Logout link does not show if logged in
+- Admin: Ad List Sql Query fix
+- Top Advertisers Sql Query Fix
+
+
+MDS 2.0.11
+
+
+- Fix problem with category field types.
+- Fix problem with deleting Advertiser's account form the admin.
+
+===================================================
+
+Million Dollar Script version 1.7.8 - 1.7.9
+Released April 28, 2006 
+
+This version contains some minor bug fixes reported by users.
+There are no major features in this version.
+
+You can upgrade to this version from any older version. No sequence is
+necessary. The latest version will update your database automatically
+to the latest version. Your tables and data will be preserved.
+It is always a good idea to backup your data before the upgrade.
+
+See below for upgrade instructions
+
+
+
+#######################################################
+CHANGES 
+
+Version 1.7.8 & 1.7.9:
+
+- Maintanance release version, includes minor fixes to be compatible with more
+servers & minor reported bugs fixed.
+
+Since Version 1.7.7:
+
+- Fixed SMTP email bug, SMTP email test & seperated SMTP server form POP
+- POP before SMTP setting
+- Localized some strings in the payment module
+- minor bug fixes.
+
+Since Version 1.7.6:
+
+- Seperated POP server & SMTP setting in Main Config
+- Added a Pop-before-smtp option (beta)
+- Updated Authorize.net module
+
+Since Version 1.7.5:
+
+- Added ccAvenue, e-gold, moneybookers and Authorize.net payment modules
+- Added email alert to Admin when pixels are uploaded, admin can approve pixels and
+process the image by email
+- Minor bug fixes all round.
+
+Since Version 1.7.4:
+
+- Fixed bug with displaying confirmed order when using packages.
+- Fixed bug with unlimited max orders in packages. 
+
+Since Version 1.7.3:
+
+- Fixed bug with displaying 'days to expire' of packages
+- Fixed bug with click.php
+- Fixed bug in install.php
+
+Since Version 1.7.2:
+
+- Fixed mouseover bugs
+- Addred transition effects to mouseover
+- Fixed bug with selection image not showing as GIF, when GIF was selected
+
+
+Since Version 1.6.5:
+
+
+- Optimized HTML, saving up to 90% bandwidth in a best case scenario. Grids will load much faster - they will scream!
+- Packages: Prices options can be grouped in a package, the advertiser will be able to select the best price option from the package.
+- Enhanced click tracking & click reports
+- Click on available pixels will take the user to a Admin-defined URL
+- Improvements to the AJAX code 
+- Improvements to Approve URL
+

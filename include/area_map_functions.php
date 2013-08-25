@@ -1,4 +1,35 @@
 <?php
+/**
+ * @version		$Id: area_map_functions.php 164 2012-12-14 21:22:24Z ryan $
+ * @package		mds
+ * @copyright	(C) Copyright 2010 Ryan Rhode, All rights reserved.
+ * @author		Ryan Rhode, ryan@milliondollarscript.com
+ * @license		This program is free software; you can redistribute it and/or modify
+ *		it under the terms of the GNU General Public License as published by
+ *		the Free Software Foundation; either version 3 of the License, or
+ *		(at your option) any later version.
+ *
+ *		This program is distributed in the hope that it will be useful,
+ *		but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License along
+ *		with this program;  If not, see http://www.gnu.org/licenses/gpl-3.0.html.
+ *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ *		Million Dollar Script
+ *		A pixel script for selling pixels on your website.
+ *
+ *		For instructions see README.txt
+ *
+ *		Visit our website for FAQs, documentation, a list team members,
+ *		to post any bugs or feature requests, and a community forum:
+ * 		http://www.milliondollarscript.com/
+ *
+ */
+
 // Contributed by Martin 
 	// AREA render  function
 	// Million Penny Home Page
@@ -6,8 +37,6 @@
 	function render_map_area($fh,$data, $b_row) {
 
 		$BID = $b_row['banner_id'];
-
-		
 		
 		if (isset($data['x2'])) {
 		  $x2 = $data['x2'];
@@ -18,8 +47,7 @@
 		}
 		fwrite($fh, "<area ");
 		if (ENABLE_CLOAKING == 'YES') {
-			
-		  fwrite($fh, "onclick=\"return po(".$data['block_id'].");\" href=\"".$data['url']."\"");
+		  fwrite($fh, "onclick=\"return po(".$data['block_id'].");\" href=\"http://".$data['url']."\" ");
 		} else {
 		  fwrite($fh, "onclick=\"block_clicked=true;\" href=\"click.php?block_id=".$data['block_id']."&BID=$BID\" target=\"_blank\" " );
 		}
@@ -28,7 +56,7 @@
 			if ($data['ad_id']>0) {
 			  $data['alt_text'] = $data['alt_text'].'<img src="'.BASE_HTTP_PATH.'periods.gif" border="0">';
 		  }
-		  fwrite($fh, "onmousemove=\"sB(event,'".htmlspecialchars(str_replace("'","\'",($data['alt_text'])))."',this, ".$data['ad_id'].")\" onmouseout=\"hI()\" ");
+		  fwrite($fh, "onmouseover=\"sB(event,'".htmlspecialchars(str_replace("'","\'",($data['alt_text'])))."',this, ".$data['ad_id'].")\" onmousemove=\"sB(event,'".htmlspecialchars(str_replace("'","\'",($data['alt_text'])))."',this, ".$data['ad_id'].")\" onmouseout=\"hI()\" ");
 		}
 		fwrite($fh, "coords=\"".$data['x1'].",".$data['y1'].",".($x2+$b_row['block_width']).",".($y2+$b_row['block_height'])."\"");
 		if (ENABLE_MOUSEOVER=='NO') {
@@ -64,8 +92,6 @@ function process_map($BID, $map_file='') {
 	if (!$map_file) {
 		$map_file = get_map_file_name($BID);
 	}
-
-	
 
   // open file
   $fh = fopen("$map_file","w");
@@ -139,9 +165,7 @@ function process_map($BID, $map_file='') {
   fwrite($fh, "</map>");
   fclose($fh);
 
-
 }
-
 
 ////////////////////////////////////////
 /*
@@ -169,10 +193,7 @@ The structure of output:
 
 </body>
 
-
-
 */
-
 
 function show_map($BID = 1) {
 
@@ -220,7 +241,6 @@ function show_map($BID = 1) {
 		header("Last-Modified: $gmdate_mod");
 
 	}
-	
 
 	?>
 	<head>
@@ -263,8 +283,6 @@ function show_map($BID = 1) {
 
 		var y=box.offsetTop;
 		var x=box.offsetLeft;
-
-
 
 		//window.status="x:"+x+" y:"+y+" box.ypos:"+box.ypos+" box.xpos:"+box.xpos;
 		if ((y<box.ypos)||(y>box.ypos)||(x<box.xpos)||(x>box.xpos)) {
@@ -507,6 +525,8 @@ function show_map($BID = 1) {
 
 	function  sB(e, str, area, aid)
 	{
+		window.clearTimeout(timeoutId);
+
 		var relTarg;
 		var bubble = document.getElementById('bubble');
 		if (!e) var e = window.event;
@@ -638,6 +658,8 @@ function show_map($BID = 1) {
 
 	function hideBubble(e) {
 
+		window.clearTimeout(timeoutId);
+
 		var bubble = document.getElementById('bubble');
 		b = bubble.style;
 		
@@ -688,8 +710,6 @@ function show_map($BID = 1) {
 	function cI() {
 
 		if (timeoutId!=0) {
-
-			window.clearTimeout(timeoutId);
 			timeoutId=0;
 		}
 

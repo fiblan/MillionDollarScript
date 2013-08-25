@@ -1,20 +1,21 @@
 //\/////
 //\  overLIB Crossframe Support Plugin
-//\  This file requires overLIB 4.00 or later.
+//\  This file requires overLIB 4.10 or later.
 //\
-//\  overLIB 4.00 - You may not remove or change this notice.
+//\  overLIB 4.05 - You may not remove or change this notice.
 //\  Copyright Erik Bosrup 1998-2004. All rights reserved.
 //\  Contributors are listed on the homepage.
 //\  See http://www.bosrup.com/web/overlib/ for details.
-//   $Revision: 1.3.4.1 $                $Date: 2004/03/23 16:29:38 $
+//   $Revision: 68 $                $Date: 2010-09-11 21:31:03 -0400 (Sat, 11 Sep 2010) $
 //\/////
-
+//\mini
 
 ////////
 // PRE-INIT
 // Ignore these lines, configuration is below.
 ////////
-if (typeof olInfo == 'undefined' || olInfo.simpleversion < 400) alert('overLIB 4.00 or later is required for the Cross Frame Support Plugin.');
+if (typeof olInfo == 'undefined' || typeof olInfo.meets == 'undefined' || !olInfo.meets(4.10)) alert('overLIB 4.10 or later is required for the Cross Frame Support Plugin.');
+else {
 registerCommands('frame');
 
 
@@ -27,7 +28,7 @@ function parseFrameExtras(pf,i,ar) {
 	var k = i,v;
 
 	if (k < ar.length) {
-		if (ar[k] == FRAME) { v = ar[++k]; if(pf == 'ol_'&&compatibleframe(v)) ol_frame = v; else opt_FRAME(v); return k; }
+		if (ar[k] == FRAME) { v = ar[++k]; if(pf == 'ol_') ol_frame = v; else opt_FRAME(v); return k; }
 	}
 
 	return -1;
@@ -39,30 +40,9 @@ function parseFrameExtras(pf,i,ar) {
 
 // Defines which frame we should point to.
 function opt_FRAME(frm) {
- 	o3_frame = compatibleFrame(frm) ? frm : ol_frame;
- 	
-	if (olNs4) {
-		over = o3_frame.document.layers['overDiv'];
-	} else if (document.all) {
-		over = o3_frame.document.all['overDiv'];
-	} else if (document.getElementById) {
-		over = o3_frame.document.getElementById("overDiv");
-	}
-
+ 	o3_frame = frm; 	
+	over = createDivContainer('overDiv');	
 	return 0;
-}
-
-// Makes sure target frame has overLIB
-function compatibleFrame(frameid) { 
-	if (olNs4 && typeof frameid.document.overDiv == 'undefined') {
-		return false;
-	} else if (document.all && typeof frameid.document.all["overDiv"] == 'undefined') {
-		return false;
-	} else if (document.getElementById && frameid.document.getElementById('overDiv') == null) {
-		return false;
-	}
-
-	return true;
 }
 
 // Get frame depth of nested frames
@@ -122,4 +102,4 @@ function chkForFrmRef() {
 ////////
 registerCmdLineFunction(parseFrameExtras);
 registerPostParseFunction(chkForFrmRef);
-
+}

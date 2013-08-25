@@ -1,23 +1,35 @@
 <?php
-/*
-COPYRIGHT 2008 - see www.milliondollarscript.com for a list of authors
+/**
+ * @version		$Id: menu.php 86 2010-10-12 13:51:14Z ryan $
+ * @package		mds
+ * @copyright	(C) Copyright 2010 Ryan Rhode, All rights reserved.
+ * @author		Ryan Rhode, ryan@milliondollarscript.com
+ * @license		This program is free software; you can redistribute it and/or modify
+ *		it under the terms of the GNU General Public License as published by
+ *		the Free Software Foundation; either version 3 of the License, or
+ *		(at your option) any later version.
+ *
+ *		This program is distributed in the hope that it will be useful,
+ *		but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License along
+ *		with this program;  If not, see http://www.gnu.org/licenses/gpl-3.0.html.
+ *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ *		Million Dollar Script
+ *		A pixel script for selling pixels on your website.
+ *
+ *		For instructions see README.txt
+ *
+ *		Visit our website for FAQs, documentation, a list team members,
+ *		to post any bugs or feature requests, and a community forum:
+ * 		http://www.milliondollarscript.com/
+ *
+ */
 
-This file is part of the Million Dollar Script.
-
-Million Dollar Script is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-Million Dollar Script is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with the Million Dollar Script.  If not, see <http://www.gnu.org/licenses/>.
-
-*/
 require("../config.php");
 require ('admin_common.php');
 
@@ -45,7 +57,7 @@ a:hover {
 </HEAD>
 
 <BODY style=" font-family: 'Arial', sans-serif; font-size:10pt; color:#000000;  " bgcolor="#F4F4F4">
-<span style="padding: 0px;"><strong>Million Dollar Script</strong> <small><br>Copyright 2008, see COPYING.txt for license information.<br> v 2.0.15 (Jan 2008)</small></span><br>
+<span style="padding: 0px;"><strong>Million Dollar Script</strong> <small><br>Copyright 2008, see COPYING.txt for license information.<br> <?php echo VERSION_INFO; ?></small></span><br>
 <br>
 <a href="main.php" target="main">Main Summary</a><br/>
 <hr>

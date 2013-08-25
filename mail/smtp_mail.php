@@ -2,7 +2,7 @@
 /*
  * smtp_mail.php
  *
- * @(#) $Header: /home/mlemos/cvsroot/mimemessage/smtp_mail.php,v 1.5 2004/10/05 18:51:09 mlemos Exp $
+ * @(#) $Header: /opt2/ena/metal/mimemessage/smtp_mail.php,v 1.5 2004/10/05 18:51:09 mlemos Exp $
  *
  *
  */
@@ -11,9 +11,9 @@
 	require_once("smtp_message.php");
 	require_once("smtp.php");
 	/* Uncomment when using SASL authentication mechanisms */
-	
-	require("sasl/sasl.php");
-	
+	/*
+	require("sasl.php");
+	*/
 
 	$message_object=new smtp_message_class;
 	$message_object->localhost="localhost";   /* This computer address */

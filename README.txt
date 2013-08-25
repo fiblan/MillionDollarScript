@@ -1,119 +1,152 @@
 #############################################################
-# INSTALLATION.
-#
-# Note: If you have CPanel based hosting, you may find these online
-# installation instructions useful: 
-# http://www.milliondollarscript.com/installation-tutorial.htm
-#
-# More help and support is available at the formum
-# http://www.milliondollarscript.com/forum/
-#
-# Knowledge Base
-# http://www.milliondollarscript.com/support/index.php?_m=knowledgebase&_a=view
+INSTALLATION.
+
+	Note: If you have CPanel based hosting, you may find these online
+	installation instructions useful: 
+	http://www.milliondollarscript.com/installation/tutorials/cpanel-install
+	
+	More help and support is available at the forum
+	http://www.milliondollarscript.com/forum/
+	
+	Knowledge Base / FAQ
+	http://www.milliondollarscript.com/faq/
+	
 #############################################################
-
-
 
 1. Setup your database.
 
-Create a new database on your hosting account.
-(Make sure that your MYSQL database user has privileges to INSERT, UPDATE,
-REPLACE and LOCK TABLES.)
-
-If you need detailed instructions for setting up a MySQL database, then these can be found 
-in the manual / docs of your web hosting provider. Here is an overview of the steps:
- a. Create a new database
- b. Create a new database user
- c. Add the new MySQL user to the database, giving the MySQL user all privileges.
+	Create a new database on your hosting account.
+	(Make sure that your MYSQL database user has privileges to INSERT, UPDATE,
+	REPLACE and LOCK TABLES.)
+	
+	If you need detailed instructions for setting up a MySQL database, then 
+	these can be found in the manual / docs of your web hosting provider.
+	
+	Here is an overview of the steps:
+	 a. Create a new database
+	 b. Create a new database user
+	 c. Add the new MySQL user to the database, giving the MySQL user all
+	 privileges.
 
 
 2. Upload all the script files to your server
-This is best done with an FTP client such as FileZilla.
-Please make sure to keep the original directory structure.
 
+	This is best done with an FTP client such as FileZilla.
+	Please make sure to keep the original directory structure.
+	
+	Note: It is not always necessary to have full permissions on all server
+	configurations.  Especially if your server is running fcgi or suExec.  In
+	some cases you might be able to get away with using only more restrictive
+	permissions.  For example 700, 750, 770, 755 for directories or for files
+	600, 640, 660, 644.
+	
+	More info: 
+	http://en.wikipedia.org/wiki/Chmod
+	http://en.wikipedia.org/wiki/Filesystem_permissions
+	
+	
+	Set write permissions for the following directories: (chmod 777)
+	
+	admin/temp/
+	pixels/
+	
+	(Reason for the permissions: The script needs to be able to create images in
+	the admin/temp/ and pixels/ directories)
+	
+	Set write permissions to config.php (chmod 666). The script needs to write
+	to this file during installation and configuration.
+	
+	Tips:
+	
+	*nix via SSH: Change permissions from the command line using the "chmod" 
+	command. eg. chmod 777 pixels
+	
+	*nix via FTP: Use an FTP client which allows you to set permissions. 
+	eg. Right click on the file.
+	
+	See tutorials on www.milliondollarscript.com
+	
+	Windows: Make sure the web-server/php process can write to pixels/ and 
+	admin/temp directories
 
-Set write permissions for the following directories: (chmod 777)
-
-admin/temp/
-pixels/
-
-(Reason for the permissions: The script needs to be able to create images in the admin/temp/
-and pixels/ directories)
-
-Set write permissions to config.php (chmod 666). The script needs to write
-to this file during installation and configuration.
-
-Tips:
-*nix via SSH: Change permissions from the command line using the "chmod" command. eg. chmod 777 pixels
-*nix via FTP: Use an FTP client which allows you to set permissions. eg. Right click on the file.
-See tutorials on www.milliondollarscript.com
-Windows: Make sure the web-server/php process can write to pixels/ and admin/temp directories
 
 3. Run the installation install.php script
+	
+	Go to http://yourwebsite.com/admin/install.php
+	
+	The installation script will install the database for you.
+	Fill in the database details from step 1.
+	
+	Please delete the install.php file after successful installation.
 
-Go to http://yourwebsite.com/admin/install.php
-
-The installation script will install the database for you.
-Fill in the database details from step 1.
-
-Please delete the install.php file after successful installation.
 
 4. Edit your configuration.
+	
+	Go to http://yourwebsite.com/admin/ and use 'ok' as the default password
+	
+	Here is what should be configured:
+	
+	 a. Main Config (Configuration menu.)
+	 b. Languages (Edit labels, email templates, etc using the editing tool)
+	 c. Payment Modules
+	 d. Currencies
+	
+	 After configuration, go to 'Pixel Admin' and process pixels. Click on the
+	 'Process Images(s)' button to generate the images.
+	
+	Additionally, you can set up your pixel inventory, prices, background 
+	blending, etc.
+	
+	The admin has many possibilities, be creative ;)
 
-Go to http://yourwebsite.com/admin/ and use 'ok' as the default password
-
-Here is what should configured:
-
- a. Main Config (Configuration menu.)
- b. Languages (Edit labels, email templates, etc using the editing tool)
- c. Payment Modules
- d. Currencies
-
- After configuration, go to 'Pixel Admin' and process pixels. Click on the
- 'Process Images(s)' button to generate the images.
-
-Additionally, you can set up your pixel inventory, prices, background blending, etc.
-The admin has many possibilities, be creative ;)
 
 5. Test the script.
-
-If running the script for the first time, go to Admin and process the pixels from
-the 'Pixel Admin' menu. 
-
-Then look at example.html to see if the images were
-installed correctly. Finally, sign up as a new user and make a test order.
-You can set all the payment modules to demo mode if needed.
-
-6. Create your site / integrate the script to your site. 
-Look at example.html as an example of integration.
+	
+	If running the script for the first time, go to Admin and process the pixels
+	from the 'Pixel Admin' menu. 
+	
+	Then look at /index.php to see if the images were
+	installed correctly. Finally, sign up as a new user and make a test order.
+	You can set all the payment modules to demo mode if needed.
 
 
-Note for C20 settings
-The script requires C2O account version 2. Also you will need to set the return URLs
-in your C20 account (under the Look and Feel). C20 agreement allows only one account per website,
-so it is better to have  the script running on the same domain that you registered your C20 account with!
+6. Create your site / integrate the script to your site.
+
+	Look at index.php as an example of integration.
+
+
+Note for 2C0 settings
+
+	The script requires 2CO account version 2. Also you will need to set the 
+	return URLs in your 2C0 account (under the Look and Feel). 2C0 agreement 
+	allows only one account per website, so it is better to have the script 
+	running on the same domain that you registered your 2C0 account with!
 
 
 Note of PayPal settings
-To get the Instant Payment Notifications to work, ensure that 
-IPN is enabled for your PayPal account. Log into your paypal account and click
-on 'Profile' -> 'Instant Payment Notification Preferences' and hit Edit.
-Enter the URL of your website. (Any URL will do, the script will automatically tell PayPal
-the URL when an order is made)
+
+	To get the Instant Payment Notifications to work, ensure that 
+	IPN is enabled for your PayPal account. Log into your paypal account and 
+	click on 'Profile' -> 'Instant Payment Notification Preferences' and hit 
+	Edit.  Enter the URL of your website. (Any URL will do, the script will 
+	automatically tell PayPal the URL when an order is made)
 
 
 -----------------------------
-Knowledge Base:
+
+Knowledge Base / FAQ:
 
 - There are over 100 articles in the knowledge base covering many topics.
 
-http://www.milliondollarscript.com/support/index.php?_m=knowledgebase&_a=view
+http://www.milliondollarscript.com/faq/
 
 -----------------------------
 
-Tips for Use
 
-> How to order without paying via Paypal / C20
+Tips for Use
+##########################################################
+
+> How to order without paying via Paypal / 2C0
 
 1. Select some pixels to place them on the order. 
 2. Confirm the order
@@ -145,7 +178,6 @@ AFTER approving your client's links.
 ##########################################################
 
 > How do I log in to another user's account??
-
 
 You can use the Admin password as the master password to log
 in to a user's account.
@@ -193,9 +225,10 @@ not_for_sale_block.png - N.F.S. block used for final processed grid (white)
 1. Incorrect path and URL settings in Main Config. Please edit this carefully
 and follow the recommendations
 
-2. Permission problems. This is a common problem. Please check your permission settings.
+2. Permission problems. This is a common problem. Please check your permission 
+settings.
 
-3. Your PHP is too old. Check to make sure you have at least 4.3.9
+3. Your PHP is too old. Check to make sure you have at least 5.2.x
 
 4. The files were not uploaded with the original directory structure in tact.
 
@@ -208,12 +241,10 @@ processed.
 
 > I change header.php and footer.php, but there is no effect. Why?
 
-The files forgot.php, signup.php, validate.php and the login form (login_functions.php) 
-do not use the header and footer files because they external from the 'main' application.
-Please modify the header tags directly in these files. Note that the css file
-still affects these files.
-
-
+The files forgot.php, signup.php, validate.php and the login form 
+(login_functions.php) do not use the header and footer files because they are
+external from the 'main' application.  Please modify the header tags directly in
+these files. Note that the css file still affects these files.
 
 ######################################################
 
@@ -235,20 +266,19 @@ Please try to upgarde your PHP, or disable pdflib from PHP.
 
 ######################################################
 
-
-
 > I am getting an error: "Fatal error: Call to undefined function imagecreate()"
 
-If you are hosting on Windows then it means that you do not have the GD library turned on. 
+If you are hosting on Windows then it means that you do not have the GD library 
+turned on. 
  
 Please see PHP the documentation to learn how to enable extensions in Windows.
 
 Roughly, here is what you need to do:
  
-1. Copy the file php_gd2.dll from your PHP's ext/ directory to where
-you have your php extensions. (No need to copy if php_gd2.dll is in the extension 
-dir already. Look in php.ini for 'extension_dir' directive to 
-find what is your current extension directory)
+1. Copy the file php_gd2.dll from your PHP's ext/ directory to where you have
+your php extensions. (No need to copy if php_gd2.dll is in the extension dir
+already. Look in php.ini for 'extension_dir' directive to find what is your
+current extension directory)
  
 2. Modify your php.ini and change the following line:
  
@@ -259,7 +289,6 @@ to:
 extension=php_gd2.dll
  
 3. Restart your web server.
-
 
 ######################################################
 
@@ -274,8 +303,8 @@ Why are the links grouped?
 
 If you approve each link individually then the images might end up 
 looking like Swiss cheese. This is because an image can have different 
-links, and if you don't approve some, then you will end up having holes in the image.
-Grouping them eliminates this problem.
+links, and if you don't approve some, then you will end up having holes in the 
+image.  Grouping them eliminates this problem.
 
 ########################################################
 
@@ -288,9 +317,9 @@ You can upload the image by FTP.
 
 Upload the file to the admin/temp directory
 
-Then, rename the file to background1.png (The number 1 is to identify that the background
-is to be used with the first grid. Rename to background2.png if you want to
-identify with the 2nd grid and so on)
+Then, rename the file to background1.png (The number 1 is to identify that the 
+background is to be used with the first grid. Rename to background2.png if you 
+want to identify with the 2nd grid and so on)
 
 You will be able to see the background in the Admin after it is uploaded.
 
@@ -327,13 +356,22 @@ rename to temp1.png, upload myfile.txt and rename to temp1.jpg, and so on...
 The above example creates the files for grid 1. If you have a 2nd grid, replace
 the 1 with a 2, and so on..
 
+	Note: It is not always necessary to have full permissions on all server
+	configurations.  Especially if your server is running fcgi or suExec.  In
+	some cases you might be able to get away with using only more restrictive
+	permissions.  For example 700, 750, 770, 755 for directories or for files
+	600, 640, 660, 644.
+	
+	More info: 
+	http://en.wikipedia.org/wiki/Chmod
+	http://en.wikipedia.org/wiki/Filesystem_permissions
+
 ###################################################
 
 > I get error SQL when registering a new user
 
-The script is written for MySQL version 4 or below. 
-It does not support the recently released version 5.
- 
+Note: As of version 2.1 MySQL 5 is recommended.
+
 This problem can also be solved by opening the file 'my.ini' in your MySQL 
 install folder - the config file. And commenting out the command near the 
 top that turns on the 'strict' mode.
@@ -346,9 +384,11 @@ top that turns on the 'strict' mode.
 > Fatal error: Allowed memory size of 8388608 bytes exhausted
 > (tried to allocate 3000 bytes)
 
+Note: As of version 2.1 the default memory limit is set to 32M.
+
 It looks like your PHP memory limit is set to 8MB and the script needs more. 
 Please contact your hosting service to increase the limit.
-Increasing to 12MB usually helps.
+Increasing to 12MB or more usually helps.
 
 If you are running apache, you can try this:
 
@@ -370,7 +410,6 @@ The script can get very thirsty if there are more than 10,000 blocks
 per grid (1 million pixels) so check if you didn't set it to something
 really big! Or...you may have a really big background image that's 
 causing the trouble.
-
 
 ####################################################
 
@@ -394,45 +433,62 @@ error_reporting  =  E_ALL & ~E_NOTICE & ~E_STRICT
 
 Please make sure to restart your web server after editing the php.ini file.
 
-
 ###################################################
 
 UPGRADES
 
-You may get upgrades sent by email from us.
-The upgrades are sent to you as of our courtesy.
+Please check the website for updates.  http://www.milliondollarscript.com
+
+Notices and instructions will be posted on the site when updates are released.
+ 
 Unless otherwise stated, it is not required for you to upgrade.
-If you want to keep your script upgradeable, please limit your customization of the
-script to only the following files: main.css, labels.php, header.php, footer.php and config.php 
+
+If you want to keep your script upgradeable, please limit your customization of 
+the script to only the following files: main.css, labels.php, header.php, 
+footer.php and config.php
+ 
 If you have made significant customizations, use a program such as WinDiff or
 the very excellent WinMerge http://winmerge.sourceforge.net/
 to help you with merging the new files.
 
-
 ######################################################################
 
 
-COPYRIGHT 2008 - see www.milliondollarscript.com for a list of authors
+/**
+ * @version		$Id: README.txt 142 2011-08-17 21:54:59Z ryan $
+ * @package		mds
+ * @copyright	(C) Copyright 2010 Ryan Rhode, All rights reserved.
+ * @author		Ryan Rhode, ryan@milliondollarscript.com
+ * @license		This program is free software; you can redistribute it and/or modify
+ *		it under the terms of the GNU General Public License as published by
+ *		the Free Software Foundation; either version 3 of the License, or
+ *		(at your option) any later version.
+ *
+ *		This program is distributed in the hope that it will be useful,
+ *		but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License along
+ *		with this program;  If not, see http://www.gnu.org/licenses/gpl-3.0.html.
+ *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ *		Million Dollar Script
+ *		A pixel script for selling pixels on your website.
+ *
+ *		For instructions see README.txt
+ *
+ *		Visit our website for FAQs, documentation, a list team members,
+ *		to post any bugs or feature requests, and a community forum:
+ * 		http://www.milliondollarscript.com/
+ *
+ */
 
-This file is part of the Million Dollar Script.
-
-Million Dollar Script is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-Million Dollar Script is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with the Million Dollar Script.  If not, see <http://www.gnu.org/licenses/>.
-
-
-www.milliondollarscript.com
 
 Acknowledgments
 
 SMTP code is based on MIME E-Mail class, released under LGPL by Manuel Lemos.
 AREA Map code contributed by Martin Diekhoff,  http://www.onecentads.com/
+
+Thank you to everyone else who helps out!

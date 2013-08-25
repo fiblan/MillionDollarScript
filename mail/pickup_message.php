@@ -2,20 +2,20 @@
 /*
  * pickup_message.php
  *
- * @(#) $Header: /home/mlemos/cvsroot/mimemessage/pickup_message.php,v 1.4 2006/05/04 01:24:35 mlemos Exp $
+ * @(#) $Header: /opt2/ena/metal/mimemessage/pickup_message.php,v 1.4 2006/05/04 01:24:35 mlemos Exp $
  *
  *
  */
 
 /*
-{metadocument}<?xml version="1.0" encoding="ISO-8859-1"?>
+{metadocument}<?xml version="1.0" encoding="UTF-8"?>
 <class>
 
 	<package>net.manuellemos.mimemessage</package>
 
 	<name>pickup_message_class</name>
-	<version>@(#) $Id: pickup_message.php,v 1.4 2006/05/04 01:24:35 mlemos Exp $</version>
-	<copyright>Copyright ¿ (C) Manuel Lemos 1999-2004</copyright>
+	<version>@(#) $Id: pickup_message.php 161 2012-10-11 18:09:12Z ryan $</version>
+	<copyright>Copyright (C) Manuel Lemos 1999-2004</copyright>
 	<title>MIME E-mail message composing and sending using a Windows mail
 		server pickup directory</title>
 	<author>Manuel Lemos</author>
@@ -102,7 +102,7 @@ class pickup_message_class extends email_message_class
 {metadocument}
 	<variable>
 		<name>mailer_delivery</name>
-		<value>pickup $Revision: 1.4 $</value>
+		<value>pickup $Revision: 161 $</value>
 		<documentation>
 			<purpose>Specify the text that is used to identify the mail
 				delivery class or sub-class. This text is appended to the
@@ -113,7 +113,7 @@ class pickup_message_class extends email_message_class
 	</variable>
 {/metadocument}
 */
-	var $mailer_delivery='pickup $Revision: 1.4 $';
+	var $mailer_delivery='pickup $Revision: 161 $';
 
 	Function CleanupMessageFile()
 	{

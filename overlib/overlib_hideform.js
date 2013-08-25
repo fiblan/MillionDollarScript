@@ -1,18 +1,19 @@
 //\/////
 //\  overLIB Hide Form Plugin
-//\  This file requires overLIB 4.00 or later.
 //\
 //\  Uses an iframe shim to mask system controls for IE v5.5 or higher as suggested in
 //\  http://dotnetjunkies.com/weblog/jking/posts/488.aspx
+//\  This file requires overLIB 4.10 or later.
 //\
-//\  overLIB 4.00 - You may not remove or change this notice.
+//\  overLIB 4.05 - You may not remove or change this notice.
 //\  Copyright Erik Bosrup 1998-2004. All rights reserved.
 //\  Contributors are listed on the homepage.
 //\  See http://www.bosrup.com/web/overlib/ for details.
-//   $Revision: 1.12.2.1 $                $Date: 2004/03/23 16:29:38 $
+//   $Revision: 68 $                $Date: 2010-09-11 21:31:03 -0400 (Sat, 11 Sep 2010) $
 //\/////
-
-if (typeof olInfo == 'undefined' || olInfo.simpleversion < 400) alert('overLIB 4.00 or later is required for the HideForm Plugin.');
+//\mini
+if (typeof olInfo == 'undefined' || typeof olInfo.meets == 'undefined' || !olInfo.meets(4.10)) alert('overLIB 4.10 or later is required for the HideForm Plugin.');
+else {
 
 // Function which generates the popup with an IFRAME shim
 function generatePopUp(content) {
@@ -20,18 +21,38 @@ function generatePopUp(content) {
 
 	var wd,ht,txt, zIdx =  0;
 
-	wd =  parseInt(o3_width);
+	wd =  over.offsetWidth;
 	ht =  over.offsetHeight;
-	txt =  bckDropSrc(wd,ht,zIdx++);
+	txt =  backDropSource(wd,ht,zIdx++);
 	txt += '<div style="position: absolute; top: 0; left: 0; width: '+ wd+'px; z-index: ' + zIdx + ';">' + content + '</div>';
 	layerWrite(txt);
 }
 
 // Code for the IFRAME which is used in other places
-function bckDropSrc(width, height, Z) {
-	return '<iframe frameborder="0" scrolling="no" src="" width="' + width + '" height="' + height + '" style="z-index: ' + Z + '; filter: Beta(Style=0,Opacity=0);"></iframe>';
+function backDropSource(width, height, Z) {
+	if (!olShimObj) {
+		olShimObj=document.createElement('iframe');
+		olShimObj.setAttribute("frameborder","0");
+		olShimObj.setAttribute("scrolling","no");
+		olShimObj.setAttribute("src","javascript:false");
+		olShimObj.setAttribute("width",width);
+		olShimObj.setAttribute("height",height);
+		olShimObj.style.zIndex=Z;
+		olShimObj.style.filter="Alpha(Style=0,Opacity=0)";
+	} else {
+		olShimObj.setAttribute("width",width);
+		olShimObj.setAttribute("height",height);
+		olShimObj.style.zIndex=Z;
+	}
+	return '';
 }
-
+// Set the iframe shim in place or replaces it if its there already
+function setShim(obj) {
+	if (!olIe4||olOp||!olIe55) return;
+	var ifrm = obj.getElementsByTagName('IFRAME');
+	if (ifrm.length) obj.replaceChild(olShimObj,ifrm[0]);
+	else obj.insertBefore(olShimObj,obj.firstChild);
+}
 // Hides SELECT boxes that will be under the popup
 // Checking Gecko version number to try to include other browsers based on the Gecko engine
 function hideSelectBox() {
@@ -121,13 +142,16 @@ if (!(olNs4 || olOp || olIe55 || navigator.userAgent.indexOf('Netscape6') != -1)
 	}
 
 	f = capExtent.onmousemove.toString().match(/function[ ]+(\w*)\(/);
-	if (f&&f[1] != 'annoymous') capExtent.onmousemove = olMouseMove;
+	if (f&&f[1] != 'anonymous') capExtent.onmousemove = olMouseMove;
 }
 
 
 ////////
 // PLUGIN REGISTRATIONS
 ////////
-registerHook("createPopup",generatePopUp,FAFTER);
+registerHook("olCreatePopup",generatePopUp,FAFTER);
+registerHook("showObject",setShim,FBEFORE);
 registerHook("hideObject",showSelectBox,FAFTER);
+olShimObj=null;
 olHideForm=1;
+}

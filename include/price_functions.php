@@ -1,5 +1,34 @@
 <?php
-
+/**
+ * @version		$Id: price_functions.php 159 2012-10-11 17:31:31Z ryan $
+ * @package		mds
+ * @copyright	(C) Copyright 2010 Ryan Rhode, All rights reserved.
+ * @author		Ryan Rhode, ryan@milliondollarscript.com
+ * @license		This program is free software; you can redistribute it and/or modify
+ *		it under the terms of the GNU General Public License as published by
+ *		the Free Software Foundation; either version 3 of the License, or
+ *		(at your option) any later version.
+ *
+ *		This program is distributed in the hope that it will be useful,
+ *		but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License along
+ *		with this program;  If not, see http://www.gnu.org/licenses/gpl-3.0.html.
+ *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ *		Million Dollar Script
+ *		A pixel script for selling pixels on your website.
+ *
+ *		For instructions see README.txt
+ *
+ *		Visit our website for FAQs, documentation, a list team members,
+ *		to post any bugs or feature requests, and a community forum:
+ * 		http://www.milliondollarscript.com/
+ *
+ */
 
 $price_table = array();
 
@@ -7,8 +36,10 @@ function load_price_zones($banner_id) {
 
 	global $price_table;
 
-	if ($price_table['loaded']==1) {
-		return;
+	if (isset($price_table['loaded'])) {
+		if($price_table['loaded']==1) {
+			return;
+		}
 	}
 
 	$sql = "SELECT * FROM prices where banner_id='$banner_id' ";
@@ -104,9 +135,14 @@ function get_zone_price($banner_id, $row, $col) {
 	$row = $row+1;
 	$col = $col+1;
 	global $price_table;
-	if ($price_table['loaded']!=1) {
+	if(isset($price_table['loaded'])) {
+		if($price_table['loaded'] != 1) {
+	
 		load_price_zones($banner_id);
 		//print_r ($price_table);
+		}
+	} else {
+		load_price_zones($banner_id);
 	}
 
 	
@@ -185,7 +221,9 @@ while ($row=mysql_fetch_array($result)) {
 
 function display_price_table ($banner_id) {
 
-	global $label;
+	global $label, $f2;
+	
+	$banner_id = $banner_id;
 
 	if (banner_get_packages($banner_id)) {
 

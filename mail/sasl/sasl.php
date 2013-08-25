@@ -2,7 +2,7 @@
 /*
  * sasl.php
  *
- * @(#) $Id: sasl.php,v 1.11 2005/10/31 18:43:27 mlemos Exp $
+ * @(#) $Id: sasl.php 67 2010-09-12 01:30:49Z ryan $
  *
  */
 
@@ -22,13 +22,13 @@ class sasl_interact_class
 };
 
 /*
-{metadocument}<?xml version="1.0" encoding="ISO-8859-1" ?>
+{metadocument}<?xml version="1.0" encoding="UTF-8" ?>
 <class>
 
 	<package>net.manuellemos.sasl</package>
 
-	<version>@(#) $Id: sasl.php,v 1.11 2005/10/31 18:43:27 mlemos Exp $</version>
-	<copyright>Copyright © (C) Manuel Lemos 2004</copyright>
+	<version>@(#) $Id: sasl.php 67 2010-09-12 01:30:49Z ryan $</version>
+	<copyright>Copyright (C) Manuel Lemos 2004</copyright>
 	<title>Simple Authentication and Security Layer client</title>
 	<author>Manuel Lemos</author>
 	<authoraddress>mlemos-at-acm.org</authoraddress>

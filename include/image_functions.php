@@ -1,4 +1,34 @@
 <?php
+/**
+ * @version		$Id: image_functions.php 153 2012-09-10 22:08:44Z ryan $
+ * @package		mds
+ * @copyright	(C) Copyright 2010 Ryan Rhode, All rights reserved.
+ * @author		Ryan Rhode, ryan@milliondollarscript.com
+ * @license		This program is free software; you can redistribute it and/or modify
+ *		it under the terms of the GNU General Public License as published by
+ *		the Free Software Foundation; either version 3 of the License, or
+ *		(at your option) any later version.
+ *
+ *		This program is distributed in the hope that it will be useful,
+ *		but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License along
+ *		with this program;  If not, see http://www.gnu.org/licenses/gpl-3.0.html.
+ *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ *		Million Dollar Script
+ *		A pixel script for selling pixels on your website.
+ *
+ *		For instructions see README.txt
+ *
+ *		Visit our website for FAQs, documentation, a list team members,
+ *		to post any bugs or feature requests, and a community forum:
+ * 		http://www.milliondollarscript.com/
+ *
+ */
 
 ##################################################
 
@@ -196,7 +226,10 @@ function process_image($BID) {
 		if (INTERLACE_SWITCH=='YES') {
 			imageinterlace($map, 1);
 		}
-		touch($file_path."temp/temp$BID.jpg");
+		if(!touch($file_path."temp/temp$BID.jpg")) {
+			$progress .= "<b>Warning:</b> The script does not have permission write to " . $file_path . "temp/temp" . $BID . ".jpg or the directory does not exist<br>";
+			
+		}
 		imagejpeg($map, $file_path."temp/temp$BID.jpg", JPEG_QUALITY);
 		$progress .= "<br>Saved as ".$file_path."temp/temp$BID.jpg<br>";
 
@@ -205,7 +238,10 @@ function process_image($BID) {
 		if (INTERLACE_SWITCH=='YES') {
 			imageinterlace($map, 1);
 		}
-		touch($file_path."temp/temp$BID.png");
+		if(!touch($file_path."temp/temp$BID.png")) {
+			$progress .= "<b>Warning:</b> The script does not have permission write to " . $file_path . "temp/temp" . $BID . ".png or the directory does not exist<br>";
+			
+		}
 		imagepng($map, $file_path."temp/temp$BID.png");
 		$progress .= "<br>Saved as ".$file_path."temp/temp$BID.png<br>";
 
@@ -215,8 +251,11 @@ function process_image($BID) {
 			imageinterlace($map, 1);
 		}
 		//$fh = fopen ($file_path."temp/temp$BID.gif", 'wb');
-	//	echo 'touching '.$file_path."temp/temp$BID.gif<br>";
-		touch($file_path."temp/temp$BID.gif");
+		//	echo 'touching '.$file_path."temp/temp$BID.gif<br>";
+		if(!touch($file_path."temp/temp$BID.gif")) {
+			$progress .= "<b>Warning:</b> The script does not have permission write to " . $file_path . "temp/temp" . $BID . ".gif or the directory does not exist<br>";
+			
+		}
 		imagegif($map, $file_path."temp/temp$BID.gif");
 		$progress .= "<br>Saved as ".$file_path."temp/temp$BID.gif<br>";
 		//fclose($fh);

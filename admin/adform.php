@@ -1,23 +1,36 @@
-<?php session_start();
-/*
-COPYRIGHT 2008 - see www.milliondollarscript.com for a list of authors
+<?php
+/**
+ * @version		$Id: adform.php 164 2012-12-14 21:22:24Z ryan $
+ * @package		mds
+ * @copyright	(C) Copyright 2010 Ryan Rhode, All rights reserved.
+ * @author		Ryan Rhode, ryan@milliondollarscript.com
+ * @license		This program is free software; you can redistribute it and/or modify
+ *		it under the terms of the GNU General Public License as published by
+ *		the Free Software Foundation; either version 3 of the License, or
+ *		(at your option) any later version.
+ *
+ *		This program is distributed in the hope that it will be useful,
+ *		but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License along
+ *		with this program;  If not, see http://www.gnu.org/licenses/gpl-3.0.html.
+ *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ *		Million Dollar Script
+ *		A pixel script for selling pixels on your website.
+ *
+ *		For instructions see README.txt
+ *
+ *		Visit our website for FAQs, documentation, a list team members,
+ *		to post any bugs or feature requests, and a community forum:
+ * 		http://www.milliondollarscript.com/
+ *
+ */
 
-This file is part of the Million Dollar Script.
-
-Million Dollar Script is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-Million Dollar Script is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with the Million Dollar Script.  If not, see <http://www.gnu.org/licenses/>.
-
-*/
+session_start();
 require ('../config.php');
 require ("admin_common.php");
 require_once ('../include/dynamic_forms.php');
@@ -27,9 +40,9 @@ require_once ('../include/ads.inc.php');
 $mode = $_REQUEST['mode'];
 
 ?>
-<head>
+<?php echo $f2->get_doc(); ?>
+
 <link rel="stylesheet" type="text/css" href="../main.css" >
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <script language="JavaScript" type="text/javascript">
 
 	function confirmLink(theLink, theConfirmMsg) {
@@ -50,39 +63,38 @@ $mode = $_REQUEST['mode'];
 
 </head>
 
-<BODY style=" font-family: 'Arial', sans-serif; font-size:10pt; background: #fff  url( <?php echo BASE_HTTP_PATH;?>images/grgrad.gif) repeat-x; ">
+<body style=" font-family: 'Arial', sans-serif; font-size:10pt; padding-top:10px;background: #fff  url( <?php echo BASE_HTTP_PATH;?>grgrad.gif) repeat-x; ">
 <div id="overDiv" style="position:absolute; visibility:hidden; z-index:1000; "></div>
-<b>[Ads Form]</b><span style="background-color: <?php if (($_REQUEST['mode']!='EDIT')) { echo "#FFFFCC"; }  ?>; border-style:outset; padding: 5px;"><a href="adform.php?mode=VIEW">View Form</a></span> <span style="background-color:  <?php if (($_REQUEST['mode']=='EDIT') && ($_REQUEST['NEW_FIELD']=='')) { echo "#FFFFCC"; }  ?>; border-style:outset; padding: 5px;"><a href="adform.php?mode=EDIT">Edit Fields</a></span> <span style="background-color: <?php if (($_REQUEST['mode']=='EDIT') && ($_REQUEST['NEW_FIELD']!='')) { echo "#FFFFCC"; }  ?>; border-style:outset; padding: 5px;"><a href="adform.php?NEW_FIELD=YES&mode=EDIT">New Field</a></span>&nbsp; &nbsp; <span style="background-color: <?php  echo "#F2F2F2";?> ; border-style:outset; padding: 5px;"><a href="adtemplate.php">Edit Template</a></span> <span style="background-color: <?php  echo "#F2F2F2";?> ; border-style:outset; padding: 5px;"><a href="adslist.php">Ad List</a></span>
-	
-	<hr>
+<b>[Ads Form]</b><span style="background-color: <?php if (($mode!='edit')) { echo "#FFFFCC"; }  ?>; border-style:outset; padding: 5px;"><a href="adform.php?mode=view">View Form</a></span> <span style="background-color:  <?php if (($_REQUEST['mode']=='edit') && ($_REQUEST['NEW_FIELD']=='')) { echo "#FFFFCC"; }  ?>; border-style:outset; padding: 5px;"><a href="adform.php?mode=edit">Edit Fields</a></span> <span style="background-color: <?php if (($_REQUEST['mode']=='edit') && ($_REQUEST['NEW_FIELD']!='')) { echo "#FFFFCC"; }  ?>; border-style:outset; padding: 5px;"><a href="adform.php?NEW_FIELD=YES&mode=edit">New Field</a></span>&nbsp; &nbsp; <span style="background-color: <?php  echo "#F2F2F2";?> ; border-style:outset; padding: 5px;"><a href="adtemplate.php">Edit Template</a></span> <span style="background-color: <?php  echo "#F2F2F2";?> ; border-style:outset; padding: 5px;"><a href="adslist.php">Ad List</a></span>
 
+<br />
+<br />
+<br />
 
 <?php
 
-
-
 global $AVAILABLE_LANGS;
-	echo "Current Language: [".$_SESSION['MDS_LANG']."] Select language:";
+
+echo '<div style="width:250px;float:left;">Current Language: ['.$_SESSION['MDS_LANG'].'] Select language:</div>';
 
 ?>
 
-<form name="lang_form">
+<form name="lang_form" style="width:100px;float:left;">
 <input type="hidden" name="field_id" value="<?php echo $field_id; ?>"/>
 <input type="hidden" name="mode" value="<?php echo $mode; ?>"/>
 <select name='lang' onChange="document.lang_form.submit()">
 <?php
 	foreach  ($AVAILABLE_LANGS as $key => $val) {
 		$sel = '';
-		if ($key==$_SESSION['MDS_LANG']) { $sel = " selected ";}
+		if ($key==$_SESSION['MDS_LANG']) { $sel = " selected "; }
 		echo "<option $sel value='".$key."'>".$val."</option>";
-
-}
+	}
 
 ?>
 
 </select>
 </form>
-
+<div style="clear:both;"></div>
 <?php
 
 //print_r ($_REQUEST);
@@ -106,7 +118,6 @@ if ($save != '') {
 		$_REQUEST['field_id'] = $id;
 	} else {
 		echo "<font color='#ff0000'><b>ERROR!</b></font><br>".$error.'';
-		
 	}
 
 }
@@ -114,7 +125,7 @@ if ($save != '') {
 if ($_REQUEST['delete'] != '') {
 
 	echo "Deleting...";
-	$sql = "SELECT * FROM form_fields WHERE form_id=1 and field_id='".$_REQUEST['field_id']."'";
+	$sql = "SELECT * FROM form_fields WHERE form_id=1 and field_id='".intval($_REQUEST['field_id'])."'";
 	$result = mysql_query ($sql);
 
 	$row = mysql_fetch_array($result) or die(mysql_error());
@@ -139,7 +150,7 @@ if (is_table_unsaved ("ads")) {
 	require ('build_ads_table.php');
 
 }
-//$mode = "EDIT";
+//$mode = "edit";
 ?>
 <table>
 
@@ -151,7 +162,6 @@ if (is_table_unsaved ("ads")) {
 	build_sort_fields (1, 2);
 	build_sort_fields (1, 3);
 
-
 	if ($_REQUEST['action']=='move_up') {
 		move_field_up(1, $_REQUEST['field_id']);
 	}
@@ -161,17 +171,14 @@ if (is_table_unsaved ("ads")) {
 	}
 
 	if ($NEW_FIELD=='NO') {
-	
 		display_ad_form (1, $_REQUEST['mode'], '');
-		
 	}
 	?>
-
 
 	</td>
 	<td valign="top">
 
-	<?php if ((($_REQUEST['mode']=='EDIT') && ($_REQUEST['field_id']!='')) || ($NEW_FIELD=='YES')) field_form($NEW_FIELD, $prams, 1); ?>
+	<?php if ((($mode=='edit') && ($_REQUEST['field_id']!='')) || ($NEW_FIELD=='YES')) field_form($NEW_FIELD, $prams, 1); ?>
 
 	</td>
 
@@ -180,18 +187,18 @@ if (is_table_unsaved ("ads")) {
 </table>
 <?php
 
-if ($_REQUEST['mode']=='EDIT') {
+if ($mode=='edit') {
 
 	?>
 
-	<IMG SRC="reserved.gif" WIDTH="13" HEIGHT="13" BORDER="0" ALT=""> - This field is reserved by the system, and cannot be deleted. You can however, change the field type / field name, and most other parameters.
+	<img src="reserved.gif" width="13" height="13" border="0" alt=""> - This field is reserved by the system, and cannot be deleted. You can however, change the field type / field name, and most other parameters.
 
 	<?php
 
 
 }
 
-if ($_REQUEST['mode']!='EDIT') {
+if ($mode!='edit') {
 	//echo "<hr>- Preview of the search form<br><br>";
 
 	//display_dynamic_search_form (1);

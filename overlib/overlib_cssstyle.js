@@ -1,21 +1,22 @@
 //\/////
 //\  overLIB CSS Style Plugin
-//\  This file requires overLIB 4.00 or later.
+//\  This file requires overLIB 4.10 or later.
 //\
-//\  overLIB 4.00 - You may not remove or change this notice.
+//\  overLIB 4.05 - You may not remove or change this notice.
 //\  Copyright Erik Bosrup 1998-2004. All rights reserved.
 //\  Contributors are listed on the homepage.
 //\  See http://www.bosrup.com/web/overlib/ for details.
-//   $Revision: 1.7.4.1 $                      $Date: 2004/03/23 16:29:38 $
+//   $Revision: 68 $                      $Date: 2010-09-11 21:31:03 -0400 (Sat, 11 Sep 2010) $
 //\/////
-
+//\mini
 
 
 ////////
 // PRE-INIT
 // Ignore these lines, configuration is below.
 ////////
-if (typeof olInfo == 'undefined' || olInfo.simpleversion < 400) alert('overLIB 4.00 or later is required for the CSS Style Plugin.');
+if (typeof olInfo == 'undefined' || typeof olInfo.meets == 'undefined' || !olInfo.meets(4.10)) alert('overLIB 4.10 or later is required for the CSS Style Plugin.');
+else {
 registerCommands('cssstyle,padunit,heightunit,widthunit,textsizeunit,textdecoration,textstyle,textweight,captionsizeunit,captiondecoration,captionstyle,captionweight,closesizeunit,closedecoration,closestyle,closeweight');
 
 
@@ -178,3 +179,4 @@ registerCmdLineFunction(parseCSSStyleExtras);
 registerHook("ol_content_simple", ol_content_simple_cssstyle, FALTERNATE, CSSSTYLE);
 registerHook("ol_content_caption", ol_content_caption_cssstyle, FALTERNATE, CSSSTYLE);
 registerHook("ol_content_background", ol_content_background_cssstyle, FALTERNATE, CSSSTYLE);
+}

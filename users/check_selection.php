@@ -1,4 +1,35 @@
 <?php
+/**
+ * @version		$Id: check_selection.php 137 2011-04-18 19:48:11Z ryan $
+ * @package		mds
+ * @copyright	(C) Copyright 2010 Ryan Rhode, All rights reserved.
+ * @author		Ryan Rhode, ryan@milliondollarscript.com
+ * @license		This program is free software; you can redistribute it and/or modify
+ *		it under the terms of the GNU General Public License as published by
+ *		the Free Software Foundation; either version 3 of the License, or
+ *		(at your option) any later version.
+ *
+ *		This program is distributed in the hope that it will be useful,
+ *		but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License along
+ *		with this program;  If not, see http://www.gnu.org/licenses/gpl-3.0.html.
+ *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ *		Million Dollar Script
+ *		A pixel script for selling pixels on your website.
+ *
+ *		For instructions see README.txt
+ *
+ *		Visit our website for FAQs, documentation, a list team members,
+ *		to post any bugs or feature requests, and a community forum:
+ * 		http://www.milliondollarscript.com/
+ *
+ */
+
 session_start();
 define ('NO_HOUSE_KEEP', 'YES');
 // check the image selection.
@@ -7,7 +38,8 @@ require ("../config.php");
 header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 header("Expires: Mon, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 
-load_banner_constants($_REQUEST['BID']);
+$BID = $f2->bid($_REQUEST['BID']);
+load_banner_constants($BID);
 
 // normalize...
 
@@ -21,10 +53,11 @@ $_REQUEST['block_id'] = floor ($_REQUEST['block_id']);
 function place_temp_order($in_str, $price) {
 
 
-	//global $b_row;
+	global $f2;
 
 	if (session_id()=='') { return false; } // cannot place order if there is no session!
 	$blocks = explode(',', $in_str);
+
 	$quantity = sizeof($blocks)*(BLK_WIDTH*BLK_HEIGHT);
 
 	$now = (gmdate("Y-m-d H:i:s")); 
@@ -35,9 +68,12 @@ function place_temp_order($in_str, $price) {
 	$row = mysql_fetch_array($result);
 	$ad_id = $row['ad_id'];
 	$block_info = addslashes($row['block_info']);
+	
+	$BID = $f2->bid($_REQUEST['BID']);
+
 	// DAYS_EXPIRE comes form load_banner_constants()
-	$sql = "REPLACE INTO `temp_orders` ( `session_id` , `blocks` , `order_date` , `price` , `quantity` ,  `days_expire`, `banner_id` , `currency` ,  `date_stamp` , `ad_id`, `block_info` )  VALUES ('".addslashes(session_id())."', '".$in_str."', '".$now."', '0', '".$quantity."', '".DAYS_EXPIRE."', '".$_REQUEST['BID']."', '".get_default_currency()."',  '$now', '$ad_id', '$block_info' );";
-	mds_log('Placed Temp order. '.$sql);
+	$sql = "REPLACE INTO `temp_orders` ( `session_id` , `blocks` , `order_date` , `price` , `quantity` ,  `days_expire`, `banner_id` , `currency` ,  `date_stamp` , `ad_id`, `block_info` )  VALUES ('".addslashes(session_id())."', '".$in_str."', '".$now."', '0', '".$quantity."', '".DAYS_EXPIRE."', '".$BID."', '".get_default_currency()."',  '$now', '$ad_id', '$block_info' );";
+	$f2->debug('Placed Temp order. '.$sql);
 	mysql_query($sql) or die (mysql_error());
 
 }
@@ -50,15 +86,15 @@ $price_table ='';
 
 function reserve_temp_order_pixels($block_info, $in_str) {
 
-	global $label;
+	global $f2, $label;
 
 	if (session_id()=='') { return false; } // cannot reserve pixels if there is no session
 
 	// check if it is free
+	$BID = $f2->bid($_REQUEST['BID']);
 
-
-
-	$sql = "select block_id from blocks where banner_id='".$_REQUEST['BID']."' and block_id IN($in_str) ";
+	$sql = "select block_id from blocks where banner_id='".$BID."' and block_id IN($in_str) ";
+	
 	$result = mysql_query($sql) or die ($sql.mysql_error()); 
 	if (mysql_num_rows($result)>0) {
 		echo js_out_prep($label['check_sel_notavailable']." (E432)");
@@ -72,9 +108,9 @@ function reserve_temp_order_pixels($block_info, $in_str) {
 
 	foreach ($block_info as $key=>$block) {
 
-		//$price = get_zone_price($_REQUEST['BID'],  $block['map_y']/10, $block['map_x']/10);
+		//$price = get_zone_price($f2->bid($_REQUEST['BID']),  $block['map_y']/10, $block['map_x']/10);
 
-		$price = get_zone_price($_REQUEST['BID'],  $block['map_y']/BLK_HEIGHT, $block['map_x']/BLK_WIDTH);
+		$price = get_zone_price($BID,  $block['map_y']/BLK_HEIGHT, $block['map_x']/BLK_WIDTH);
 
 		$currency = get_default_currency();
 
@@ -82,7 +118,7 @@ function reserve_temp_order_pixels($block_info, $in_str) {
 
 		$block_info[$key]['currency'] = $currency;
 		$block_info[$key]['price'] = $price;
-		$block_info[$key]['banner_id'] = $_REQUEST['BID'];
+		$block_info[$key]['banner_id'] = $f2->bid($_REQUEST['BID']);
 
 		$total += $price;
 
@@ -118,7 +154,7 @@ check_selection_main();
 
 function check_selection_main() {
 
-	//global $b_row;
+	global $f2;
 
 	# check the status of the block.
 
@@ -183,7 +219,8 @@ function check_selection_main() {
 		$dest = imagecreate(BLK_WIDTH, BLK_HEIGHT);
 		$whole_image = imagecreate ($new_size[0], $new_size[1]);
 	}
-	$parts = split ('\.', $upload_image_file);
+	
+	$parts = explode ('.', $upload_image_file);
 	$ext = strtolower(array_pop($parts));
 	//echo $ext."($upload_image_file)\n";
 	switch ($ext) {
@@ -257,6 +294,7 @@ function check_selection_main() {
 	//print_r ($block_info);
 
 	// create a temporary order and place the blocks on a temp order
+
 	place_temp_order($in_str, $price);
 	//echo "in_str is:".$in_str;
 	reserve_temp_order_pixels($block_info, $in_str);
@@ -289,4 +327,3 @@ function check_selection_main() {
 
 
 ?>
-

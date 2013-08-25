@@ -1,9 +1,39 @@
 <?php
+/**
+ * @version		$Id: install.php 162 2012-12-12 16:48:21Z ryan $
+ * @package		mds
+ * @copyright	(C) Copyright 2010 Ryan Rhode, All rights reserved.
+ * @author		Ryan Rhode, ryan@milliondollarscript.com
+ * @license		This program is free software; you can redistribute it and/or modify
+ *		it under the terms of the GNU General Public License as published by
+ *		the Free Software Foundation; either version 3 of the License, or
+ *		(at your option) any later version.
+ *
+ *		This program is distributed in the hope that it will be useful,
+ *		but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License along
+ *		with this program;  If not, see http://www.gnu.org/licenses/gpl-3.0.html.
+ *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ *		Million Dollar Script
+ *		A pixel script for selling pixels on your website.
+ *
+ *		For instructions see README.txt
+ *
+ *		Visit our website for FAQs, documentation, a list team members,
+ *		to post any bugs or feature requests, and a community forum:
+ * 		http://www.milliondollarscript.com/
+ *
+ */
 error_reporting(E_ALL & ~E_NOTICE);
 if ($_REQUEST[action]=='install') {
 	
 	save_db_config();
-	require ("../config.php");
+	require("../config.php");
 
 	if ($conn=check_connection ($_REQUEST[mysql_user], $_REQUEST[mysql_pass],$_REQUEST[mysql_host])) {
 		 if (check_db ( $_REQUEST[mysql_db], $conn)) {
@@ -25,15 +55,18 @@ if ($_REQUEST[action]=='install') {
 
 } else {
 	
-
-require ("../config.php");
+if(file_exists("../config.php")) {
+	require ("../config.php");
+} else {
+	echo "config.php not found. Maybe you have to rename config-default.php to config.php";
+	die();
+}
 
 
 
 }
 $sql = "select * from users";
-$result = @mysql_query($sql);
-if ($result) {
+if ($result = @mysql_query($sql)) {
 	echo "<h3>Database successfully Installed.</h3>";
 	echo "<p>";
 	echo "Next Steps:<br>";
@@ -69,7 +102,6 @@ function check_db ( $db_name, $connection) {
 <p>
 Please fill in the form and click install.<br>
 Please make sure that the MySQL user has all the permissions to use the database (Admin privileges).<br>
-
 </p>
 <?php
 if (is_writable("../config.php")) {
@@ -106,6 +138,14 @@ if (is_writable("../upload_files/images/")) {
 } else {
 	echo "- upload_files/images/ directory is not writable. Give write permissions (777) to upload_files/docs/ directory<br>";
 }
+
+// check HTMLPurifier permissions
+if (is_writable("../library/HTMLPurifier/DefinitionCache/Serializer")) {
+	echo "- library/HTMLPurifier/DefinitionCache/Serializer is writeable. (OK)<br>";
+} else {
+	echo "- Note: library/HTMLPurifier/DefinitionCache/Serializer is not writable. Give write permissions (try 755 or 777 if that doesn't work) to library/HTMLPurifier/DefinitionCache/Serializer<br>";
+}
+
 ?>
 <form method="post" action="install.php">
 <input type="hidden" name="action" value="install">
@@ -148,8 +188,13 @@ if (is_writable("../upload_files/images/")) {
 	$dir = preg_split ('%[/\\\]%', $dir);
 	$blank = array_pop($dir);
 	$dir = implode('/', $dir);
+	
 	define ('UPLOAD_PATH', $dir.'/upload_files/');
-
+}
+if (UPLOAD_PATH=='') {
+	$UPLOAD_PATH = str_replace('\\', '/', $file_path."/upload_files/");
+} else {
+	$UPLOAD_PATH = UPLOAD_PATH;
 }
 
 if (!defined('UPLOAD_HTTP_PATH')) {
@@ -163,7 +208,12 @@ if (!defined('UPLOAD_HTTP_PATH')) {
 
 	define ('UPLOAD_HTTP_PATH', "http://".$host.$http_url."/upload_files/");
 }
-  
+if (UPLOAD_HTTP_PATH=='') {
+	$UPLOAD_HTTP_PATH = "http://" . str_replace('\\', '/', $host.$http_url."/upload_files/");
+} else {
+	$UPLOAD_HTTP_PATH = UPLOAD_HTTP_PATH;
+}
+
   ?>
   <p>&nbsp;</p>
   <table border="0" cellpadding="5" cellspacing="2" style="border-style:groove" id="AutoNumber1" width="100%" bgcolor="#FFFFFF">
@@ -174,23 +224,23 @@ if (!defined('UPLOAD_HTTP_PATH')) {
     <tr>
       <td width="20%" bgcolor="#e6f2ea"><font face="Verdana" size="1">Site's HTTP URL (address)</font></td>
       <td bgcolor="#e6f2ea"><font face="Verdana" size="1">
-      <input type="text" name="base_http_path" size="49" value="<?php echo htmlentities($BASE_HTTP_PATH); ?>"><br>Recommended: <b>http://<?php echo $host.$http_url."/"; ?></b></font></td>
+      <input type="text" name="base_http_path" size="49" value="<?php echo htmlentities($BASE_HTTP_PATH); ?>"><br>Recommended: <b>http://<?php echo $BASE_HTTP_PATH; ?></b></font></td>
     </tr>
    
 	 <tr>
       <td bgcolor="#e6f2ea"><font face="Verdana" size="1">Server Path to Admin</font></td>
       <td bgcolor="#e6f2ea"><font face="Verdana" size="1">
-      <input type="text" name="server_path_to_admin" size="49" value="<?php echo htmlentities($SERVER_PATH_TO_ADMIN); ?>" ><br>Recommended: <b><?php echo str_replace('\\', '/', getcwd());?>/</b></font></td>
+      <input type="text" name="server_path_to_admin" size="49" value="<?php echo htmlentities($SERVER_PATH_TO_ADMIN); ?>" ><br>Recommended: <b><?php echo $SERVER_PATH_TO_ADMIN;?>/</b></font></td>
     </tr>
 	<tr>
       <td bgcolor="#e6f2ea"><font face="Verdana" size="1">Path to upload directory</font></td>
       <td bgcolor="#e6f2ea"><font face="Verdana" size="1">
-      <input type="text" name="upload_path" size="55" value="<?php echo htmlentities(UPLOAD_PATH); ?>" ><br>Recommended: <b><?php echo str_replace('\\', '/', $file_path."/upload_files/");?></b></font></td>
+      <input type="text" name="upload_path" size="55" value="<?php echo htmlentities($UPLOAD_PATH); ?>" ><br>Recommended: <b><?php echo $UPLOAD_PATH;?></b></font></td>
     </tr>
 	<tr>
       <td bgcolor="#e6f2ea"><font face="Verdana" size="1">HTTP URL to upload directory</font></td>
       <td bgcolor="#e6f2ea"><font face="Verdana" size="1">
-      <input type="text" name="upload_http_path" size="55" value="<?php echo htmlentities(UPLOAD_HTTP_PATH); ?>" ><br>Recommended: <b>http://<?php echo str_replace('\\', '/', $host.$http_url."/upload_files/");?></b></font></td>
+      <input type="text" name="upload_http_path" size="55" value="<?php echo htmlentities($UPLOAD_HTTP_PATH); ?>" ><br>Recommended: <b><?php echo $UPLOAD_HTTP_PATH;?></b></font></td>
     </tr>
 	<tr>
 	<td colspan="2">
@@ -201,6 +251,8 @@ NOTES<br>
  - Use the recommended settings unless you are sure otherwise<br>
  Also, don't forget to set the permissions of the admin/temp/ directory to 777.<br> The script must be able to write  to temp/ dir in the admin<br>
  The script also needs to be able to write to the pixels/ directory (chmod 777) <br>
+ -Sometimes your web server configuration may desire different permissions than what is listed here in order for files to execute properly.  i.e. if you are running suExec, etc.<br />
+You should check with your host if you are unsure.
  </font>
 	</td>
 
@@ -251,6 +303,8 @@ NOTES<br>
 
 
 function save_db_config() {
+	require_once '../include/functions2.php';
+	$f2 = new functions2();
 
 	$filename = "../config.php";
 	$handle  = fopen($filename, "r");
@@ -260,8 +314,8 @@ function save_db_config() {
 
 	$contents = preg_replace ( "/.*define\('MYSQL_HOST',[ ]*'[^']*'\);[ ]*/U", "define('MYSQL_HOST', '".$_REQUEST['mysql_host']."');", $contents) ;
 	$contents = preg_replace ( "/.*define\('MYSQL_USER',[ ]*'[^']*'\);[ ]*/U", "define('MYSQL_USER', '".$_REQUEST['mysql_user']."');", $contents) ;
-	$contents = preg_replace ( "/.*define\('MYSQL_PASS',[ ]*'[^']*'\);[ ]*/U", "define('MYSQL_PASS', '". $_REQUEST['mysql_pass']."');", $contents) ;
-	$contents = preg_replace ( "/.*define\('MYSQL_DB',[ ]*'[^']*'\);[ ]*/U", "define('MYSQL_DB', '". $_REQUEST['mysql_db']."');", $contents) ;
+	$contents = preg_replace ( "/.*define\('MYSQL_PASS',[ ]*'[^']*'\);[ ]*/U", "define('MYSQL_PASS', '".$_REQUEST['mysql_pass']."');", $contents) ;
+	$contents = preg_replace ( "/.*define\('MYSQL_DB',[ ]*'[^']*'\);[ ]*/U", "define('MYSQL_DB', '".    $_REQUEST['mysql_db']."');", $contents) ;
 	
 	$contents = preg_replace ( "/.*define\('SERVER_PATH_TO_ADMIN',[ ]*'[^']*'\);[ ]*/U", "define('SERVER_PATH_TO_ADMIN', '".$_REQUEST['server_path_to_admin']."');", $contents) ;
 	
@@ -273,11 +327,8 @@ function save_db_config() {
 
 	fwrite($handle , $contents);
 
-	
-
 	fclose ($handle);
 	//echo " done.";
-
 }
 ###################################
 function query_parser($q){
@@ -412,7 +463,7 @@ CREATE TABLE `form_fields` (
 );;;
 
 INSERT INTO `form_fields` VALUES (1, 1, 1, 'not_empty', 'Ad Text', 'TEXT', 1, 'Y', '', '', 'was not filled in', '', 80, 0, 0, 0, 'ALT_TEXT', '', '', '', 0, '', 0, '', '', '');;;
-INSERT INTO `form_fields` VALUES (1, 2, 1, 'url', 'URL', 'TEXT', 2, 'Y', '', '', 'is not valid.', 'http://', 80, 0, 0, 0, 'URL', '', '', '', 0, '', 0, '', '', '');;;
+INSERT INTO `form_fields` VALUES (1, 2, 1, 'url', 'URL', 'TEXT', 2, 'Y', '', '', 'is not valid.', '', 80, 0, 0, 0, 'URL', '', '', '', 0, '', 0, '', '', '');;;
 INSERT INTO `form_fields` VALUES (1, 3, 1, '', 'Additional Image', 'IMAGE', 3, '', '', '', '', '', 0, 0, 0, 0, 'IMAGE', '', '', '(This image will be displayed when a mouse pointer is placed over your ad)', 0, '', 0, '', '', '');;;
 
 
@@ -529,11 +580,11 @@ CREATE TABLE `temp_orders` (
 	);;;
 
 
-	INSERT INTO `currencies` VALUES ('AUD', 'Australian Dollar', 1.3630, 'N', '$', 2, '.', ',');;;
-	INSERT INTO `currencies` VALUES ('CAD', 'Canadian Dollar', 1.1888, 'N', '$', 2, '.', ',');;;
-	INSERT INTO `currencies` VALUES ('EUR', 'Euro', 0.8498, 'N', '€', 2, '.', ',');;;
-	INSERT INTO `currencies` VALUES ('GBP', 'British Pound', 0.5739, 'N', '£', 2, '.', ',');;;
-	INSERT INTO `currencies` VALUES ('JPY', 'Japanese Yen', 117.2750, 'N', '¥', 0, '.', ',');;;
+	INSERT INTO `currencies` VALUES ('AUD', 'Australian Dollar', 1.0075, 'N', '$', 2, '.', ',');;;
+	INSERT INTO `currencies` VALUES ('CAD', 'Canadian Dollar', 0.99489, 'N', '$', 2, '.', ',');;;
+	INSERT INTO `currencies` VALUES ('EUR', 'Euro', 0.77476, 'N', 'â‚¬', 2, '.', ',');;;
+	INSERT INTO `currencies` VALUES ('GBP', 'British Pound', 0.64337, 'N', 'Â£', 2, '.', ',');;;
+	INSERT INTO `currencies` VALUES ('JPY', 'Japanese Yen', 83.149, 'N', 'Â¥', 0, '.', ',');;;
 	INSERT INTO `currencies` VALUES ('USD', 'U.S. Dollar', 1.0000, 'Y', '$', 2, '.', ',');;;
 
 
@@ -553,7 +604,7 @@ CREATE TABLE `temp_orders` (
 
 	 
 
-	INSERT INTO `lang` VALUES ('EN', 'english.php', 'english.gif', 'Y', 'English', '', 'R0lGODlhGQARAMQAAAURdBYscgNNfrUOEMkMBdAqE9UTMtItONNUO9w4SdxmaNuObhYuh0Y5lCxVlFJcpqN2ouhfjLCrrOeRmeHKr/Wy3Lje4dPW3PDTz9/q0vXm1ffP7MLt5/f0+AAAAAAAACwAAAAAGQARAAAF02AAMIDDkOgwEF3gukCZIICI1jhFDRmOS4dF50aMVSqEjehFIWQ2kJLUMRoxCCsNzDFBZDCuh1RMpQY6HZYIiOlIYqKy9JZIqHeZTqMWnvoZCgosCkIXDoeIAGJkfmgEB3UHkgp1dYuKVWJXWCsEnp4qAwUcpBwWphapFhoanJ+vKxOysxMRgbcDHRlfeboZF2mvwp+5Eh07YC9naMzNzLmKuggTDy8G19jZ2NAiFB0LBxYuC+TlC7Syai8QGU0TAs7xaNxLDLoDdsPDuS98ABXfQgAAOw==', 'image/gif', 'Y');;;
+	INSERT INTO `lang` VALUES ('EN', 'english.php', 'english.gif', 'Y', 'English', 'en_US.utf8', 'R0lGODlhGQARAMQAAAURdBYscgNNfrUOEMkMBdAqE9UTMtItONNUO9w4SdxmaNuObhYuh0Y5lCxVlFJcpqN2ouhfjLCrrOeRmeHKr/Wy3Lje4dPW3PDTz9/q0vXm1ffP7MLt5/f0+AAAAAAAACwAAAAAGQARAAAF02AAMIDDkOgwEF3gukCZIICI1jhFDRmOS4dF50aMVSqEjehFIWQ2kJLUMRoxCCsNzDFBZDCuh1RMpQY6HZYIiOlIYqKy9JZIqHeZTqMWnvoZCgosCkIXDoeIAGJkfmgEB3UHkgp1dYuKVWJXWCsEnp4qAwUcpBwWphapFhoanJ+vKxOysxMRgbcDHRlfeboZF2mvwp+5Eh07YC9naMzNzLmKuggTDy8G19jZ2NAiFB0LBxYuC+TlC7Syai8QGU0TAs7xaNxLDLoDdsPDuS98ABXfQgAAOw==', 'image/gif', 'Y');;;
 
 
 
@@ -721,5 +772,3 @@ CREATE TABLE `codes` (
 
 
 ?>
-
-

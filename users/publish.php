@@ -1,4 +1,35 @@
 <?php
+/**
+ * @version		$Id: publish.php 147 2011-09-04 18:22:57Z ryan $
+ * @package		mds
+ * @copyright	(C) Copyright 2010 Ryan Rhode, All rights reserved.
+ * @author		Ryan Rhode, ryan@milliondollarscript.com
+ * @license		This program is free software; you can redistribute it and/or modify
+ *		it under the terms of the GNU General Public License as published by
+ *		the Free Software Foundation; either version 3 of the License, or
+ *		(at your option) any later version.
+ *
+ *		This program is distributed in the hope that it will be useful,
+ *		but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License along
+ *		with this program;  If not, see http://www.gnu.org/licenses/gpl-3.0.html.
+ *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ *		Million Dollar Script
+ *		A pixel script for selling pixels on your website.
+ *
+ *		For instructions see README.txt
+ *
+ *		Visit our website for FAQs, documentation, a list team members,
+ *		to post any bugs or feature requests, and a community forum:
+ * 		http://www.milliondollarscript.com/
+ *
+ */
+
 @set_time_limit ( 260); // 180 sec
 session_start();
 include ("../config.php");
@@ -16,8 +47,8 @@ require ("header.php");
 
 // Work out the banner id...
 
-if ($_REQUEST['BID']!='') {
-	$BID = $_REQUEST['BID'];
+if ($f2->bid($_REQUEST['BID'])!='') {
+	$BID = $f2->bid($_REQUEST['BID']);
 	
 } elseif ($_REQUEST['ad_id']!='') {
 	$sql = "select banner_id from ads where ad_id='".$_REQUEST['ad_id']."'";
@@ -216,13 +247,6 @@ function disapprove_modified_order($order_id, $BID) {
 	///echo $sql;
 	mysql_query($sql) or die(mysql_error());
 
-	// send pixel change notification
-
-	if (EMAIL_ADMIN_PUBLISH_NOTIFY=='YES') {
-		send_published_pixels_notification($_SESSION['MDS_ID'], $BID);
-	}
-
-
 }
 
 /////////////////////////
@@ -256,7 +280,7 @@ if ($_REQUEST['ad_id']) {
 
 		$uploaddir = SERVER_PATH_TO_ADMIN."temp/";
 
-		$parts = split ('\.', $_FILES['pixels']['name']);
+		$parts = explode ('.', $_FILES['pixels']['name']);
 		$ext = strtolower(array_pop($parts));
 
 		// CHECK THE EXTENSION TO MAKE SURE IT IS ALLOWED
@@ -332,7 +356,7 @@ if ($_REQUEST['ad_id']) {
 						$whole_image = imagecreate ($size['x'], $new_size['y']);
 					}
 
-					$parts = split ('\.', $tmp_image_file);
+					$parts = explode ('.', $tmp_image_file);
 					$ext = strtolower(array_pop($parts));
 					//echo $ext."($upload_image_file)\n";
 					switch (strtolower($ext)) {
@@ -481,7 +505,7 @@ if ($_REQUEST['ad_id']!='') {
 
 		$error = validate_ad_data(1);
 		if ($error != '') { // we have an error
-			$mode = "edit";
+			$mode = "user";
 			//display_ad_intro();
 			display_ad_form (1, $mode, '');
 		} else {
@@ -498,7 +522,7 @@ if ($_REQUEST['ad_id']!='') {
 			<p>&nbsp;</p>
 			<?php
 
-			$mode = "edit";
+			$mode = "user";
 		
 			display_ad_form (1, $mode, $prams);
 
@@ -515,12 +539,17 @@ if ($_REQUEST['ad_id']!='') {
 				//echo 'published.';
 			}
 
+			// send pixel change notification
+			if (EMAIL_ADMIN_PUBLISH_NOTIFY=='YES') {
+				send_published_pixels_notification($_SESSION['MDS_ID'], $BID);
+			}
+
 		}
 
 	} else {
 			
 			$prams = load_ad_values ($_REQUEST['ad_id']);
-			display_ad_form (1, 'edit', $prams);
+			display_ad_form (1, 'user', $prams);
 
 	}
 

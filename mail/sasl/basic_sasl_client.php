@@ -2,7 +2,7 @@
 /*
  * basic_sasl_client.php
  *
- * @(#) $Id: basic_sasl_client.php,v 1.1 2004/11/17 08:01:23 mlemos Exp $
+ * @(#) $Id: basic_sasl_client.php 67 2010-09-12 01:30:49Z ryan $
  *
  */
 

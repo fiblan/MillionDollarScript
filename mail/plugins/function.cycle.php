@@ -32,7 +32,7 @@
  * </pre>
  * @link http://smarty.php.net/manual/en/language.function.cycle.php {cycle}
  *       (Smarty online manual)
- * @author Monte Ohrt <monte@ispi.net>
+ * @author Monte Ohrt <monte at ohrt dot com>
  * @author credit to Mark Priatel <mpriatel@rogers.com>
  * @author credit to Gerard <gerard@interfold.com>
  * @author credit to Jason Sweat <jsweat_php@yahoo.com>
@@ -63,7 +63,11 @@ function smarty_function_cycle($params, &$smarty)
         $cycle_vars[$name]['values'] = $params['values'];
     }
 
-    $cycle_vars[$name]['delimiter'] = (isset($params['delimiter'])) ? $params['delimiter'] : ',';
+    if (isset($params['delimiter'])) {
+        $cycle_vars[$name]['delimiter'] = $params['delimiter'];
+    } elseif (!isset($cycle_vars[$name]['delimiter'])) {
+        $cycle_vars[$name]['delimiter'] = ',';       
+    }
     
     if(is_array($cycle_vars[$name]['values'])) {
         $cycle_array = $cycle_vars[$name]['values'];

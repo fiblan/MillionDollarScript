@@ -1,23 +1,34 @@
 <?php
-/*
-COPYRIGHT 2008 - see www.milliondollarscript.com for a list of authors
-
-This file is part of the Million Dollar Script.
-
-Million Dollar Script is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-Million Dollar Script is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with the Million Dollar Script.  If not, see <http://www.gnu.org/licenses/>.
-
-*/
+/**
+ * @version		$Id: ads.inc.php 162 2012-12-12 16:48:21Z ryan $
+ * @package		mds
+ * @copyright	(C) Copyright 2010 Ryan Rhode, All rights reserved.
+ * @author		Ryan Rhode, ryan@milliondollarscript.com
+ * @license		This program is free software; you can redistribute it and/or modify
+ *		it under the terms of the GNU General Public License as published by
+ *		the Free Software Foundation; either version 3 of the License, or
+ *		(at your option) any later version.
+ *
+ *		This program is distributed in the hope that it will be useful,
+ *		but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License along
+ *		with this program;  If not, see http://www.gnu.org/licenses/gpl-3.0.html.
+ *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ *		Million Dollar Script
+ *		A pixel script for selling pixels on your website.
+ *
+ *		For instructions see README.txt
+ *
+ *		Visit our website for FAQs, documentation, a list team members,
+ *		to post any bugs or feature requests, and a community forum:
+ * 		http://www.milliondollarscript.com/
+ *
+ */
 
 require_once ('category.inc.php');
 require_once ('lists.inc.php');
@@ -52,7 +63,8 @@ function ad_tag_to_field_id_init () {
 	}
 	global $label;
 
-	$sql = "SELECT *, t2.field_label AS NAME FROM `form_fields` as t1, form_field_translations as t2 where t1.field_id = t2.field_id AND t2.lang='".$_SESSION['MDS_LANG']."' AND form_id=1 ORDER BY list_sort_order ";
+	//$sql = "SELECT *, t2.field_label AS NAME FROM `form_fields` as t1, form_field_translations as t2 where t1.field_id = t2.field_id AND t2.lang='".$_SESSION['MDS_LANG']."' AND form_id=1 ORDER BY list_sort_order ";
+	$sql = "SELECT * FROM `form_fields`, form_field_translations where form_fields.field_id = form_field_translations.field_id AND form_field_translations.lang='".$_SESSION['MDS_LANG']."' AND form_id=1 ORDER BY list_sort_order ";
 	$result = mysql_query($sql) or die (mysql_error());
 	# do a query for each field
 	while ($fields = mysql_fetch_array($result, MYSQL_ASSOC)) {
@@ -60,7 +72,7 @@ function ad_tag_to_field_id_init () {
 		//$form_data = $row[]
 		$tag_to_field_id[$fields['template_tag']]['field_id'] = $fields['field_id'];
 		$tag_to_field_id[$fields['template_tag']]['field_type'] = $fields['field_type'];
-		$tag_to_field_id[$fields['template_tag']]['field_label'] = $fields['NAME'];
+		$tag_to_field_id[$fields['template_tag']]['field_label'] = $fields['field_label'];
 	}
 
 
@@ -92,6 +104,8 @@ function ad_tag_to_field_id_init () {
 ######################################################################
 
 function load_ad_values ($ad_id) {
+
+	global $f2;
 
 	$prams = array();
 
@@ -183,9 +197,7 @@ function assign_ad_template($prams) {
 
 function display_ad_form ($form_id, $mode, $prams) {
 
-	global $label;
-	global $error;
-	global $BID;
+	global $f2, $label, $error, $BID;
 
 	if ($prams == '' ) {
 
@@ -224,14 +236,14 @@ function display_ad_form ($form_id, $mode, $prams) {
 	}
 
 
-
+/*
 	if (!defined('SCW_INCLUDE')) {
 		?>
 		<script type='text/JavaScript' src='<?php echo BASE_HTTP_PATH."scw/scw_js.php?lang=".$_SESSION['MDS_LANG']; ?>'></script>
 		<?php
 		define ('SCW_INCLUDE', 'Y');
 	}
-
+*/
 	?>
 	<form method="POST"  action="<?php htmlentities($_SERVER['PHP_SELF']); ?>" name="form1" onsubmit=" form1.savebutton.disabled=true;" enctype="multipart/form-data">
 	
@@ -242,14 +254,14 @@ function display_ad_form ($form_id, $mode, $prams) {
 	<input type="hidden" name="banner_id" size="" value="<?php echo $prams['banner_id']; ?>">
 
 	<table cellSpacing="1" cellPadding="5" class="ad_data"  id="ad"   >
-	<?php  if (($error != '' ) && ($mode!='EDIT')) { ?>
+	<?php  if (($error != '' ) && ($mode!='edit')) { ?>
 	<tr>
 		<td bgcolor="#F2F2F2" colspan="2"><?php  echo "<span class='error_msg_label'>".$label['ad_save_error']."</span><br> <b>".$error."</b>";  ?></td>
 	</tr>
 	<?php } ?>
   <tr  bgColor="#ffffff">
     <td  bgColor="#eaeaea">
-	<?php if ($mode == "EDIT") {
+	<?php if ($mode == "edit") {
 					echo "[Ad Form]";
 				}
 		 // section 1
@@ -259,8 +271,8 @@ function display_ad_form ($form_id, $mode, $prams) {
   </tr>
 	<tr><td colspan="2" bgcolor="#ffffff">
 		<input type="hidden" name="save" id="save101" value="">
-		<?php if ($mode=='edit') { ?>
-		<input class="form_submit_button" TYPE="SUBMIT" class='big_button' name="savebutton" value="<?php echo $label['ad_save_button'];?>" onClick="save101.value='1';">
+		<?php if ($mode=='edit' || $mode == 'user') { ?>
+		<input class="form_submit_button big_button" type="submit" name="savebutton" value="<?php echo $label['ad_save_button'];?>" onClick="save101.value='1';">
 		<?php } ?>
 		</td></tr>
 	</table>
@@ -277,8 +289,7 @@ function display_ad_form ($form_id, $mode, $prams) {
 function list_ads ($admin=false, $order, $offset, $list_mode='ALL', $user_id='') {
 
 	## Globals
-	global $label;
-	global $tag_to_field_id;
+	global $f2, $label, $tag_to_field_id;
 	$tag_to_field_id = ad_tag_to_field_id_init();
 
 	###########################################
@@ -330,7 +341,8 @@ function list_ads ($admin=false, $order, $offset, $list_mode='ALL', $user_id='')
 		if (!is_numeric($user_id)) {
 			$user_id = $_SESSION['MDS_ID'];
 		} 
-		$sql = "Select *  FROM `ads` as t1, `orders` as t2 WHERE t1.ad_id=t2.ad_id AND t1.order_id > 0 AND t1.banner_id='".$BID."' AND t1.user_id='".$user_id."' AND (t2.status = 'completed' OR t2.status = 'expired') $where_sql ORDER BY $order $ord ";
+		//$sql = "Select *  FROM `ads` as t1, `orders` as t2 WHERE t1.ad_id=t2.ad_id AND t1.order_id > 0 AND t1.banner_id='".$BID."' AND t1.user_id='".$user_id."' AND (t2.status = 'completed' OR t2.status = 'expired') $where_sql ORDER BY $order $ord ";
+		$sql = "Select *  FROM `ads`, `orders` WHERE ads.ad_id=orders.ad_id AND ads.order_id > 0 AND ads.banner_id='".$BID."' AND ads.user_id='".$user_id."' AND (orders.status = 'completed' OR orders.status = 'expired') $where_sql ORDER BY $order $ord ";
 
 	} elseif ($list_mode =='TOPLIST') {
 
@@ -338,7 +350,8 @@ function list_ads ($admin=false, $order, $offset, $list_mode='ALL', $user_id='')
 		
 	} else {
 		
-		$sql = "Select *  FROM `ads` as t1, `orders` AS t2 WHERE t1.ad_id=t2.ad_id AND t1.banner_id='$BID' and t1.order_id > 0 $where_sql ORDER BY $order $ord ";
+		//$sql = "Select *  FROM `ads` as t1, `orders` AS t2 WHERE t1.ad_id=t2.ad_id AND t1.banner_id='$BID' and t1.order_id > 0 $where_sql ORDER BY $order $ord ";
+		$sql = "Select *  FROM `ads`, `orders` WHERE ads.ad_id=orders.ad_id AND ads.banner_id='$BID' and ads.order_id > 0 $where_sql ORDER BY $order $ord ";
 
 	}
 
@@ -579,6 +592,7 @@ function delete_ad ($ad_id) {
 ################################
 
 function search_category_tree_for_ads() {
+	global $f2;
 
 	if (func_num_args() > 0 ) {
 		$cat_id = func_get_arg(0);
@@ -628,6 +642,7 @@ function search_category_tree_for_ads() {
 ####################
 
 function search_category_for_ads() {
+	global $f2;
 
 	if (func_num_args() > 0 ) {
 		$cat_id = func_get_arg(0);
@@ -689,17 +704,20 @@ function temp_ad_exists($sid) {
 ################################################################
 
 function insert_ad_data() {
+	global $f2;
 
 	if (func_num_args() > 0) {
 		$admin = func_get_arg(0); // admin mode.
 
 	}
 
+	//print_r($_REQUEST);
+
 	$user_id = $_SESSION['MDS_ID'];
 	if ($user_id=='') {
 		$user_id = addslashes(session_id());
 	}
-	$order_id = $_REQUEST['order_id'];
+	$order_id = ($order_id)?$_REQUEST['order_id']:0;
 	$ad_date = (gmdate("Y-m-d H:i:s")); 
 	$banner_id = $_REQUEST['banner_id'];
 	
@@ -707,18 +725,28 @@ function insert_ad_data() {
 
 		$ad_id = generate_ad_id ();
 		$now = (gmdate("Y-m-d H:i:s"));
-		$sql = "REPLACE INTO `ads` (`ad_id`, `order_id`, `user_id`, `ad_date`, `banner_id` ".get_sql_insert_fields(1).") VALUES ('$ad_id',  '$order_id', '$user_id', '$ad_date', '$banner_id' ".get_sql_insert_values(1, "ads", "ad_id", $_REQUEST['ad_id'], $user_id).") ";
+
+		//$extra_columns = get_sql_insert_fields(1);
+		$extra_values = get_sql_insert_values(1, "ads", "ad_id", $_REQUEST['ad_id'], $user_id);
+		$values = $ad_id . ", '" . $user_id . "', '" . mysql_real_escape_string($now) . "', " . $order_id . ", $banner_id" . $extra_values;
+
+/*$sql = "INSERT INTO `ads` (`ad_id`, `user_id`, `ad_date`, `order_id`, `banner_id` " . $extra_columns .") " .
+		"VALUES (" . $values . ") " .
+		"ON DUPLICATE KEY UPDATE `ad_id`='" . $ad_id . "', `user_id` = '" . $user_id . "', `ad_date` = '" . mysql_real_escape_string($ad_date) . "', `order_id` = " . parseNull($order_id) . ", `banner_id` = '" . $banner_id ."'". get_sql_update_values(1, "ads", "ad_id", $_REQUEST['ad_id'], $user_id);
+*/
+
+		$sql = "REPLACE INTO ads VALUES (" . $values . ");";
 
 	} else {
 		
-		$ad_id = $_REQUEST['ad_id'];
+		$ad_id = intval($_REQUEST['ad_id']);
 
 		if (!$admin) { // make sure that the logged in user is the owner of this ad.
 
 			if (!is_numeric($_REQUEST['user_id'])) { // temp order (user_id = session_id())
 				if ($_REQUEST['user_id']!=session_id()) return false;
 			} else { // user is logged in
-				$sql = "select user_id from `ads` WHERE ad_id='".$_REQUEST['ad_id']."'";
+				$sql = "select user_id from `ads` WHERE ad_id='".intval($_REQUEST['ad_id'])."'";
 				$result = mysql_query ($sql) or die(mysql_error());
 				$row = @mysql_fetch_array($result);
 				if ($_SESSION['MDS_ID']!==$row['user_id']) {
@@ -727,20 +755,13 @@ function insert_ad_data() {
 				}
 			}
 		}
-		
 
 		$now = (gmdate("Y-m-d H:i:s"));
-		$sql = "UPDATE `ads` SET `ad_date`='$now'  ".get_sql_update_values (1, "ads", "ad_id", $_REQUEST['ad_id'], $user_id)." WHERE ad_id='".$ad_id."'";
-		
+		$sql = "UPDATE ads SET ad_date='$now'".get_sql_update_values(1, "ads", "ad_id", $_REQUEST['ad_id'], $user_id)." WHERE ad_id='".$ad_id."'";
+		$f2->write_log($sql);
 	}
 	
-	//echo "<hr><b>Insert:</b> $sql<hr>";
-	
-	//print_r ($_FILES);
-	mysql_query ($sql) or die("[$sql]".mysql_error());
-
-	//build_ad_count(0);
-
+	mysql_query($sql) or die("<br />SQL:[$sql]<br />ERROR:[".mysql_error()."]<br />");
 
 	return $ad_id;
 }
@@ -755,13 +776,13 @@ function validate_ad_data($form_id) {
 ################################################################
 
 function update_blocks_with_ad($ad_id, $user_id) {
-	global $prams;
+	global $prams, $f2;
 	$prams = load_ad_values($ad_id);
 	
 	if ($prams['order_id']>0) {
 		$sql = "UPDATE blocks SET alt_text='".addslashes(get_template_value('ALT_TEXT', 1))."', url='".addslashes(get_template_value('URL', 1))."'  WHERE order_id='".$prams['order_id']."' AND user_id='".$user_id."' ";
 		mysql_query($sql) or die(mysql_error());
-		mds_log("Updated blocks with ad URL, ALT_TEXT", $sql);
+		$f2->debug("Updated blocks with ad URL, ALT_TEXT", $sql);
 	}
 
 }

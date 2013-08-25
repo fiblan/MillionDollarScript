@@ -1,16 +1,40 @@
 <?php
+/**
+ * @version		$Id: write_ad.php 157 2012-10-04 15:09:35Z ryan $
+ * @package		mds
+ * @copyright	(C) Copyright 2010 Ryan Rhode, All rights reserved.
+ * @author		Ryan Rhode, ryan@milliondollarscript.com
+ * @license		This program is free software; you can redistribute it and/or modify
+ *		it under the terms of the GNU General Public License as published by
+ *		the Free Software Foundation; either version 3 of the License, or
+ *		(at your option) any later version.
+ *
+ *		This program is distributed in the hope that it will be useful,
+ *		but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License along
+ *		with this program;  If not, see http://www.gnu.org/licenses/gpl-3.0.html.
+ *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ *		Million Dollar Script
+ *		A pixel script for selling pixels on your website.
+ *
+ *		For instructions see README.txt
+ *
+ *		Visit our website for FAQs, documentation, a list team members,
+ *		to post any bugs or feature requests, and a community forum:
+ * 		http://www.milliondollarscript.com/
+ *
+ */
+
 session_start();
 include ("../config.php");
 require_once ("../include/ads.inc.php");
 
-
-
-if ($_REQUEST['BID']!='') {
-	$BID=$_REQUEST['BID'];
-} else {
-$BID = 1; # Banner ID. Change this later & allow users to select multiple banners
-
-}
+$BID = $f2->bid($_REQUEST['BID']);
 
 $sql = "select * from temp_orders where session_id='".addslashes(session_id())."' ";
 
@@ -30,7 +54,6 @@ if (mysql_num_rows($order_result)==0) {
 
 require ("header.php");
 $row = mysql_fetch_array($order_result);
-
 
 //print_r (unserialize( $row['block_info']));
 update_temp_order_timestamp();
@@ -53,17 +76,19 @@ show_nav_status (2);
 <?php
 
 $_REQUEST['user_id'] = addslashes(session_id());
+//	print_r($_REQUEST);
 
-if ($_REQUEST['save'] != "" ) { // saving
+// TODO: fixing save / edit form
+
+// saving
+if ($_REQUEST['save'] != "" ) {
 	
 	$error = validate_ad_data(1);
 	if ($error != '') { // we have an error
-		$mode = "edit";
+		$mode = "user";
 		//display_ad_intro();
-		
 		display_ad_form (1, $mode, '');
 	} else {
-	
 		$ad_id = insert_ad_data();
 
 		// save ad_id with the temp order...
@@ -80,7 +105,7 @@ if ($_REQUEST['save'] != "" ) { // saving
 		<center><div class='ok_msg_label'><input type="button"  class='big_button' value="<?php echo $label['write_ad_saved']." ".$label['write_ad_continue_button']; ?>" onclick="window.location='confirm_order.php'"></div></center>
 		<p>&nbsp;</p>
 		<?php
-		display_ad_form (1, "edit", $prams);
+		display_ad_form (1, "user", $prams);
 	}
 } else {
 
@@ -94,12 +119,9 @@ if ($_REQUEST['save'] != "" ) { // saving
 	$prams = load_ad_values ($ad_id); // user is not logged in
 
 	//print_r($prams);
-	display_ad_form (1, 'edit', $prams);
+	display_ad_form (1, 'user', $prams);
 
 }
-
-	
-
 
 require ("footer.php");
 ?>

@@ -1,23 +1,35 @@
 <?php
-/*
-COPYRIGHT 2008 - see www.milliondollarscript.com for a list of authors
+/**
+ * @version		$Id: category.inc.php 157 2012-10-04 15:09:35Z ryan $
+ * @package		mds
+ * @copyright	(C) Copyright 2010 Ryan Rhode, All rights reserved.
+ * @author		Ryan Rhode, ryan@milliondollarscript.com
+ * @license		This program is free software; you can redistribute it and/or modify
+ *		it under the terms of the GNU General Public License as published by
+ *		the Free Software Foundation; either version 3 of the License, or
+ *		(at your option) any later version.
+ *
+ *		This program is distributed in the hope that it will be useful,
+ *		but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License along
+ *		with this program;  If not, see http://www.gnu.org/licenses/gpl-3.0.html.
+ *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ *		Million Dollar Script
+ *		A pixel script for selling pixels on your website.
+ *
+ *		For instructions see README.txt
+ *
+ *		Visit our website for FAQs, documentation, a list team members,
+ *		to post any bugs or feature requests, and a community forum:
+ * 		http://www.milliondollarscript.com/
+ *
+ */
 
-This file is part of the Million Dollar Script.
-
-Million Dollar Script is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-Million Dollar Script is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with the Million Dollar Script.  If not, see <http://www.gnu.org/licenses/>.
-
-*/
 
 ##########################################################
 
@@ -88,9 +100,7 @@ $form_id;
 
 function showAllCat($child, $cols, $subCat, $lang, $f_id)
 {
-   global $withSubCat;
-   global $catName;
-   global $form_id;
+   global $withSubCat, $catName, $form_id, $f2;
    # initialise the global subcat flag
    $withSubCat = $subCat;
    $form_id = $f_id;
@@ -98,7 +108,7 @@ function showAllCat($child, $cols, $subCat, $lang, $f_id)
    # query to get all the nodes that are the 
    # children of child id
 
-    $query = "SELECT categories.category_id, categories.category_name, lang,  cat_name_translations.category_name AS NAME, obj_count, allow_records  FROM categories LEFT JOIN cat_name_translations ON categories.category_id=cat_name_translations.category_id WHERE parent_category_id='$child' AND (lang='".$_SESSION['MDS_LANG']."') and form_id='$form_id' ORDER BY list_order , NAME ";
+    $query = "SELECT categories.category_id, categories.category_name, lang,  cat_name_translations.category_name, obj_count, allow_records  FROM categories LEFT JOIN cat_name_translations ON categories.category_id=cat_name_translations.category_id WHERE parent_category_id='$child' AND (lang='".$_SESSION['MDS_LANG']."') and form_id='$form_id' ORDER BY list_order , NAME ";
 
 	//echo "$query";
 
@@ -204,7 +214,10 @@ function showCat ($cat) {
 
 function showSubcat ($c) {
 
-   $query = "SELECT t1.category_id, t1.category_name, t2.category_name, obj_count, allow_records FROM categories as t1, cat_name_translations as t2 WHERE t1.category_id=t2.category_id AND parent_category_id='$c' and t2.lang='".$_SESSION['MDS_LANG']."' order by t1.list_order,  t2.category_name ASC ";
+	global $f2;
+
+   //$query = "SELECT t1.category_id, t1.category_name, t2.category_name, obj_count, allow_records FROM categories as t1, cat_name_translations as t2 WHERE t1.category_id=t2.category_id AND parent_category_id='$c' and t2.lang='".$_SESSION['MDS_LANG']."' order by t1.list_order,  t2.category_name ASC ";
+   $query = "SELECT categories.category_id, categories.category_name, cat_name_translations.category_name, obj_count, allow_records FROM categories, cat_name_translations WHERE categories.category_id=cat_name_translations.category_id AND parent_category_id='$c' and cat_name_translations.lang='".$_SESSION['MDS_LANG']."' order by categories.list_order,  cat_name_translations.category_name ASC ";
    
    $result = mysql_query ($query ) or die(mysql_error());
 
@@ -273,8 +286,9 @@ function get_search_set($c, $path) {
 #
 function findPath($c, $path) {
 
-	$query = "SELECT t1.category_name, t1.parent_category_id, t2.category_name
-	FROM categories as t1, cat_name_translations as t2 WHERE t1.category_id=t2.category_id AND t1.category_id='$c' AND t2.lang = '".$_SESSION['MDS_LANG']."' ";
+	global $f2;
+	//$query = "SELECT t1.category_name, t1.parent_category_id, t2.category_name FROM categories as t1, cat_name_translations as t2 WHERE t1.category_id=t2.category_id AND t1.category_id='$c' AND t2.lang = '".$_SESSION['MDS_LANG']."' ";
+	$query = "SELECT categories.category_name, categories.parent_category_id, cat_name_translations.category_name FROM categories, cat_name_translations WHERE categories.category_id=cat_name_translations.category_id AND categories.category_id='$c' AND cat_name_translations.lang = '".$_SESSION['MDS_LANG']."' ";
 //echo $query;
 	$result = mysql_query($query) or die("<b>$query</b>".mysql_error());
 	if (mysql_num_rows($result)>0) {
@@ -361,6 +375,7 @@ echo "<input type='hidden' name='cat' value='$parent'>";
 ###################################################################
 
 function add_cat ( $catname, $parent, $form_id, $allow_records) {
+	global $f2;
 
    #$id = db_generate_id("category_id", "categories");
    
@@ -418,9 +433,10 @@ function del_cat_recursive ($category_id) {
 ###################################################################
 
 function get_category($category_id) {
+	global $f2;
 
-	$sql = "select *, t1.category_name AS NAME FROM cat_name_translations as t1, categories as t2  ".
-		   "WHERE t1.category_id=t2.category_id AND t2.category_id='$category_id' and lang='".$_SESSION['MDS_LANG']."'";
+	$sql = "select * FROM cat_name_translations, categories  ".
+		   "WHERE cat_name_translations.category_id=categories.category_id AND categories.category_id='$category_id' and lang='".$_SESSION['MDS_LANG']."'";
 
 	$result = mysql_query($sql) or die (mysql_error());
 	return mysql_fetch_array($result);
@@ -465,11 +481,11 @@ function build_ad_count ($cat) {
 # show all categories that are the children
 
 function getCatStruct($cat_id, $lang, $f_id) {
+	global $CACHE_ENABLED, $f2;
   
 	// $category_table = array();
 
 	if ($cat_id==false) $cat_id='0';
-	global $CACHE_ENABLED;
 
 	if ($CACHE_ENABLED=='YES') {
 		$dir = dirname(__FILE__);
@@ -487,7 +503,7 @@ function getCatStruct($cat_id, $lang, $f_id) {
    # query to get all the nodes that are the 
    # children of child id
 
-    $query = "SELECT categories.category_id, categories.category_name, lang, cat_name_translations.category_name AS NAME, obj_count  FROM categories LEFT JOIN cat_name_translations  ON categories.category_id=cat_name_translations.category_id WHERE parent_category_id='$cat_id' AND (lang='".$lang."') and form_id=$f_id ORDER BY list_order, NAME ";
+    $query = "SELECT categories.category_id, categories.category_name, lang, cat_name_translations.category_name, obj_count  FROM categories LEFT JOIN cat_name_translations  ON categories.category_id=cat_name_translations.category_id WHERE parent_category_id='$cat_id' AND (lang='".$lang."') and form_id=$f_id ORDER BY list_order, category_name ";
 
 	//echo "$query";
 
@@ -498,13 +514,13 @@ function getCatStruct($cat_id, $lang, $f_id) {
    while ($row = mysql_fetch_row($result)) {
 	   //$children = array();
 	   $children = getCategoryChildrenStruct($row[0], $lang, $f_id);
-	   $category_table[$i][category_id] = $row[0];
-	   $category_table[$i][category_parent_id] = $cat_id;
-	   $category_table[$i][category_type] = "PARENT";
-	   $category_table[$i][category_name] = $row[3];
-	   $category_table[$i][category_obj_cnt] = $row[4];
-	   $category_table[$i][category_children] = $children;
-	   $category_table[$i][category_child_cnt] = sizeof($children);	   
+	   $category_table[$i]['category_id'] = $row[0];
+	   $category_table[$i]['category_parent_id'] = $cat_id;
+	   $category_table[$i]['category_type'] = "PARENT";
+	   $category_table[$i]['category_name'] = $row[3];
+	   $category_table[$i]['category_obj_cnt'] = $row[4];
+	   $category_table[$i]['category_children'] = $children;
+	   $category_table[$i]['category_child_cnt'] = sizeof($children);	   
 		$i++;
 	   //echo $row[3]." ";
      
@@ -528,10 +544,10 @@ function getCategoryChildrenStruct($cat_id, $lang, $f_id) {
 
 	$i=0;
 	 while ($row = mysql_fetch_row($result)) {
-	   $children[$i][category_id] = $row[0];
-	   $children[$i][category_type] = "CHILD";
-	   $children[$i][category_name] = $row[3];
-	   $children[$i][category_obj_cnt] = $row[4];
+	   $children[$i]['category_id'] = $row[0];
+	   $children[$i]['category_type'] = "CHILD";
+	   $children[$i]['category_name'] = $row[3];
+	   $children[$i]['category_obj_cnt'] = $row[4];
 	   $i++;
 
 	 }

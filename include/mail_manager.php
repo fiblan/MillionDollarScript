@@ -1,5 +1,34 @@
 <?php
-
+/**
+ * @version		$Id: mail_manager.php 64 2010-09-12 01:18:42Z ryan $
+ * @package		mds
+ * @copyright	(C) Copyright 2010 Ryan Rhode, All rights reserved.
+ * @author		Ryan Rhode, ryan@milliondollarscript.com
+ * @license		This program is free software; you can redistribute it and/or modify
+ *		it under the terms of the GNU General Public License as published by
+ *		the Free Software Foundation; either version 3 of the License, or
+ *		(at your option) any later version.
+ *
+ *		This program is distributed in the hope that it will be useful,
+ *		but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License along
+ *		with this program;  If not, see http://www.gnu.org/licenses/gpl-3.0.html.
+ *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ *		Million Dollar Script
+ *		A pixel script for selling pixels on your website.
+ *
+ *		For instructions see README.txt
+ *
+ *		Visit our website for FAQs, documentation, a list team members,
+ *		to post any bugs or feature requests, and a community forum:
+ * 		http://www.milliondollarscript.com/
+ *
+ */
 
 function add_mail_attachments(&$email_message, &$mail_row) {
 
@@ -397,7 +426,7 @@ function send_smtp_email($mail_row) {
 	$error_delivery_address=SITE_CONTACT_EMAIL;
 	
 	
-	//$message="Hello ".strtok($to_name," ").",\n\nThis message is just to let you know that your e-mail sending class is working as expected.\n\nHere's some non-ASCII characters ÁèÎõÜ in the message body to let you see if they are sent properly encoded.\n\nThank you,\n$from_name";
+	//$message="Hello ".strtok($to_name," ").",\n\nThis message is just to let you know that your e-mail sending class is working as expected.\n\nHere's some non-ASCII characters ï¿½ï¿½ï¿½ï¿½ï¿½ in the message body to let you see if they are sent properly encoded.\n\nThank you,\n$from_name";
 	//$email_message=new email_message_class;
 	$email_message->default_charset='UTF-8';
 	$email_message->SetEncodedEmailHeader("To",$to_address,$to_name);

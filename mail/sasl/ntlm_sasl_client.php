@@ -2,7 +2,7 @@
 /*
  * ntlm_sasl_client.php
  *
- * @(#) $Id: ntlm_sasl_client.php,v 1.3 2004/11/17 08:00:37 mlemos Exp $
+ * @(#) $Id: ntlm_sasl_client.php 67 2010-09-12 01:30:49Z ryan $
  *
  */
 

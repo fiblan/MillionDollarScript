@@ -2,7 +2,7 @@
 /*
  * digest_sasl_client.php
  *
- * @(#) $Id: digest_sasl_client.php,v 1.1 2005/10/27 05:24:15 mlemos Exp $
+ * @(#) $Id: digest_sasl_client.php 67 2010-09-12 01:30:49Z ryan $
  *
  */
 

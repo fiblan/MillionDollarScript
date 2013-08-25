@@ -1,28 +1,40 @@
 <?php
-/*
-COPYRIGHT 2008 - see www.milliondollarscript.com for a list of authors
-
-This file is part of the Million Dollar Script.
-
-Million Dollar Script is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-Million Dollar Script is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with the Million Dollar Script.  If not, see <http://www.gnu.org/licenses/>.
-
-*/
+/**
+ * @version		$Id: dynamic_forms.php 164 2012-12-14 21:22:24Z ryan $
+ * @package		mds
+ * @copyright	(C) Copyright 2010 Ryan Rhode, All rights reserved.
+ * @author		Ryan Rhode, ryan@milliondollarscript.com
+ * @license		This program is free software; you can redistribute it and/or modify
+ *		it under the terms of the GNU General Public License as published by
+ *		the Free Software Foundation; either version 3 of the License, or
+ *		(at your option) any later version.
+ *
+ *		This program is distributed in the hope that it will be useful,
+ *		but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License along
+ *		with this program;  If not, see http://www.gnu.org/licenses/gpl-3.0.html.
+ *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ *		Million Dollar Script
+ *		A pixel script for selling pixels on your website.
+ *
+ *		For instructions see README.txt
+ *
+ *		Visit our website for FAQs, documentation, a list team members,
+ *		to post any bugs or feature requests, and a community forum:
+ * 		http://www.milliondollarscript.com/
+ *
+ */
 
 //require_once ('skill_matrix_functions.php');
 require_once ("code_functions.php");
 require_once ("category.inc.php");
 
+global $f2;
 if (($_SESSION['JB_ID'] != '') && ($_SESSION['JB_Domain']=='EMPLOYER')) {
 	if (SUBSCRIPTION_FEE_ENABLED=='YES') {
 		//$subscr_status = get_employer_subscription_status($_SESSION['JB_ID']);
@@ -39,20 +51,28 @@ function format_field_translation_table ($form_id) {
 	global $AVAILABLE_LANGS;
 
 	$sql = "SELECT * FROM form_fields WHERE `form_id`=$form_id ";
-	$f_result = mysql_query ($sql) or die ($sql.mysql_error());
+	$f_result = mysql_query ($sql) or die ("SQL:".$sql."<br />ERROR: ".mysql_error());
 	while ($f_row = mysql_fetch_array($f_result, MYSQL_ASSOC)) { 
 
 		foreach  ($AVAILABLE_LANGS as $key => $val) {
 
-			$sql = "SELECT t2.field_id, t2.field_label AS FLABEL, lang FROM form_field_translations as t1, form_fields as t2 WHERE t2.field_id=t1.field_id AND t2.field_id='".$f_row['field_id']."' AND lang='$key' ";
+			//$sql = "SELECT t2.field_id, t2.field_label AS FLABEL, lang FROM form_field_translations as t1, form_fields as t2 WHERE t2.field_id=t1.field_id AND t2.field_id='".$f_row['field_id']."' AND lang='$key' ";
+			$sql = "SELECT form_field_translations.field_id, form_field_translations.field_label, lang FROM form_field_translations, form_fields WHERE form_field_translations.field_id=form_fields.field_id AND form_field_translations.field_id='".$f_row['field_id']."' AND lang='$key' ";
 			//echo $sql;
-			$result = mysql_query($sql) or die($sql.mysql_error());
+			$result = mysql_query($sql) or die("SQL:".$sql."<br />ERROR: ".mysql_error());
 			//$row = mysql_fetch_row($result);
 			if (mysql_num_rows($result)==0) {
 				//$cat_row = get_category($cat);
-				$sql = "REPLACE INTO `form_field_translations` (`field_id`, `lang`, `field_label`, `error_message`, `field_comment`) VALUES ('".$f_row['field_id']."', '".$key."', '".addslashes($f_row['field_label'])."', '".addslashes($f_row['error_message'])."', '".addslashes($f_row['field_comment'])."')";
+$sql = "INSERT INTO `form_field_translations` (`field_id`, `lang`, `field_label`, `error_message`, `field_comment`)
+VALUES ('".$f_row['field_id']."', '".$key."', '".addslashes($f_row['field_label'])."', '".addslashes($f_row['error_message'])."', '".addslashes($f_row['field_comment'])."') 
+ON DUPLICATE KEY UPDATE 
+`field_id` = '".$f_row['field_id']."',
+`lang` = '".$key."',
+`field_label` = '".addslashes($f_row['field_label'])."',
+`error_message` = '".addslashes($f_row['error_message'])."',
+ `field_comment` = '".addslashes($f_row['field_comment'])."';";
 				//echo "<b>$sql</b>";
-				mysql_query($sql) or die (mysql_error().$sql);
+				mysql_query($sql) or die ("SQL:".$sql."<br />ERROR: ".mysql_error());
 
 			}
 
@@ -124,7 +144,7 @@ function get_template_value ($tmpl, $form_id) {
 			break;
 		case "SKILL_MATRIX":
 			$sql = "SELECT name FROM skill_matrix_data where object_id='".$prams['resume_id']."' ";
-			$result = mysql_query ($sql) or die (mysql_error());
+			$result = mysql_query ($sql) or die ("SQL:".$sql."<br />ERROR: ".mysql_error());
 			$val='';
 			while ($row = mysql_fetch_array($result)) {
 				$val .= $comma.$row['name'];
@@ -173,6 +193,7 @@ function get_template_field_label ($tmpl, $form_id) {
 ##########################################################################
 
 function generate_q_string($form_id) {
+	global $f2;
 
 	if ($_REQUEST['action']=='') {
 		return false;
@@ -193,14 +214,14 @@ function generate_q_string($form_id) {
 			$q_string .= ("&".$tag_to_search[$key]['field_id']."=".urlencode($_REQUEST[$tag_to_search[$key]['field_id']]));
 		}
 	}
-	return ($q_string);
+	return $q_string;
 }
 
 ##############################################################
 
 function echo_order_arrows($row) {
 
-	echo '<div align="left" style="margin: 0"><table align="left" border="0" cellpadding="0" cellspacing="0"><tr><td ><a href="?mode=EDIT&action=move_up&field_id='.$row['field_id'].'&field_sort='.$row['field_sort'].'&section='.$row['section'].'"><IMG SRC="sortup.gif" WIDTH="9" align="top" HEIGHT="13" BORDER="0" ALT="Move Up"></td></tr><tr><td><a href="?mode=EDIT&action=move_down&field_id='.$row['field_id'].'&field_sort='.$row['field_sort'].'&section='.$row['section'].'"><IMG SRC="sortdown.gif" WIDTH="9" HEIGHT="13" BORDER="0" ALT="Move Down"></a></td></tr></table></div>';
+	echo '<div align="left" style="margin: 0"><table align="left" border="0" cellpadding="0" cellspacing="0"><tr><td ><a href="?mode=edit&action=move_up&field_id='.$row['field_id'].'&field_sort='.$row['field_sort'].'&section='.$row['section'].'"><IMG SRC="sortup.gif" WIDTH="9" align="top" HEIGHT="13" BORDER="0" ALT="Move Up"></td></tr><tr><td><a href="?mode=edit&action=move_down&field_id='.$row['field_id'].'&field_sort='.$row['field_sort'].'&section='.$row['section'].'"><IMG SRC="sortdown.gif" WIDTH="9" HEIGHT="13" BORDER="0" ALT="Move Down"></a></td></tr></table></div>';
 
 
 }
@@ -210,10 +231,8 @@ function echo_order_arrows($row) {
 
 
 function display_form ($form_id, $mode,  $prams, $section) {
-
-	global $label;
-	global $admin;
-	global $subscr_block_status;
+//echo "MODE:".$mode;
+	global $f2, $label, $admin, $subscr_block_status;
 	//print_r( $prams);
 
 	if (func_num_args() > 4) {
@@ -222,9 +241,10 @@ function display_form ($form_id, $mode,  $prams, $section) {
 
 	}
 
-	$sql = "SELECT t2.field_label AS FLABEL, t1.* AS ID, t2.field_comment AS FCOMMENT FROM form_fields AS t1, form_field_translations AS t2 WHERE t1.field_id=t2.field_id AND lang='".$_SESSION['MDS_LANG']."' AND section='$section' AND form_id='$form_id' $where_sql order by field_sort  ";
+	//$sql = "SELECT t2.field_label, t1.*, t2.field_comment AS FCOMMENT FROM form_fields AS t1, form_field_translations AS t2 WHERE t1.field_id=t2.field_id AND lang='".$_SESSION['MDS_LANG']."' AND section='$section' AND form_id='$form_id' $where_sql order by field_sort  ";
+	$sql = "SELECT form_field_translations.field_label, form_fields.*, form_field_translations.field_comment FROM form_fields, form_field_translations WHERE form_fields.field_id=form_field_translations.field_id AND lang='".$_SESSION['MDS_LANG']."' AND section='$section' AND form_id='$form_id' $where_sql order by field_sort  ";
 	//echo $sql;
-	$result = mysql_query ($sql) or die (mysql_error());
+	$result = mysql_query ($sql) or die ("SQL:".$sql."<br />ERROR: ".mysql_error());
 
 	if (!$dont_break_table) {
 
@@ -241,9 +261,10 @@ function display_form ($form_id, $mode,  $prams, $section) {
 		$i=0;
 
 		while ($row = mysql_fetch_array($result, MYSQL_ASSOC)) {
+			//print_r($row);
 			$i++;
 
-			if (($mode=='EDIT') && ($_REQUEST['field_id']==$row['field_id'])) {
+			if (($mode=='edit' || $mode == 'user') && ($_REQUEST['field_id']==$row['field_id'])) {
 				$bg_selected = ' style="background-color: #FFFFCC;" ';
 			} else {
 				$bg_selected = '';
@@ -263,13 +284,13 @@ function display_form ($form_id, $mode,  $prams, $section) {
 			# Hidden Fields, do not appear on website (view mode) 
 
 			} 
-			elseif ($row[field_type]=="SEPERATOR") {
+			elseif ($row['field_type']=="SEPERATOR") {
 				?>
 
 				<tr <?php echo $bg_selected; ?>>
-				<td colspan="2" class="dynamic_form_seperator" ><font face="Arial" size="2"><b><?php if ($mode=='EDIT')  { 
+				<td colspan="2" class="dynamic_form_seperator" ><font face="Arial" size="2"><b><?php if ($mode=='edit')  { 
 					echo_order_arrows($row);
-					echo '<a href="'.htmlentities($_SERVER['PHP_SELF']).'?field_id='.$row['field_id'].'&mode=EDIT"><IMG SRC="../admin/edit.gif" WIDTH="16" HEIGHT="16" align="middle" BORDER="0" ALT="-"> '; } echo $row[FLABEL]; ?><?php if ($mode=='EDIT')  { echo '</a>'; } ?></b></font></td>
+					echo '<a href="'.htmlentities($_SERVER['PHP_SELF']).'?field_id='.$row['field_id'].'&mode=edit"><IMG SRC="../admin/edit.gif" WIDTH="16" HEIGHT="16" align="middle" BORDER="0" ALT="-"> '; } echo $row[field_label]; ?><?php if ($mode=='edit')  { echo '</a>'; } ?></b></font></td>
 				</tr>
 
 				<?php
@@ -281,15 +302,15 @@ function display_form ($form_id, $mode,  $prams, $section) {
 					<td <?php echo $bg_selected;?> class="dynamic_form_field">
 					<?php
 
-						if ($mode=='EDIT')  { 
+					if ($mode=='edit')  { 
 					echo_order_arrows($row);
-					echo '<a href="'.htmlentities($_SERVER['PHP_SELF']).'?field_id='.$row['field_id'].'&mode=EDIT"><IMG SRC="../admin/edit.gif" WIDTH="16" HEIGHT="16" align="middle" BORDER="0" ALT="-"> '; } echo "<b>".$row['FLABEL']."</b>"; ?><?php if ($mode=='EDIT')  { echo '</a>'; 
+					echo '<a href="'.htmlentities($_SERVER['PHP_SELF']).'?field_id='.$row['field_id'].'&mode=edit"><IMG SRC="../admin/edit.gif" WIDTH="16" HEIGHT="16" align="middle" BORDER="0" ALT="-"> '; } echo "<b>".$row['field_label']."</b>"; ?><?php if ($mode=='edit')  { echo '</a>'; 
 					
 					?>
 					<br>
 					- 
 					<a href=""
-					onclick="window.open('build_matrix.php?field_id=<?php echo $row[field_id];?>', '', 'toolbar=no,scrollbars=yes,location=no,statusbar=no,menubar=no,resizable=1,width=550,height=500,left = 50,top = 50');return false;"> [Skill Matrix Settings...]
+					onclick="window.open('build_matrix.php?field_id=<?php echo $row['field_id'];?>', '', 'toolbar=no,scrollbars=yes,location=no,statusbar=no,menubar=no,resizable=1,width=550,height=500,left = 50,top = 50');return false;"> [Skill Matrix Settings...]
 					</a>
 
 					<?php
@@ -301,7 +322,7 @@ function display_form ($form_id, $mode,  $prams, $section) {
 				<td <?php echo $bg_selected;?> class="dynamic_form_value"><font face="Arial" size="2"><?php 
 					
 					
-					if ($row['FCOMMENT']!='') {echo " <br>".$row['FCOMMENT']."";}
+					if ($row['field_comment']!='') {echo " <br>".$row['field_comment']."";}
 					display_matrix ($row['field_id'], $prams, $mode);
 					?></b></font></td>
 				</tr>
@@ -315,12 +336,12 @@ function display_form ($form_id, $mode,  $prams, $section) {
 				?>
 				<tr>
 				<td class="dynamic_form_2_col_field" nowrap valign="top"  colspan="2" <?php echo $bg_selected;?>  >
-				<?php if ($mode=='EDIT')  {  
+				<?php if ($mode=='edit')  {  
 					echo_order_arrows($row);
-					echo '<a href="'.htmlentities($_SERVER['PHP_SELF']).'?field_id='.$row['field_id'].'&mode=EDIT"><IMG SRC="../admin/edit.gif" WIDTH="16" HEIGHT="16" align="middle" BORDER="0" ALT="-">'; }
-				echo "<span class='dynamic_form_image_label'>".$row['FLABEL']."</span><br>";
-				if ($mode=='EDIT')  { echo '</a>'; }
-				if (($mode=='EDIT') && is_reserved_template_tag($row['template_tag'])) {
+					echo '<a href="'.htmlentities($_SERVER['PHP_SELF']).'?field_id='.$row['field_id'].'&mode=edit"><IMG SRC="../admin/edit.gif" WIDTH="16" HEIGHT="16" align="middle" BORDER="0" ALT="-">'; }
+				echo "<span class='dynamic_form_image_label'>".$row['field_label']."</span><br>";
+				if ($mode=='edit')  { echo '</a>'; }
+				if (($mode=='edit') && is_reserved_template_tag($row['template_tag'])) {
 					$alt = get_reserved_tag_description($row[template_tag]);
 					?>
 					<a href="" onclick="alert('<?php echo htmlentities($alt); ?>');return false;">
@@ -334,20 +355,20 @@ function display_form ($form_id, $mode,  $prams, $section) {
 
 				}
 				
-				if ($prams[$row[field_id]] !='') {
+				if ($prams[$row['field_id']] !='') {
 					if (($is_hidden == 'Y') || (($is_blocked == 'Y'))) {
-						echo $prams[$row[field_id]];
+						echo $prams[$row['field_id']];
 					}
 					else {
 					
-						if ($_REQUEST['del_image'.$row[field_id]]!='') {
-							unlink (UPLOAD_PATH.'images/'.$prams[$row[field_id]]);
-							//@unlink (UPLOAD_PATH.''.$prams[$row[field_id]]);
+						if ($_REQUEST['del_image'.$row['field_id']]!='') {
+							unlink (UPLOAD_PATH.'images/'.$prams[$row['field_id']]);
+							//@unlink (UPLOAD_PATH.''.$prams[$row['field_id']]);
 						}
-						if (file_exists(UPLOAD_PATH.'images/'.$prams[$row[field_id]])) {
+						if (file_exists(UPLOAD_PATH.'images/'.$prams[$row['field_id']])) {
 
 					?>
-					<img alt="" src="<?php echo UPLOAD_HTTP_PATH.'images/'.$prams[$row[field_id]]; ?>" >
+					<img alt="" src="<?php echo UPLOAD_HTTP_PATH.'images/'.$prams[$row['field_id']]; ?>" >
 				<?php	} else {
 						echo '<IMG SRC="'.UPLOAD_HTTP_PATH.'images/no-image.gif" WIDTH="150" HEIGHT="150" BORDER="0" ALT="">';
 
@@ -357,18 +378,18 @@ function display_form ($form_id, $mode,  $prams, $section) {
 						echo '<IMG SRC="'.UPLOAD_HTTP_PATH.'images/no-image.gif" WIDTH="150" HEIGHT="150" BORDER="0" ALT="">';
 					}
 					
-					if ((strtolower($mode)=='edit'))  { 
+					if (($mode=='edit' || $mode == 'user'))  { 
 
 						// delete image button
-						if (file_exists(UPLOAD_PATH.'images/'.$prams[$row[field_id]])&& ($prams[$row[field_id]]!='')) {
+						if (file_exists(UPLOAD_PATH.'images/'.$prams[$row['field_id']])&& ($prams[$row['field_id']]!='')) {
 
-							$image_field_id = $row[field_id];
+							$image_field_id = $row['field_id'];
 
-							echo "<br><input type='hidden' name='del_image".$row[field_id]."' value=''><input type='button' value='".$label['delete_image_button']."' onclick='document.form1.del_image".$row[field_id].".value=\"".$image_field_id."\"; document.form1.submit()'><br>";
+							echo "<br><input type='hidden' name='del_image".$row['field_id']."' value=''><input type='button' value='".$label['delete_image_button']."' onclick='document.form1.del_image".$row['field_id'].".value=\"".$image_field_id."\"; document.form1.submit()'><br>";
 
 						} else {// upload image form
-							echo "<br>".$label['upload_image'].'<br> '.form_image_field ($row[field_id], $prams[$row[field_id]]);
-							if ($row['FCOMMENT']!='') {echo " <br>".$row['FCOMMENT']."";}
+							echo "<br>".$label['upload_image'].'<br> '.form_image_field ($row['field_id'], $prams[$row['field_id']]);
+							if ($row['field_comment']!='') {echo " <br>".$row['field_comment']."";}
 
 						}
 
@@ -383,7 +404,7 @@ function display_form ($form_id, $mode,  $prams, $section) {
 					
 
 
-			}   elseif ($row[field_type]=="FILE") {
+			}   elseif ($row['field_type']=="FILE") {
 
 				?>
 			
@@ -391,15 +412,15 @@ function display_form ($form_id, $mode,  $prams, $section) {
 				<td valign="top" class="dynamic_form_2_col_field" colspan="2"   <?php echo $bg_selected; ?> >
 				<span >
 				<?php
-				if ($mode=='EDIT')  { 
+				if ($mode=='edit')  { 
 					echo_order_arrows($row);
-					echo '<a href="'.htmlentities($_SERVER['PHP_SELF']).'?field_id='.$row['field_id'].'&mode=EDIT"><IMG SRC="../admin/edit.gif" WIDTH="16" HEIGHT="16" align="middle" BORDER="0" ALT="-">'; 
-					}
-					//if ($mode !='view') {
-						echo "<span class=\"dynamic_form_image_label\" >".$row[FLABEL]."</span><br>";
-					//}
-				if ($mode=='EDIT')  { echo '</a>'; }
-				if (($mode=='EDIT') && is_reserved_template_tag($row[template_tag])) {
+					echo '<a href="'.htmlentities($_SERVER['PHP_SELF']).'?field_id='.$row['field_id'].'&mode=edit"><IMG SRC="../admin/edit.gif" WIDTH="16" HEIGHT="16" align="middle" BORDER="0" ALT="-">'; 
+				}
+				//if ($mode !='view') {
+				echo "<span class=\"dynamic_form_image_label\" >".$row['field_label']."</span><br>";
+				//}
+				if ($mode=='edit')  { echo '</a>'; }
+				if (($mode=='edit') && is_reserved_template_tag($row[template_tag])) {
 					$alt = get_reserved_tag_description($row[template_tag]);
 					?>
 					<a href="" onclick="alert('<?php echo htmlentities($alt); ?>');return false;">
@@ -407,39 +428,39 @@ function display_form ($form_id, $mode,  $prams, $section) {
 					</a>
 					<?php
 				}
-					if ($_REQUEST['del_file'.$row[field_id]]!='') {
-							@unlink (UPLOAD_PATH.'docs/'.$prams[$row[field_id]]);
-							//@unlink (IMG_PATH.''.$prams[$row[field_id]]);
-					}
+				if ($_REQUEST['del_file'.$row['field_id']]!='') {
+					@unlink (UPLOAD_PATH.'docs/'.$prams[$row['field_id']]);
+					//@unlink (IMG_PATH.''.$prams[$row['field_id']]);
+				}
 
-					if (($prams[$row[field_id]]!='') && (file_exists(UPLOAD_PATH.'/docs'.$prams[$row[field_id]]))) { ?>
-					<a href="<?php echo UPLOAD_HTTP_PATH.''.$prams[$row[field_id]]; ?>" >
+				if (($prams[$row['field_id']]!='') && (file_exists(UPLOAD_PATH.'/docs'.$prams[$row['field_id']]))) { ?>
+					<a href="<?php echo UPLOAD_HTTP_PATH.''.$prams[$row['field_id']]; ?>" >
 					
 					<IMG alt="" src="../images/file.gif" width="20" height="20" border="0" alt=""> 
-					<?php echo $prams[$row[field_id]]; ?> </a> - <?php echo filesize(UPLOAD_PATH."".$prams[$row[field_id]]); ?> <?php echo $label['bytes']."<br>";?>
+					<?php echo $prams[$row['field_id']]; ?> </a> - <?php echo filesize(UPLOAD_PATH."".$prams[$row['field_id']]); ?> <?php echo $label['bytes']."<br>";?>
 				<?php } elseif ($mode=='view') {
 
 						echo '<i>'.$label['no_file_uploaded'].'</i>';
 
 
 					}
-					if ((strtolower($mode)=='edit'))  { 
+					if ($mode=='edit')  { 
 
 						
-						if (file_exists(UPLOAD_PATH.'/docs/'.$prams[$row[field_id]])&& ($prams[$row[field_id]]!='')) {
+						if (file_exists(UPLOAD_PATH.'/docs/'.$prams[$row['field_id']])&& ($prams[$row['field_id']]!='')) {
 
 							//if ($mode != 'view') {
 
-								$image_field_id = $row[field_id];
+								$image_field_id = $row['field_id'];
 
-								echo "<br><input type='hidden' name='del_file".$row[field_id]."' value=''><input type='button' value='".$label['delete_file_button']."' onclick='document.form1.del_file".$row[field_id].".value=\"".$image_field_id."\"; document.form1.submit()'><br>";
+								echo "<br><input type='hidden' name='del_file".$row['field_id']."' value=''><input type='button' value='".$label['delete_file_button']."' onclick='document.form1.del_file".$row['field_id'].".value=\"".$image_field_id."\"; document.form1.submit()'><br>";
 
 							//}
 
 						
 						} else { 
-							echo $label['upload_file']." ".form_file_field ($row[field_id], $prams[$row[field_id]]);
-						if ($row['FCOMMENT']!='') {echo " <br>".$row['FCOMMENT']."";}
+							echo $label['upload_file']." ".form_file_field ($row['field_id'], $prams[$row['field_id']]);
+						if ($row['field_comment']!='') {echo " <br>".$row['field_comment']."";}
 						}
 					}?>
 					</span>
@@ -449,7 +470,7 @@ function display_form ($form_id, $mode,  $prams, $section) {
 				<?php
 				
 				
-			} elseif ($row[field_type]=="NOTE") {
+			} elseif ($row['field_type']=="NOTE") {
 				
 				if ($mode == 'view') {
 
@@ -459,11 +480,11 @@ function display_form ($form_id, $mode,  $prams, $section) {
 				
 
 				<tr>
-				<td colspan="2" valign="top" class="dynamic_form_2_col_field" <?php echo $bg_selected; ?> ><span class="dynamic_form_note_label"><?php if ($mode=='EDIT')  { 
+				<td colspan="2" valign="top" class="dynamic_form_2_col_field" <?php echo $bg_selected; ?> ><span class="dynamic_form_note_label"><?php if ($mode=='edit')  { 
 					echo_order_arrows($row);
-					echo '<a href="'.htmlentities($_SERVER['PHP_SELF']).'?field_id='.$row['field_id'].'&mode=EDIT"><IMG SRC="../admin/edit.gif" WIDTH="16" HEIGHT="16" align="middle" BORDER="0" ALT="-"> '; } echo $row[FLABEL]; ?><?php if ($mode=='EDIT')  { echo '</a>'; }
+					echo '<a href="'.htmlentities($_SERVER['PHP_SELF']).'?field_id='.$row['field_id'].'&mode=edit"><IMG SRC="../admin/edit.gif" WIDTH="16" HEIGHT="16" align="middle" BORDER="0" ALT="-"> '; } echo $row['field_label']; ?><?php if ($mode=='edit')  { echo '</a>'; }
 					
-					if (($mode=='EDIT') && is_reserved_template_tag($row[template_tag])) {
+					if (($mode=='edit') && is_reserved_template_tag($row[template_tag])) {
 					$alt = get_reserved_tag_description($row[template_tag]);
 					?>
 					<a href="" onclick="alert('<?php echo htmlentities($alt); ?>');return false;">
@@ -484,23 +505,38 @@ function display_form ($form_id, $mode,  $prams, $section) {
 				
 
 				}
+							
+			} elseif ($row['field_type']=="MIME") { // do nothing. It is an extra field for FILE type fields..
 				
-				
-			} elseif ($row[field_type]=="MIME") { // do nothing. It is an extra field for FILE type fields..
-				
+			
 				
 			} else {
 
-				if ($row[FLABEL]=='') { $row[FLABEL]='&nbsp;&nbsp'; }
+				if ($row['field_label']=='') { $row['field_label']='&nbsp;&nbsp'; }
 				
 			?>
 		  
 			<tr >
-				<td class="dynamic_form_field" <?php echo $bg_selected;?>  valign="top" ><?php if ($mode=='EDIT')  {  
+				<td class="dynamic_form_field" <?php echo $bg_selected;?>  valign="top" >
+				<?php
+				if ($mode=='edit')  {  
 					echo_order_arrows($row);
-					echo '<a href="'.htmlentities($_SERVER['PHP_SELF']).'?field_id='.$row['field_id'].'&mode=EDIT"><IMG SRC="../admin/edit.gif" WIDTH="16" HEIGHT="16" align="middle" BORDER="0" ALT="-">'; } echo $row[FLABEL]; ?><?php if ($mode=='EDIT')  { echo '</a>'; } ?><?php if (($row[is_required]=='Y') && ($mode!='view')) { echo "<FONT SIZE='4' COLOR='#FF0000'><b>*</B></FONT>"; }
+					echo '<a href="'.htmlentities($_SERVER['PHP_SELF']).'?field_id='.$row['field_id'].'&mode=edit"><IMG SRC="../admin/edit.gif" WIDTH="16" HEIGHT="16" align="middle" BORDER="0" ALT="-">';
+				}
+				echo $row['field_label'];
+				if ($mode=='edit')  { 
+					echo '</a>';
+				}
+				if ($row[is_required]=='Y' && $mode!='view' && $mode == 'user') {
+					echo "<FONT SIZE='4' COLOR='#FF0000'><b>*</B></FONT>";
+				}
 				
-				if (($mode=='EDIT') && is_reserved_template_tag($row[template_tag])) {
+				// avoid triggering mod_security by not posting http:// in the form fields
+				if (strtolower($row['field_label']) == "url") {
+					echo "<span class=\"httplabel\">http://</span>";
+				}
+				
+				if (($mode=='edit') && is_reserved_template_tag($row[template_tag])) {
 					$alt = get_reserved_tag_description($row[template_tag]);
 					?>
 					<a href="" onclick="alert('<?php echo htmlentities($alt); ?>');return false;">
@@ -513,7 +549,7 @@ function display_form ($form_id, $mode,  $prams, $section) {
 
 				}
 
-				?><?php if (($mode=='EDIT') && ($row[field_type]=='BLANK')) { echo '<a href="'.htmlentities($_SERVER['PHP_SELF']).'?field_id='.$row['field_id'].'&mode=EDIT">[]</a>';} ?></td>
+				?><?php if (($mode=='edit') && ($row['field_type']=='BLANK')) { echo '<a href="'.htmlentities($_SERVER['PHP_SELF']).'?field_id='.$row['field_id'].'&mode=edit">[]</a>';} ?></td>
 				<td class="dynamic_form_value" <?php echo $bg_selected;?> >
 				
 				<?php 
@@ -523,7 +559,7 @@ function display_form ($form_id, $mode,  $prams, $section) {
 					
 				} else {
 
-					switch ($row[field_type]) {
+					switch ($row['field_type']) {
 						case "TEXT":
 							if ($mode == 'view') { 
 								$val = $prams[$row['field_id']];
@@ -537,7 +573,7 @@ function display_form ($form_id, $mode,  $prams, $section) {
 								echo $val; 
 							} else {
 								
-								echo form_text_field ($row['field_id'], $prams[$row['field_id']], $row['field_width']); if ($row['FCOMMENT']!='') {echo " ".$row['FCOMMENT']."";}
+								echo form_text_field ($row['field_id'], $prams[$row['field_id']], $row['field_width']); if ($row['field_comment']!='') {echo " ".$row['field_comment']."";}
 							}
 							break;
 						case "SEPERATOR":
@@ -547,18 +583,18 @@ function display_form ($form_id, $mode,  $prams, $section) {
 
 							if ($mode == 'view') { 
 								$val = process_for_html_output ($val);
-								//echo '<font face="arial" size="2">'.$prams[$row[field_id]].'</font>'; 
+								//echo '<font face="arial" size="2">'.$prams[$row['field_id']].'</font>'; 
 								echo $val;
 							} else {
-								if ($row['FCOMMENT']!='') {
-									echo $row['FCOMMENT']."<br>";
+								if ($row['field_comment']!='') {
+									echo $row['field_comment']."<br>";
 								}
 								echo form_editor_field ($row['field_id'], $val, $row['field_width'], $row['field_height']); 
 							}
 							break;
 						case "TEXTAREA":
 							if ($mode == 'view') {
-								//$val = process_for_html_output ($prams[$row[field_id]]);
+								//$val = process_for_html_output ($prams[$row['field_id']]);
 								$val = escape_html($prams[$row['field_id']]); 
 								$val = str_replace("\n", "<br>", $val);
 								if (EMAIL_AT_REPLACE=="YES") {
@@ -568,8 +604,8 @@ function display_form ($form_id, $mode,  $prams, $section) {
 								}
 								echo $val;
 							} else {
-								if ($row['FCOMMENT']!='') {
-									$row['FCOMMENT']."<br>";
+								if ($row['field_comment']!='') {
+									$row['field_comment']."<br>";
 								} 
 								echo form_textarea_field ($row['field_id'], $prams[$row['field_id']], $row['field_width'], $row['field_height']);
 							}
@@ -577,10 +613,10 @@ function display_form ($form_id, $mode,  $prams, $section) {
 						case "CATEGORY":
 							$str = getPath($prams[$row['field_id']]);
 							//if (!$str) {
-								//$str = $prams[$row[field_id]];
+								//$str = $prams[$row['field_id']];
 							//}
 							if ($mode == 'view') { echo $str; } else {
-							echo form_category_field ($row['field_id'], $row['category_init_id'], $prams[$row['field_id']], $form_id); if ($row['FCOMMENT']!='') { echo "".$row['FCOMMENT']."<br>";	} 
+							echo form_category_field ($row['field_id'], $row['category_init_id'], $prams[$row['field_id']], $form_id); if ($row['field_comment']!='') { echo "".$row['field_comment']."<br>";	} 
 							}
 							break;
 						case "DATE":
@@ -618,7 +654,7 @@ function display_form ($form_id, $mode,  $prams, $section) {
 
 									}
 
-									if ($row['FCOMMENT']!='') {echo " ".$row['FCOMMENT']."";}
+									if ($row['field_comment']!='') {echo " ".$row['field_comment']."";}
 								}
 							break;
 				
@@ -629,7 +665,7 @@ function display_form ($form_id, $mode,  $prams, $section) {
 							} else {
 								form_select_field ($row['field_id'], $prams[$row['field_id']]);
 							}
-							if ($mode=='EDIT')  { 
+							if ($mode=='edit')  { 
 							?>
 							<a href=""
 							onclick="window.open('maintain_codes.php?field_id=<?php echo $row['field_id'];?>', '', 'toolbar=no,scrollbars=yes,location=no,statusbar=no,menubar=no,resizable=1,width=400,height=500,left = 50,top = 50');return false;"> [Edit Options]
@@ -646,7 +682,7 @@ function display_form ($form_id, $mode,  $prams, $section) {
 							} else {
 								form_radio_field ($row['field_id'], $prams[$row['field_id']]);
 							}
-							if ($mode=='EDIT')  { 
+							if ($mode=='edit')  { 
 							?>
 							<a href=""
 							onclick="window.open('maintain_codes.php?field_id=<?php echo $row['field_id'];?>', '', 'toolbar=no,scrollbars=yes,location=no,statusbar=no,menubar=no,resizable=1,width=400,height=500,left = 50,top = 50');return false;"> [Edit Options]
@@ -658,7 +694,7 @@ function display_form ($form_id, $mode,  $prams, $section) {
 						
 						case "CHECK":
 							form_checkbox_field ($row['field_id'], $prams[$row['field_id']], $mode);
-							if ($mode=='EDIT')  { 
+							if ($mode=='edit')  { 
 							?>
 							<a href=""
 							onclick="window.open('maintain_codes.php?field_id=<?php echo $row['field_id'];?>', '', 'toolbar=no,scrollbars=yes,location=no,statusbar=no,menubar=no,resizable=1,width=400,height=500,left = 50,top = 50');return false;"> [Edit Options]
@@ -669,7 +705,7 @@ function display_form ($form_id, $mode,  $prams, $section) {
 							break;
 						case "MSELECT":
 							form_mselect_field ($row['field_id'], $prams[$row['field_id']], $row['field_height'], $mode);
-							if ($mode=='EDIT')  { 
+							if ($mode=='edit')  { 
 							?>
 							<a href=""
 							onclick="window.open('maintain_codes.php?field_id=<?php echo $row['field_id'];?>', '', 'toolbar=no,scrollbars=yes,location=no,statusbar=no,menubar=no,resizable=1,width=400,height=500,left = 50,top = 50');return false;"> [Edit Options]
@@ -715,32 +751,61 @@ function display_form ($form_id, $mode,  $prams, $section) {
 function delete_field ($field_id) {
 
 	$sql = "SELECT * FROM form_fields WHERE  field_id='".$field_id."'";
-	$result = mysql_query ($sql) or die(mysql_error().$sql);
+	$result = mysql_query ($sql) or die("SQL:".$sql."<br />ERROR: ".mysql_error());
 	$row = mysql_fetch_array($result, MYSQL_ASSOC) ;
 
 	// delete codes
 	if (($row['field_type']=='CHECK') || ($row['field_type']=='RADIO') || ($row['field_type']=='MSELECT')) {
 		$sql = "DELETE FROM codes where field_id='$field_id' ";
-		$result = mysql_query ($sql) or die(mysql_error().$sql);
+		$result = mysql_query ($sql) or die("SQL:".$sql."<br />ERROR: ".mysql_error());
 
 	}
 	// delete the field and any translations
 	$sql = "DELETE FROM `form_fields` WHERE field_id='$field_id' ";
-	mysql_query($sql) or die (mysql_error());
+	mysql_query($sql) or die ("SQL:".$sql."<br />ERROR: ".mysql_error());
 
 	$sql = "DELETE FROM `form_field_translations` WHERE field_id='$field_id' ";
-	mysql_query($sql) or die (mysql_error());
+	mysql_query($sql) or die ("SQL:".$sql."<br />ERROR: ".mysql_error());
 
 	$sql = "DELETE FROM `form_lists` WHERE field_id='$field_id'  ";
-	mysql_query($sql) or die (mysql_error());
+	mysql_query($sql) or die ("SQL:".$sql."<br />ERROR: ".mysql_error());
 
-	$_REQUEST['mode'] = 'EDIT'; // interface stays in edit mode
+	$_REQUEST['mode'] = 'edit'; // interface stays in edit mode
 
 
 }
 
 ###############################################################
 function save_field($error, $NEW_FIELD) {
+	global $f2;
+
+	// filter vars	
+	$form_id 			= intval($_REQUEST['form_id']);
+	$field_id 			= intval($_REQUEST['field_id']);
+	$section 			= intval($_REQUEST['section']);
+	$reg_expr 			= $f2->filter($_REQUEST['reg_expr']);
+	$field_label 		= $f2->filter($_REQUEST['field_label']);
+	$field_type 		= $f2->filter($_REQUEST['field_type']);
+	$field_sort 		= intval($_REQUEST['field_sort']);
+	$is_required		= $f2->filter($_REQUEST['is_required'], "YN");
+	$display_in_list	= $f2->filter($_REQUEST['display_in_list'], "YN");
+	$is_in_search		= $f2->filter($_REQUEST['is_in_search'], "YN");
+	$error_message		= $f2->filter($_REQUEST['error_message']);
+	$field_init			= $f2->filter($_REQUEST['field_init']);
+	$field_width		= intval($_REQUEST['field_width']);
+	$field_height		= intval($_REQUEST['field_height']);
+	$list_sort_order	= intval($_REQUEST['list_sort_order']);
+	$search_sort_order	= intval($_REQUEST['search_sort_order']);
+	$template_tag		= $f2->filter($_REQUEST['template_tag']);
+	$is_hidden			= $f2->filter($_REQUEST['is_hidden']);
+	$is_anon			= $f2->filter($_REQUEST['is_anon']);
+	$field_comment		= $f2->filter($_REQUEST['field_comment']);
+	$category_init_id	= intval($_REQUEST['category_init_id']);
+	$is_cat_multiple	= $f2->filter($_REQUEST['is_cat_multiple'], "YN");
+	$cat_multiple_rows	= intval($_REQUEST['cat_multiple_rows']);
+	$is_blocked			= $f2->filter($_REQUEST['is_blocked']);
+	$multiple_sel_all	= $f2->filter($_REQUEST['multiple_sel_all']);
+	$is_prefill			= $f2->filter($_REQUEST['is_prefill']);
 
 	//print_r($_REQUEST);
 
@@ -752,9 +817,8 @@ function save_field($error, $NEW_FIELD) {
 	} else {
 
 		//if ($_SESSION['MDS_LANG'] == "EN") {
-
-			$sql = "SELECT * FROM form_fields WHERE field_id='".$_REQUEST['field_id']."' ";
-			$result = mysql_query ($sql) or die(mysql_error().$sql);
+			$sql = "SELECT * FROM form_fields WHERE field_id='".$field_id."' ";
+			$result = mysql_query ($sql) or die("SQL:".$sql."<br />ERROR: ".mysql_error());
 			$row = mysql_fetch_array($result);
 
 			if ($row['field_type'] != $_REQUEST['field_type']) {
@@ -772,19 +836,21 @@ function save_field($error, $NEW_FIELD) {
 
 				
 			}
-
-			$sql = "UPDATE `form_fields` SET ".
+			
+// TODO
+//$sql = "UPDATE `form_fields` SET `form_id` = $_REQUEST[form_id],`field_id` = $_REQUEST['field_id'],`section` = $_REQUEST[section],`reg_expr` = '$_REQUEST[reg_expr]',`field_label` = '$_REQUEST[field_label]',`field_type` = '$_REQUEST['field_type']',`is_required` = '$_REQUEST[is_required]',`is_in_search` = '$_REQUEST[is_in_search]',`error_message` = '$_REQUEST[error_message]',`field_init` = '$_REQUEST[field_init]',`field_width` = $_REQUEST[field_width],`field_height` = $_REQUEST[field_height],`search_sort_order` = '$_REQUEST[search_sort_order]',`is_hidden` = '$_REQUEST[is_hidden]',`is_anon` = '$_REQUEST[is_anon]',`field_comment` = '$_REQUEST[field_comment]',`category_init_id` = $_REQUEST[category_init_id],`is_cat_multiple` = '$_REQUEST[is_cat_multiple]',`cat_multiple_rows` = $_REQUEST[cat_multiple_rows],`is_blocked` = '$_REQUEST[is_blocked]',`multiple_sel_all` = '',`is_prefill` = '$_REQUEST[is_prefill]' WHERE `form_fields`.`field_id` = 1;";
+/*			$sql = "UPDATE `form_fields` SET ".
 				"`reg_expr` = '$_REQUEST[reg_expr]',".
 				"`field_label` = '$_REQUEST[field_label]',".
 				"`field_type` = '$_REQUEST[field_type]',".
-				//"`field_sort` = '$_REQUEST[field_sort]',".
+				"`field_sort` = '$_REQUEST[field_sort]',".
 				"`field_init` = '$_REQUEST[field_init]',".
 				"`is_required` = '$_REQUEST[is_required]',".
 				"`field_width` = '$_REQUEST[field_width]',".
 				"`field_height` = '$_REQUEST[field_height]',".
 				"`is_in_search` = '$_REQUEST[is_in_search]',".
-				//"`display_in_list` = '$_REQUEST[display_in_list]',".
-				//"`list_sort_order` = '$_REQUEST[list_sort_order]',".
+				"`display_in_list` = '$_REQUEST[display_in_list]',".
+				"`list_sort_order` = '$_REQUEST[list_sort_order]',".
 				"`search_sort_order` = '$_REQUEST[search_sort_order]',".
 				"`section` = '$_REQUEST[section]',".
 				$tt.
@@ -797,33 +863,72 @@ function save_field($error, $NEW_FIELD) {
 					"`multiple_sel_all` = '$_REQUEST[multiple_sel_all]', ".
 				"`is_blocked` = '$_REQUEST[is_blocked]', ".
 					"`is_prefill` = '$_REQUEST[is_prefill]', ". 
-				"category_init_id = '$_REQUEST[category_init_id]' ".
-				"WHERE `field_id` = '$_REQUEST[field_id]'  ;";
-
+				"`category_init_id` = '$_REQUEST[category_init_id]' ".
+				"WHERE `field_id` = $_REQUEST[field_id];";
+				*/
+$sql = "UPDATE `form_fields` SET `form_id`=$_REQUEST[field_label],".
+"`field_id`=$_REQUEST[field_id],".
+"`section`=$_REQUEST[section],".
+"`reg_expr`='$_REQUEST[reg_expr]',".
+"`field_label`='$_REQUEST[field_label]',".
+"`field_type`='$_REQUEST[field_type]',".
+"`field_sort`=$_REQUEST[field_sort],".
+"`is_required`='$_REQUEST[is_required]',".
+"`display_in_list`='$_REQUEST[display_in_list]',".
+"`is_in_search`='$_REQUEST[is_in_search]',".
+"`error_message`='$_REQUEST[error_message]',".
+"`field_init`='$_REQUEST[field_init]',".
+"`field_width`=$_REQUEST[field_width],".
+"`field_height`=$_REQUEST[field_height],".
+"`list_sort_order`=$_REQUEST[list_sort_order],".
+"`search_sort_order`=$_REQUEST[search_sort_order],".
+$tt.
+"`is_hidden`='$_REQUEST[is_hidden]',".
+"`is_anon`='$_REQUEST[is_anon]',".
+"`field_comment`='$_REQUEST[field_comment]',".
+"`category_init_id`=$_REQUEST[category_init_id],".
+"`is_cat_multiple`='$_REQUEST[is_cat_multiple]',".
+"`cat_multiple_rows`=$_REQUEST[cat_multiple_rows],".
+"`is_blocked`='$_REQUEST[is_blocked]',".
+"`multiple_sel_all`='$_REQUEST[multiple_sel_all]',".
+"`is_prefill`='$_REQUEST[is_prefill]' ".
+"WHERE `field_id` = $_REQUEST[field_id];";
 		//}
-		//echo $sql."<br>";
-		//echo  "<hr>";
-		//print_r($_REQUEST);
-		if ($sql !='') mysql_query($sql) or die ($sql.mysql_error());
-		mysql_query($sql) or die ($sql.mysql_error());
+		echo  "<hr>";
+		echo $sql."<br>";
+		echo  "<hr>";
+		print_r($_REQUEST);
+		echo  "<hr>";
+
+		if ($sql !='') mysql_query($sql) or die ("SQL:".$sql."<br />ERROR: ".mysql_error());
+		mysql_query($sql) or die ("SQL:".$sql."<br />ERROR: ".mysql_error());
 		// update translations
 		$label = $_REQUEST['field_label'];
-		$sql = "REPLACE INTO `form_field_translations` (`field_id`, `lang`, `field_label`, `error_message`, `field_comment`) VALUES ('".$_REQUEST['field_id']."', '".$_SESSION['MDS_LANG']."', '".$label."', '".$_REQUEST['error_message']."', '".$_REQUEST['field_comment']."' )";
-		mysql_query ($sql) or die ($sql.mysql_error());
+		
+$sql = "INSERT INTO `form_field_translations` (`field_id`, `lang`, `field_label`, `error_message`, `field_comment`)
+VALUES ('".$_REQUEST['field_id']."', '".$_SESSION['MDS_LANG']."', '".$label."', '".$_REQUEST['error_message']."', '".$_REQUEST['field_comment']."') 
+ON DUPLICATE KEY UPDATE 
+`field_id` = '".$_REQUEST['field_id']."',
+`lang` '".$_SESSION['MDS_LANG']."',
+`field_label` = '".$label."',
+`error_message` = '".$_REQUEST['error_message']."',
+ `field_comment` = '".$_REQUEST['field_comment']."';";
+
+		mysql_query ($sql) or die ("SQL:".$sql."<br />ERROR: ".mysql_error());
 
 		// update template tag on the form_lists 
 
 		if ($_REQUEST['template_tag']!='') { // sometimes template tag can be blank (reserved tags)
 
 			$sql = "UPDATE form_lists SET `template_tag`='".$_REQUEST['template_tag']."' WHERE `field_id`='".$_REQUEST['field_id']."'";
-			mysql_query ($sql) or die ($sql.mysql_error());
+			mysql_query ($sql) or die ("SQL:".$sql."<br />ERROR: ".mysql_error());
 		}
 
 		
 
 	}
 
-	$result = mysql_query ($sql) or die (mysql_error().$sql);
+	$result = mysql_query ($sql) or die ("SQL:".$sql."<br />ERROR: ".mysql_error());
 	//print_r($_REQUEST);
 	if (($_REQUEST['field_type']=='RADIO') || ($_REQUEST['field_type']=='CHECK') || ($_REQUEST['field_type']=='MSELECT') || ($_REQUEST['field_type']=='SELECT')) {
 		//echo 'formatting field..<br>';
@@ -849,7 +954,7 @@ function save_field($error, $NEW_FIELD) {
 		$CACHE_ENABLED='YES';
 	}
 
-	$_REQUEST['mode'] = 'EDIT'; 
+	$_REQUEST['mode'] = 'edit'; 
 	global $NEW_FIELD;
 	$NEW_FIELD = 'NO';
 	
@@ -860,14 +965,10 @@ function save_field($error, $NEW_FIELD) {
 }
 ###############################################################
 function validate_field_form () {
+	global $f2;
 
-	
-
-	if (CLEAN_STRINGS=='YES') { // trim all fields... ?
-		foreach ($_REQUEST as $key=>$val) {
-			$_REQUEST[$key] =  trim($val);
-		}
-
+	foreach ($_REQUEST as $key=>$val) {
+		$_REQUEST[$key] =  trim($val);
 	}
 
 	if ($_REQUEST['field_label'] == '') {
@@ -912,7 +1013,7 @@ function validate_field_form () {
 
 		$sql = "select field_id from form_fields where template_tag='".$_REQUEST['template_tag']."' and form_id='".$_REQUEST['form_id']."' $f_id_sql  ";
 		//echo $sql;
-		$result = mysql_query($sql)or die ($sql.mysql_error());
+		$result = mysql_query($sql)or die ("SQL:".$sql."<br />ERROR: ".mysql_error());
 		if (mysql_num_rows($result)>0) {
 			$error .= "<FONT SIZE='' COLOR='#000000'><b>- Template Tag is already in use. Please try a different name.</B></FONT><br>";
 		}
@@ -924,11 +1025,11 @@ function validate_field_form () {
 	
 
 	if ($_REQUEST['field_id']!='') {
-		$sql = "SELECT * FROM form_fields WHERE field_id='".$_REQUEST[field_id]."' ";
-		$result = mysql_query ($sql) or die(mysql_error());
+		$sql = "SELECT * FROM form_fields WHERE field_id='".$_REQUEST['field_id']."' ";
+		$result = mysql_query ($sql) or die("SQL:".$sql."<br />ERROR: ".mysql_error());
 		$row = mysql_fetch_array($result);
 
-		if (get_definition($row['field_type']) != get_definition($_REQUEST[field_type])) {
+		if (get_definition($row['field_type']) != get_definition($_REQUEST['field_type'])) {
 			//print_r ($_REQUEST);
 			$error .= "<FONT SIZE='' COLOR='#000000'><b>- Cannot change this field type to '".$_REQUEST['field_type']."' because database types are incompatible. If you would like to continue anyway, please check the check box field below the 'Save' button.</b>";
 
@@ -939,7 +1040,10 @@ function validate_field_form () {
 				switch ($_REQUEST['form_id']) {
 
 					case "1":
-						$sql = "ALTER TABLE `ads` CHANGE `".$_REQUEST['field_id']."` `".$_REQUEST['field_id']."` ".get_definition($_REQUEST[field_type]);
+						//$sql = "ALTER TABLE `ads` CHANGE `".$_REQUEST['field_id']."` `".$_REQUEST['field_id']."` ".get_definition($_REQUEST['field_type']);
+						//ALTER TABLE `ads` ADD `6` TEXT NOT NULL
+//You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ' ADD `6` TEXT NOT NULL' at line 1
+						$sql = "ALTER TABLE 'ads' ADD '".$_REQUEST['field_id']."' ".get_definition($_REQUEST['field_type']);
 						break;
 					
 				}
@@ -948,7 +1052,9 @@ function validate_field_form () {
 
 			if ($_REQUEST['do_alter'] != '') {
 
-				@mysql_query ($sql);
+				//@mysql_query ($sql);
+				$result = mysql_query ($sql) or die("SQL:".$sql."<br />ERROR: ".mysql_error());
+
 				$_REQUEST['allow_anyway'] = '';
 				$error = "";$_REQUEST['do_alter'] = "";
 			}
@@ -966,22 +1072,23 @@ function validate_field_form () {
 
 function validate_form_data($form_id) {
 
-	global $label;
+	global $f2, $label;
 
 	if (!defined('MAX_UPLOAD_BYTES')) {
 		define ('MAX_UPLOAD_BYTES', 150000);
 	}
 
-	$sql = "SELECT *, t2.field_label AS LABEL, t2.error_message as error_message FROM form_fields as t1, form_field_translations as t2 WHERE t1.field_id=t2.field_id AND t2.lang='".$_SESSION['MDS_LANG']."' AND form_id='$form_id' AND field_type != 'SEPERATOR' AND field_type != 'BLANK' AND field_type != 'NOTE' order by field_sort";
+	//$sql = "SELECT *, t2.field_label AS LABEL, t2.error_message as error_message FROM form_fields as t1, form_field_translations as t2 WHERE t1.field_id=t2.field_id AND t2.lang='".$_SESSION['MDS_LANG']."' AND form_id='$form_id' AND field_type != 'SEPERATOR' AND field_type != 'BLANK' AND field_type != 'NOTE' order by field_sort";
+	$sql = "SELECT * FROM form_fields, form_field_translations WHERE form_fields.field_id=form_field_translations.field_id AND form_field_translations.lang='".$_SESSION['MDS_LANG']."' AND form_id='$form_id' AND field_type != 'SEPERATOR' AND field_type != 'BLANK' AND field_type != 'NOTE' order by field_sort";
 
-	$result = mysql_query($sql) or die(mysql_error());
+	$result = mysql_query($sql) or die("SQL:".$sql."<br />ERROR: ".mysql_error());
 
 	while ($row = mysql_fetch_array($result, MYSQL_ASSOC)) {
 
 		
 		if (($row['field_type']=='TEXT') || ($row['field_type']=='TEXTAREA') || ($row['field_type']=='EDITOR')) {
 			if (check_for_bad_words ($_REQUEST[$row['field_id']])) {
-				$error .= $row['LABEL']." - ".$label['bad_words_not_accept']."<br>";
+				$error .= $row['field_label']." - ".$label['bad_words_not_accept']."<br>";
 			}
 	
 		}
@@ -1003,28 +1110,23 @@ function validate_form_data($form_id) {
 
 		}
 
-		define ('STRIP_LATIN1', 'YES');
+		define ('STRIP_LATIN1', 'NO');
 		define ('STRIP_HTML', 'YES');
 
 		// clean the data..
 		if (STRIP_LATIN1=='YES') {
-			$_REQUEST[$row[field_id]] = remove_non_latin1_chars($_REQUEST[$row[field_id]]);
+			$_REQUEST[$row['field_id']] = remove_non_latin1_chars($_REQUEST[$row['field_id']]);
 		}
-		if (($row[field_type]=='EDITOR') || ($row[field_type]=='TEXTAREA')) {
+		if (($row['field_type']=='EDITOR') || ($row['field_type']=='TEXTAREA')) {
 			if (STRIP_HTML=='YES') {
-				$_REQUEST[$row[field_id]] = stripslashes($_REQUEST[$row[field_id]]);
-				//echo htmlentities($_REQUEST[$row[field_id]]);
-				$_REQUEST[$row[field_id]] = removeEvilTags($_REQUEST[$row[field_id]]);
-				$_REQUEST[$row[field_id]] = str_replace("'", "\\'", $_REQUEST[$row[field_id]]);
+				$_REQUEST[$row['field_id']] = $purifier->purify($_REQUEST[$row['field_id']]);
 			}
 		}
-
 
 		if ((($row['field_type']=='FILE') || ($row['field_type']=='IMAGE')) && ($_FILES[$row['field_id']]['name']!='')) {
 
 			$a = explode(".", $_FILES[$row['field_id']]['name']);
 			$ext = array_pop($a);
-
 
 			if (!is_filetype_allowed ($_FILES[$row['field_id']]['name']) && ($row['field_type']=='FILE')) {
 				
@@ -1059,28 +1161,28 @@ function validate_form_data($form_id) {
 			}
 
 
-			//if ($row[field_type]=='TEXT') {
-				//$_REQUEST[$row[field_id]] =  htmlspecialchars ($_REQUEST[$row[field_id]]); // escape html...
+			//if ($row['field_type']=='TEXT') {
+				//$_REQUEST[$row['field_id']] =  htmlspecialchars ($_REQUEST[$row['field_id']]); // escape html...
 			//}
 
 			switch ($row['reg_expr']) {
 				case "not_empty":
-					if (trim($_REQUEST[$row[field_id]]=='')) {
-						$error .= " - '".$row['LABEL']."' ".$row['error_message']."<br>";				
+					if (trim($_REQUEST[$row['field_id']]=='')) {
+						$error .= " - '".$row['field_label']."' ".$row['error_message']."<br>";				
 					}
 					break;
 				case "email":
-					if (!validate_mail(trim($_REQUEST[$row[field_id]]))) {
-						$error .= " - '".$row['LABEL']."' ".$row['error_message']."<br>";				
+					if (!validate_mail(trim($_REQUEST[$row['field_id']]))) {
+						$error .= " - '".$row['field_label']."' ".$row['error_message']."<br>";				
 					}
 					break;
 				case "date":
 
 					if ($row['field_type']=='DATE') {
 					
-						$day = $_REQUEST[$row[field_id]."d"];
-						$month = $_REQUEST[$row[field_id]."m"];
-						$year = $_REQUEST[$row[field_id]."y"];
+						$day = $_REQUEST[$row['field_id']."d"];
+						$month = $_REQUEST[$row['field_id']."m"];
+						$year = $_REQUEST[$row['field_id']."y"];
 
 					} else {
 
@@ -1093,20 +1195,20 @@ function validate_form_data($form_id) {
 					//$date_str = "$year-$month-$day"; // ISO 8601
 					//echo $date_str." *".strtotime($date_str)."*<Br>";
 					if (!@checkdate ($month, $day, $year)) {
-						$error .= " - '".$row['LABEL']."' ".$row['error_message']."<br>";
+						$error .= " - '".$row['field_label']."' ".$row['error_message']."<br>";
 						
 					}
 
 
 					break;
 				case 'url':
-					if (($_REQUEST[$row[field_id]]=='') || (($_REQUEST[$row[field_id]]=='http://'))) {
-						$error .= " - '".$row['LABEL']."' ".$row['error_message']."<br>";
+					if (($_REQUEST[$row['field_id']]=='') || (($_REQUEST[$row['field_id']]=='http://'))) {
+						$error .= " - '".$row['field_label']."' ".$row['error_message']."<br>";
 
 					} elseif (VALIDATE_LINK=='YES') {
 						//$handle = fopen($_REQUEST[url], "r");
 
-						$url_arr = explode ("/",$_REQUEST[$row[field_id]]);
+						$url_arr = explode ("/",$_REQUEST[$row['field_id']]);
 						$host = array_shift($url_arr);
 						$host = array_shift($url_arr);
 						$host = array_shift($url_arr);
@@ -1125,7 +1227,7 @@ function validate_form_data($form_id) {
 							$str = fgets ($fp);
 							if (strpos ($str, "404") || strpos ($str, "401") || strpos ($str, "403")) {
 
-								$error .= "- ".$row['LABEL']  ."<b>".$label['advertiser_publish_bad_url']."</b><br>";
+								$error .= "- ".$row['field_label']  ."<b>".$label['advertiser_publish_bad_url']."</b><br>";
 
 							} 
 							
@@ -1135,8 +1237,8 @@ function validate_form_data($form_id) {
 					}
 
 				default:
-					if (trim($_REQUEST[$row[field_id]]=='')) {
-						$error .= " - '".$row['LABEL']."' ".$row['error_message']."<br>";				
+					if (trim($_REQUEST[$row['field_id']]=='')) {
+						$error .= " - '".$row['field_label']."' ".$row['error_message']."<br>";				
 					}
 					break;
 
@@ -1153,53 +1255,63 @@ function validate_form_data($form_id) {
 
 ###############################################################
 function field_form($NEW_FIELD, $prams, $form_id) {
+	global $f2;
+		
+	$field_id = $_REQUEST['field_id'];
+	$_SESSION['MDS_LANG'] = $_SESSION['MDS_LANG'];
 
-	if ((($_REQUEST['save'] == '') &&($_REQUEST[field_id]!='')) && ($prams['error'] == '')) {
+	if ((($_REQUEST['save'] == '') &&($_REQUEST['field_id']!='')) && ($prams['error'] == '')) {
 
 		// load in the values
 
 		//echo "loading values...<br>";
 
-		$sql = "SELECT *, t2.field_comment AS FCOMMENT, t2.field_label AS LABEL, t2.error_message AS ERRMSG FROM form_fields AS t1, form_field_translations AS t2 WHERE t1.field_id=t2.field_id AND lang='".$_SESSION['MDS_LANG']."' AND t1.field_id='".$_REQUEST['field_id']."'";
+		//$sql = "SELECT *, t2.field_comment, t2.field_label, t2.error_message FROM form_fields, form_field_translations WHERE t1.field_id=t2.field_id AND lang='".$_SESSION['MDS_LANG']."' AND t1.field_id='".$field_id."'";
+		$sql = "SELECT * FROM form_fields, form_field_translations WHERE form_fields.field_id=form_field_translations.field_id AND lang='".$_SESSION['MDS_LANG']."' AND form_fields.field_id='".$field_id."'";
+		
 		//echo $sql;
-		$result = mysql_query($sql) or die(mysql_error());
+		
+		$result = mysql_query($sql) or die("SQL:".$sql."<br />ERROR: ".mysql_error());
 		$prams = mysql_fetch_array($result, MYSQL_ASSOC);
 
-		$prams['field_comment'] = $prams['FCOMMENT'];
-		$prams['field_label'] = $prams['LABEL'];
-		$prams['error_message'] = $prams['ERRMSG'];
+		$prams['field_comment'] = $prams['t2.field_comment'];
+		$prams['field_label'] = $prams['t2.field_label'];
+		$prams['error_message'] = $prams['t2.error_message'];
 
 		//echo "fieldc:".$prams['field_comment'];
 
 
-
+// TODO
 	} else {
-		$prams['field_id'] = $_REQUEST[field_id];
-		$prams['form_id'] = $_REQUEST[form_id];
-		$prams['field_label'] = $_REQUEST[field_label];
-		$prams['field_sort'] = $_REQUEST[field_sort];
-		$prams['field_type'] = $_REQUEST[field_type];
-		$prams['is_required'] = $_REQUEST[is_required];
-		$prams['display_in_list'] = $_REQUEST[display_in_list];
-		$prams['reg_expr'] = $_REQUEST[reg_expr];
-		$prams['error_message'] = $_REQUEST[error_message];
-		$prams['field_init'] = $_REQUEST[field_init];
-		$prams['field_width'] = $_REQUEST[field_width]; 
-		$prams['field_height'] = $_REQUEST[field_height];
-		$prams['is_in_search'] = $_REQUEST[is_in_search];
-		$prams['template_tag'] = $_REQUEST[template_tag];
-		$prams['section'] = $_REQUEST[section];
-		$prams['list_sort_order'] = $_REQUEST[list_sort_order];
-		$prams['search_sort_order'] = $_REQUEST[search_sort_order];
-		$prams['field_comment'] = $_REQUEST[field_comment];
-		$prams['is_hidden'] = $_REQUEST[is_hidden];
-		$prams['is_anon'] = $_REQUEST[is_anon];
-		$prams['is_blocked'] = $_REQUEST[is_blocked];
-		$prams['is_prefill'] = $_REQUEST[is_prefill];
-		$prams['multiple_sel_all'] = $_REQUEST[multiple_sel_all];
-		$prams['category_init_id'] = $_REQUEST[category_init_id];
-		$prams['is_cat_multiple'] = $_REQUEST[is_cat_multiple];
-		$prams['cat_multiple_rows'] = $_REQUEST[cat_multiple_rows];
+		$prams['field_id'] = $_REQUEST['field_id'];
+		$prams['form_id'] = $_REQUEST['form_id'];
+		$prams['field_label'] = $_REQUEST['field_label'];
+		$prams['field_sort'] = $_REQUEST['field_sort'];
+		$prams['field_type'] = $_REQUEST['field_type'];
+		$prams['is_required'] = $_REQUEST['is_required'];
+		$prams['display_in_list'] = $_REQUEST['display_in_list'];
+		$prams['reg_expr'] = $_REQUEST['reg_expr'];
+		$prams['error_message'] = $_REQUEST['error_message'];
+		$prams['field_init'] = $_REQUEST['field_init'];
+		$prams['field_width'] = $_REQUEST['field_width']; 
+		$prams['field_height'] = $_REQUEST['field_height'];
+		$prams['is_in_search'] = $_REQUEST['is_in_search'];
+		$prams['template_tag'] = $_REQUEST['template_tag'];
+		$prams['section'] = $_REQUEST['section'];
+		$prams['list_sort_order'] = $_REQUEST['list_sort_order'];
+		$prams['search_sort_order'] = $_REQUEST['search_sort_order'];
+		$prams['field_comment'] = $_REQUEST['field_comment'];
+		$prams['is_hidden'] = $_REQUEST['is_hidden'];
+		$prams['is_anon'] = $_REQUEST['is_anon'];
+		$prams['is_blocked'] = $_REQUEST['is_blocked'];
+		$prams['is_prefill'] = $_REQUEST['is_prefill'];
+		$prams['multiple_sel_all'] = $_REQUEST['multiple_sel_all'];
+		$prams['category_init_id'] = $_REQUEST['category_init_id'];
+		$prams['is_cat_multiple'] = $_REQUEST['is_cat_multiple'];
+		$prams['cat_multiple_rows'] = $_REQUEST['cat_multiple_rows'];
+		/*foreach ($prams as $key=>$val) {
+			$prams[$key] =  $val;
+		}*/
 	
 	}
 
@@ -1212,9 +1324,10 @@ function field_form($NEW_FIELD, $prams, $form_id) {
 			
 			// try to get template tag from the database (It could be blank because it was reserved)
 
-			$sql = "SELECT * FROM form_fields AS t1, form_field_translations AS t2 WHERE t1.field_id=t2.field_id AND lang='".$_SESSION['MDS_LANG']."' AND t1.field_id='".$_REQUEST['field_id']."'";
+			//$sql = "SELECT * FROM form_fields, form_field_translations WHERE t1.field_id=t2.field_id AND lang='".$_SESSION['MDS_LANG']."' AND t1.field_id='".$field_id."'";
+			$sql = "SELECT * FROM form_fields, form_field_translations WHERE form_fields.field_id=form_field_translations.field_id AND lang='".$_SESSION['MDS_LANG']."' AND form_fields.field_id='".$field_id."'";
 		
-			$temp_result = mysql_query($sql) or die(mysql_error());
+			$temp_result = mysql_query($sql) or die("SQL:".$sql."<br />ERROR: ".mysql_error());
 			$temp_row = mysql_fetch_array($temp_result, MYSQL_ASSOC);
 
 			$prams['template_tag'] = $temp_row['template_tag'];
@@ -1232,8 +1345,8 @@ function field_form($NEW_FIELD, $prams, $form_id) {
 
 <form method="POST" name="form2" action="<?php echo htmlentities($_SERVER['PHP_SELF']); ?>" method="post" >
 <input type="hidden" name="form_id" value="<?php echo $form_id;?>"/>
-<input type="hidden" name="NEW_FIELD" value="<?php echo $_REQUEST[NEW_FIELD]; ?>"/>
-<input type="hidden" name="field_id" value="<?php echo $prams[field_id]; ?>"/>
+<input type="hidden" name="NEW_FIELD" value="<?php echo $_REQUEST['NEW_FIELD']; ?>"/>
+<input type="hidden" name="field_id" value="<?php echo $prams['field_id']; ?>"/>
 <input type="hidden" name="mode" value="<?php echo $_REQUEST['mode'] ?>"/>
 <table border="0" cellSpacing="1" cellPadding="3" bgColor="#d9d9d9" >
   <tr>
@@ -1250,25 +1363,25 @@ function field_form($NEW_FIELD, $prams, $form_id) {
   <tr bgColor="#ffffff">
     <td><font face="Arial" size="2"><b>Field label</b></font></td>
     <td>
-  <input type="text" name="field_label" size="27" value="<?php echo $prams[field_label];?>" /></td>
+  <input type="text" name="field_label" size="27" value="<?php echo $prams['field_label'];?>" /></td>
   </tr>
   <tr bgcolor="#ffffff">
-    <td><font face="Arial" size="2" ><b>Type<font color="#ff0000"><b>*</b></font></b></font></td>
+    <td><font face="Arial" size="2" ><b>Type<font color="#ff0000">*</font></b></font></td>
     <td><select size="5" name="field_type" >
-   <option value="BLANK" <?php if ($prams[field_type]=='BLANK') { echo " selected ";} ?>>Blank Space</option>
-   <option value="CATEGORY" <?php if ($prams[field_type]=='CATEGORY') { echo " selected ";} ?> >Category</option>
-   <option value="CHECK" <?php if ($prams[field_type]=='CHECK') { echo " selected ";} ?>>Check Boxes</option> 
+   <option value="BLANK" <?php if ($prams['field_type']=='BLANK') { echo " selected ";} ?>>Blank Space</option>
+   <option value="CATEGORY" <?php if ($prams['field_type']=='CATEGORY') { echo " selected ";} ?> >Category</option>
+   <option value="CHECK" <?php if ($prams['field_type']=='CHECK') { echo " selected ";} ?>>Check Boxes</option> 
    
-	<option value="DATE" <?php if ($prams[field_type]=='DATE') { echo " selected ";} ?>>Date</option>
-	<!--<option value="DATE_CAL" <?php if ($prams[field_type]=='DATE_CAL') { echo " selected ";} ?>>Date - Calendar</option>-->
-	<!--<option value="FILE" <?php if ($prams[field_type]=='FILE') { echo " selected ";} ?>>File</option>-->
-	<option value="IMAGE" <?php if ($prams[field_type]=='IMAGE') { echo " selected ";} ?>>Image</option>
+	<option value="DATE" <?php if ($prams['field_type']=='DATE') { echo " selected ";} ?>>Date</option>
+	<!--<option value="DATE_CAL" <?php if ($prams['field_type']=='DATE_CAL') { echo " selected ";} ?>>Date - Calendar</option>-->
+	<!--<option value="FILE" <?php if ($prams['field_type']=='FILE') { echo " selected ";} ?>>File</option>-->
+	<option value="IMAGE" <?php if ($prams['field_type']=='IMAGE') { echo " selected ";} ?>>Image</option>
 	<?php
 
 		//if ($form_id==1) {  // HTML editor is for job posts only.
 		
 	?>
-	 <option value="EDITOR" <?php if ($prams[field_type]=='EDITOR') { echo " selected ";} ?> >HTML Editor</option>
+	 <option value="EDITOR" <?php if ($prams['field_type']=='EDITOR') { echo " selected ";} ?> >HTML Editor</option>
 	 <?php
 
 	//	}
@@ -1291,8 +1404,8 @@ function field_form($NEW_FIELD, $prams, $form_id) {
 		}
 
 	?>
-	<option value="TEXTAREA" <?php if ($prams[field_type]=='TEXTAREA') { echo " selected ";} ?> >Text Editor</option>
-	 <option value="TEXT" <?php if ($prams[field_type]=='TEXT') { echo " selected ";} ?>  >Text Field</option>
+	<option value="TEXTAREA" <?php if ($prams['field_type']=='TEXTAREA') { echo " selected ";} ?> >Text Editor</option>
+	 <option value="TEXT" <?php if ($prams['field_type']=='TEXT') { echo " selected ";} ?>  >Text Field</option>
     </select></td>
   </tr>
   <tr bgcolor="#ffffff">
@@ -1348,7 +1461,7 @@ function field_form($NEW_FIELD, $prams, $form_id) {
  </td>
   </tr>
   <tr bgcolor="#ffffff">
-    <td><font face="Arial" size="2"><b>Error message</b></font></td>
+    <td><font face="Arial" size="2"><b>Error message</b></font><font color="#ff0000"><b>*</b></font></td>
     <td>
   <input type="text" name="error_message" size="27" value="<?php echo $prams[error_message];?>"/>(The reason for the error. Eg: <i>was not filled in</i> or <i>was invalid</i> for email.)</td>
   </tr>
@@ -1422,7 +1535,7 @@ function field_form($NEW_FIELD, $prams, $form_id) {
    <tr bgcolor="#ffffff">
     <td><font face="Arial" size="2"><b>Category</b></font></td>
     <td>
-	<input type="button" onclick="window.open('selectcat_window.php?field_id=<?php echo $row[field_id];?>&form_id=<?php echo $form_id; ?>', '', 'toolbar=no,scrollbars=yes,location=no,statusbar=no,menubar=no,resizable=1,width=500,height=500,left = 50,top = 50');return false;" value="Select Category..." >
+	<input type="button" onclick="window.open('selectcat_window.php?field_id=<?php echo $row['field_id'];?>&form_id=<?php echo $form_id; ?>', '', 'toolbar=no,scrollbars=yes,location=no,statusbar=no,menubar=no,resizable=1,width=500,height=500,left = 50,top = 50');return false;" value="Select Category..." >
 
   <input type="hidden" name="category_init_id"  value="<?php echo $prams[category_init_id];?>" size="3"/><font size='2'> (If field is a category, select the initial category) </font>
   Currently Selected:<br><input type="text" disabled name="category_init_name"  value="<?php echo  getCatName($prams[category_init_id])." (#".$prams[category_init_id].")" ;?> " size="30"/><br>
@@ -1469,23 +1582,34 @@ function form_image_field ($field_name, $field_value) {
 ###########################################################
 
 function form_editor_field ($field_name, $field_value, $width, $height) {
-	include_once("../fckeditor/fckeditor.php") ;
 
-	ob_start();
+	if (!$height)	$height = 25;
+	if (!$width)	$width = 30;
+	
+	$html = 	'<script type="text/javascript" src="../ckeditor/ckeditor.js"></script>';
+	$html .=	'	<div id="alerts">
+		<noscript>
+			<p>
+				<strong>CKEditor requires JavaScript to run</strong>. In a browser with no JavaScript
+				support, like yours, you should still see the contents (HTML data) and you should
+				be able to edit it normally, without a rich editor interface.
+			</p>
+		</noscript>
+	</div>
+';
+	$html .=	'			<textarea cols="'.$width.'" id="'.$field_name.'" name="'.$field_name.'" rows="'.$height.'">'.(escape_html($field_value)).'</textarea>';
+	$html .=	'			<script type="text/javascript">
+			//<![CDATA[
 
-	// BASE_HTTP_PATH
+				CKEDITOR.replace( \''.$field_name.'\',
+					{
+						fullPage : true
+					});
 
-	if (!$height) $height = 25;
-	if (!$width) { $width = 30;} 
-	$oFCKeditor = new FCKeditor($field_name) ;
-	$oFCKeditor->BasePath	= '../fckeditor/' ;
-	$oFCKeditor->ToolbarSet = 'Basic';
-	$oFCKeditor->Value		= $field_value ;
-	$oFCKeditor->Height = $height*15;
-	$oFCKeditor->Width = $width*15;
-	$oFCKeditor->Create() ;
-	$html = ob_get_contents();
-	ob_end_clean();
+			//]]>
+			</script>
+';
+
 	return $html;
 
 	
@@ -1495,7 +1619,7 @@ function form_editor_field ($field_name, $field_value, $width, $height) {
 function form_textarea_field ($field_name, $field_value, $width, $height) {
 	//$val = str_replace ("<", "&lt;", $field_value);
 	//$val = str_replace (">", "&gt;", $val);
-	return '<TEXTAREA  name="'.$field_name.'" cols="'.$width.'" rows="'.$height.'">'.(escape_html($field_value)).'</TEXTAREA>';
+	return '<textarea  name="'.$field_name.'" cols="'.$width.'" rows="'.$height.'">'.(escape_html($field_value)).'</textarea>';
 
 	
 }
@@ -1642,7 +1766,7 @@ function category_select_field ($field_name, $category_id, $selected, $form_id) 
 
 function form_select_field ($field_id, $selected) {
 
-	global $label;
+	global $f2, $label;
 
 	if ($_SESSION['MDS_LANG'] !='') {
 
@@ -1652,7 +1776,7 @@ function form_select_field ($field_id, $selected) {
 		$sql = "SELECT * FROM `codes` WHERE `field_id`='$field_id' ";
 	}
 
-	$result = mysql_query ($sql) or die (mysql_error());
+	$result = mysql_query ($sql) or die ("SQL:".$sql."<br />ERROR: ".mysql_error());
 	echo '<select  name="'.$field_id.'">';
 	echo '<option value="">'.$label['sel_box_select'].'</option>';
 	while ($row = mysql_fetch_array($result, MYSQL_ASSOC)) {
@@ -1671,6 +1795,7 @@ function form_select_field ($field_id, $selected) {
 ################################################################
 
 function form_radio_field ($field_id, $selected) {
+	global $f2;
 
 	if ($_SESSION['MDS_LANG'] !='') {
 
@@ -1680,7 +1805,7 @@ function form_radio_field ($field_id, $selected) {
 		$sql = "SELECT * FROM `codes` WHERE `field_id`='$field_id' ";
 	}
 
-	$result = mysql_query ($sql) or die (mysql_error());
+	$result = mysql_query ($sql) or die ("SQL:".$sql."<br />ERROR: ".mysql_error());
 
 	while ($row = mysql_fetch_array($result, MYSQL_ASSOC)) {
 
@@ -1700,6 +1825,10 @@ function form_radio_field ($field_id, $selected) {
 
 function form_checkbox_field ($field_id, $selected, $mode) {
 
+	global $f2;
+	
+	$mode = strtolower($mode);
+	
 	if ($_SESSION['MDS_LANG'] !='') {
 
 		$sql = "SELECT * FROM `codes_translations` WHERE `field_id`='$field_id' and lang='".$_SESSION['MDS_LANG']."' ";
@@ -1708,7 +1837,7 @@ function form_checkbox_field ($field_id, $selected, $mode) {
 		$sql = "SELECT * FROM `codes` WHERE `field_id`='$field_id' ";
 	}
 	
-	$result = mysql_query ($sql) or die (mysql_error());
+	$result = mysql_query ($sql) or die ("SQL:".$sql."<br />ERROR: ".mysql_error());
 	$checked_codes = explode (",", $selected);
 
 	while ($row = mysql_fetch_array($result, MYSQL_ASSOC)) {
@@ -1741,6 +1870,7 @@ function form_checkbox_field ($field_id, $selected, $mode) {
 
 function form_mselect_field ($field_id, $selected, $size, $mode) {
 
+	global $f2;
 	if ($_SESSION['MDS_LANG'] !='') {
 
 		$sql = "SELECT * FROM `codes_translations` WHERE `field_id`='$field_id' and lang='".$_SESSION['MDS_LANG']."' ";
@@ -1749,7 +1879,7 @@ function form_mselect_field ($field_id, $selected, $size, $mode) {
 		$sql = "SELECT * FROM `codes` WHERE `field_id`='$field_id' ";
 	}
 
-	$result = mysql_query ($sql) or die (mysql_error());
+	$result = mysql_query ($sql) or die ("SQL:".$sql."<br />ERROR: ".mysql_error());
 
 	$selected_codes = explode (",", $selected);
 
@@ -1793,9 +1923,11 @@ function form_mselect_field ($field_id, $selected, $size, $mode) {
 # recursive function, builds an option list for the select field 
 $options_arr = array();
 function generate_category_option_list($category_id, $selected) {
-
-	global $options_arr;
+	global $f2, $options_arr;
 	
+	$category_id = $category_id;
+	$_SESSION['MDS_LANG'] = $_SESSION['MDS_LANG'];
+	$form_id_sql = $form_id_sql;
 
 	if (func_num_args()>2) {
 		
@@ -1809,14 +1941,15 @@ function generate_category_option_list($category_id, $selected) {
 		
 		$query = "SELECT * FROM categories WHERE category_id=$category_id $form_id_sql ORDER by list_order, category_name ";
 	} else {
-		$query = "SELECT *, t2.category_name as NAME FROM categories as t1, cat_name_translations as t2 WHERE t1.category_id=t2.category_id AND t1.category_id=$category_id AND t2.lang='".$_SESSION['MDS_LANG']."' $form_id_sql  ORDER by t1.list_order, t2.category_name  ";
+		//$query = "SELECT *, t2.category_name as NAME FROM categories as t1, cat_name_translations as t2 WHERE t1.category_id=t2.category_id AND t1.category_id=$category_id AND t2.lang='".$_SESSION['MDS_LANG']."' $form_id_sql  ORDER by t1.list_order, t2.category_name  ";
+		$query = "SELECT * FROM categories, cat_name_translations WHERE categories.category_id=cat_name_translations.category_id AND categories.category_id=$category_id AND cat_name_translations.lang='".$_SESSION['MDS_LANG']."' $form_id_sql  ORDER by categories.list_order, cat_name_translations.category_name  ";
 
 	}
 	//echo "<option>$query</option>";
 
-	$result = mysql_query ($query) or die(mysql_error());
+	$result = mysql_query () or die("SQL:".$sql."<br />ERROR: ".mysql_error());
 	$row = mysql_fetch_array($result, MYSQL_ASSOC);
-	$cat_names[$depth] = $row['NAME'];
+	$cat_names[$depth] = $row['category_name'];
 	if ($depth != 0) {
 		if (is_array($selected)) {
 			if (in_array($row['search_set'], $selected)) {
@@ -1853,7 +1986,7 @@ function generate_category_option_list($category_id, $selected) {
 	}
 
 	$query ="SELECT * FROM categories WHERE parent_category_id='$category_id' $form_id_sql ORDER by list_order, category_name ";
-	$result = mysql_query ($query) or die(mysql_error());
+	$result = mysql_query ($query) or die("SQL:".$sql."<br />ERROR: ".mysql_error());
 
 	while ($row = mysql_fetch_array($result, MYSQL_ASSOC)) {
 
@@ -1896,26 +2029,28 @@ function category_option_list($category_id, $selected) {
 
 function category_option_list2($category_id, $selected) {
 
+	global $f2, $depth, $cat_names;
+	
 	if (func_num_args()>2) {
 		
 		$form_id = func_get_arg(2);
 		$form_id_sql = " AND `form_id`=$form_id ";
 	}
 
-	global $depth, $cat_names;
 	if ($depth =='') $depth=0;
 	if ($_SESSION['MDS_LANG'] == '') {
 		
 		$query = "SELECT * FROM categories WHERE category_id=$category_id $form_id_sql ORDER by list_order, category_name  ";
 	} else {
-		$query = "SELECT *, t2.category_name as NAME FROM categories as t1, cat_name_translations as t2 WHERE t1.category_id=t2.category_id AND t1.category_id=$category_id AND t2.lang='".$_SESSION['MDS_LANG']."' $form_id_sql ORDER by list_order, t2.category_name ";
+		//$query = "SELECT *, t2.category_name as NAME FROM categories as t1, cat_name_translations as t2 WHERE t1.category_id=t2.category_id AND t1.category_id=$category_id AND t2.lang='".$_SESSION['MDS_LANG']."' $form_id_sql ORDER by list_order, t2.category_name ";
+		$query = "SELECT * FROM categories, cat_name_translations WHERE categories.category_id=cat_name_translations.category_id AND categories.category_id=$category_id AND cat_name_translations.lang='".$_SESSION['MDS_LANG']."' $form_id_sql ORDER by list_order, cat_name_translations.category_name ";
 
 	}
 	//echo "<option>$query</option>";
 
-	$result = mysql_query ($query) or die(mysql_error());
+	$result = mysql_query ($query) or die("SQL:".$sql."<br />ERROR: ".mysql_error());
 	$row = mysql_fetch_array($result, MYSQL_ASSOC);
-	$cat_names[$depth] = $row['NAME'];
+	$cat_names[$depth] = $row['category_name'];
 	if ($depth != 0) {
 		if ($row['category_id']==$selected) {
 			$sel = " selected ";
@@ -1933,7 +2068,7 @@ function category_option_list2($category_id, $selected) {
 	}
 
 	$query ="SELECT * FROM categories WHERE parent_category_id='$category_id' $form_id_sql ORDER by list_order, category_name ";
-	$result = mysql_query ($query) or die(mysql_error());
+	$result = mysql_query ($query) or die("SQL:".$sql."<br />ERROR: ".mysql_error());
 
 	while ($row = mysql_fetch_array($result, MYSQL_ASSOC)) {
 
@@ -1945,12 +2080,11 @@ function category_option_list2($category_id, $selected) {
 
 }
 
-
 ########################################################
 
 function get_sql_insert_fields ($form_id) {
 	$sql = "SELECT * FROM form_fields WHERE form_id='$form_id' AND field_type != 'SEPERATOR' AND field_type != 'BLANK' AND field_type != 'NOTE' ";
-	$result = mysql_query($sql) or die(mysql_error());
+	$result = mysql_query($sql) or die("SQL:".$sql."<br />ERROR: ".mysql_error());
 	while ($row = mysql_fetch_array($result, MYSQL_ASSOC)) {
 
 		switch ($row['field_type']) {
@@ -1988,12 +2122,28 @@ function get_sql_insert_fields ($form_id) {
 	return $str;
 
 }
+
+// parse null strings
+function parseNull($data)
+{
+	//Be sure your data is escaped before you use this function
+    if (rtrim($data) != "") {
+        if (strtolower(rtrim($data)) == "null")
+            return "NULL";
+        else
+            return "'" . $data . "'";
+    } else {
+        return "NULL";
+    }
+}
+
 ################################################################
 # Not just get..() anymore , but also saves / deletes images, and updates the skills matrix fields.. 
 
 function get_sql_insert_values ($form_id, $table_name, $object_name, $object_id, $user_id) {
+	global $f2;
 	$sql = "SELECT * FROM form_fields WHERE form_id='$form_id' AND field_type != 'SEPERATOR' AND field_type != 'BLANK' AND field_type != 'NOTE'  ";
-	$result = mysql_query($sql) or die(mysql_error());
+	$result = mysql_query($sql) or die("SQL:".$sql."<br />ERROR: ".mysql_error());
 	while ($row = mysql_fetch_array($result, MYSQL_ASSOC)) {
 
 		switch ($row['field_type']) {
@@ -2004,9 +2154,11 @@ function get_sql_insert_values ($form_id, $table_name, $object_name, $object_id,
 					$_REQUEST[$row['field_id']] = $file_name;
 					// delete the old image
 					if ($object_id != '') {
-						deleteImage($table_name, $object_name, $object_id, $row[field_id]);
+						deleteImage($table_name, $object_name, $object_id, $row['field_id']);
 					}
-					$str .= ", '".$_REQUEST[$row['field_id']]."' ";
+				$str .= ", '" .mysql_real_escape_string($_REQUEST[$row['field_id']]) . "'";
+				} else {
+					$str .= ", ''";
 				}
 				break;
 			case "FILE":
@@ -2017,28 +2169,31 @@ function get_sql_insert_values ($form_id, $table_name, $object_name, $object_id,
 					$_REQUEST[$row['field_id']] = $file_name;
 					// delete the old image
 					if ($object_id != '') {
-						deleteFile($table_name, $object_name, $object_id, $row[field_id]);
+						deleteFile($table_name, $object_name, $object_id, $row['field_id']);
 					}
 					// we update 2 fields: file name and mime type...
-					//$str .= ", '".$_REQUEST[$row[field_id]]."', '".$mime_type."' ";
+					//$str .= ", '".$_REQUEST[$row['field_id']]."', '".$mime_type."' ";
 
-					$str .= ", '".$_REQUEST[$row['field_id']]."' ";
+				$str .= ", '" .mysql_real_escape_string($_REQUEST[$row['field_id']]) . "'";
 					
+				} else {
+					$str .= ", ''";
 				}
+				
 				break;
 			case "DATE":
 				$day = $_REQUEST[$row['field_id']."d"];
 				$month = $_REQUEST[$row['field_id']."m"];
 				$year = $_REQUEST[$row['field_id']."y"];
 				$_REQUEST[$row['field_id']] = $year."-".$month."-".$day;
-				$str .= ", '".$_REQUEST[$row['field_id']]."' ";
+				$str .= ",'" .mysql_real_escape_string($_REQUEST[$row['field_id']]) . "'";
 				break;
 			case "DATE_CAL":
 				$temp_time = strtotime($_REQUEST[$row['field_id']]." GMT");
 				$day = date('d', $temp_time);
 				$month = date('m', $temp_time);
 				$year = date('y', $temp_time);
-				$str .= ", '".$year."-".$month."-".$day."' ";
+				$str .= ", '" .mysql_real_escape_string($year."-".$month."-".$day)."'";
 				break;
 			case "CHECK":
 
@@ -2050,7 +2205,7 @@ function get_sql_insert_values ($form_id, $table_name, $object_name, $object_id,
 				}
 
 				$_REQUEST[$row['field_id']] = $tmp;
-				$str .= ", '".$_REQUEST[$row['field_id']]."' ";
+				$str .= ", '" .mysql_real_escape_string($_REQUEST[$row['field_id']]) . "'";
 				break;
 
 				
@@ -2063,14 +2218,14 @@ function get_sql_insert_values ($form_id, $table_name, $object_name, $object_id,
 				}
 
 				$_REQUEST[$row['field_id']] = $tmp;
-				$str .= ", '".$_REQUEST[$row['field_id']]."' ";
+				$str .= ", '" .mysql_real_escape_string($_REQUEST[$row['field_id']]) . "'";
 				break;
 			case "SKILL_MATRIX":
 				save_skill_matrix_data($row['field_id'], $object_id, $user_id);
-				$str .= ", '".$_REQUEST[$row['field_id']]."' ";
+				$str .= ", '" .mysql_real_escape_string($_REQUEST[$row['field_id']]) . "'";
 				break;
 			default:
-				$str .= ", '".$_REQUEST[$row['field_id']]."' ";
+				$str .= ", '" .mysql_real_escape_string($_REQUEST[$row['field_id']]) . "'";
 				break;
 
 		}
@@ -2084,8 +2239,9 @@ function get_sql_insert_values ($form_id, $table_name, $object_name, $object_id,
 # Not just get..() anymore , but also saves / deletes images, and updates the skills matrix fields.. 
 
 function get_sql_update_values ($form_id, $table_name, $object_name, $object_id, $user_id) {
+	global $f2;
 	$sql = "SELECT * FROM form_fields WHERE form_id='$form_id' AND field_type != 'SEPERATOR' AND field_type != 'BLANK' AND field_type != 'NOTE'  ";
-	$result = mysql_query($sql) or die(mysql_error());
+	$result = mysql_query($sql) or die("SQL:".$sql."<br />ERROR: ".mysql_error());
 	while ($row = mysql_fetch_array($result, MYSQL_ASSOC)) {
 		$tmp = ''; $comma = '';
 		switch ($row['field_type']) {
@@ -2097,22 +2253,22 @@ function get_sql_update_values ($form_id, $table_name, $object_name, $object_id,
 					$_REQUEST[$row['field_id']] = $file_name;
 					// delete the old image
 					if ($object_id != '') {
-						deleteImage($table_name, $object_name, $object_id, $row[field_id]);
+						deleteImage($table_name, $object_name, $object_id, $row['field_id']);
 					}
-					$str .= ", `".$row['field_id']."` = '".$file_name."' ";
+					$str .= ", `".$row['field_id']."`='".mysql_real_escape_string($file_name)."'";
 				}
 				break;
 			case "FILE":
 				if ($_FILES[$row['field_id']]['name'] !='') {
 					$file_name = saveFile($row['field_id']);
 					$mime_type = $_FILES[$row['field_id']]['type'];
-					//$_REQUEST[$row[field_id]] = $file_name;
+					//$_REQUEST[$row['field_id']] = $file_name;
 					// delete the old image
 					if ($object_id != '') {
 						deleteFile($table_name, $object_name, $object_id, $row['field_id']);
 					}
-					//$str .= ", `".$row['field_id']."` = '".$file_name."' , `".$row[field_id]."9193` = '".$mime_type."'";
-					$str .= ", `".$row['field_id']."` = '".$file_name."' ";
+					//$str .= ", `".$row['field_id']."` = '".$file_name."' , `".$row['field_id']."9193` = '".$mime_type."'";
+					$str .= ", `".$row['field_id']."`='".mysql_real_escape_string($file_name)."'";
 				}
 				break;
 			case "DATE":
@@ -2120,14 +2276,14 @@ function get_sql_update_values ($form_id, $table_name, $object_name, $object_id,
 				$month = $_REQUEST[$row['field_id']."m"];
 				$year = $_REQUEST[$row['field_id']."y"];
 				$_REQUEST[$row['field_id']] = $year."-".$month."-".$day;
-				$str .= ", `".$row['field_id']."` = '".$_REQUEST[$row['field_id']]."' ";
+				$str .= ", `".$row['field_id']."`='".mysql_real_escape_string($_REQUEST[$row['field_id']])."'";
 				break;
 			case "DATE_CAL":
 				$temp_time = strtotime($_REQUEST[$row['field_id']]." GMT");
 				$day = date('d', $temp_time);
 				$month = date('m', $temp_time);
 				$year = date('y', $temp_time);
-				$str .= ", `".$row['field_id']."` = '".$year."-".$month."-".$day."' ";
+				$str .= ", `".$row['field_id']."`='".mysql_real_escape_string($year."-".$month."-".$day)."'";
 				break;
 			case "CHECK":
 				
@@ -2139,7 +2295,7 @@ function get_sql_update_values ($form_id, $table_name, $object_name, $object_id,
 				}
 
 				$_REQUEST[$row['field_id']] = $tmp;
-				$str .= ", `".$row['field_id']."` = '".$_REQUEST[$row['field_id']]."' ";
+				$str .= ", `".$row['field_id']."`='".mysql_real_escape_string($_REQUEST[$row['field_id']])."'";
 				break;
 
 			case "MSELECT":
@@ -2152,17 +2308,17 @@ function get_sql_update_values ($form_id, $table_name, $object_name, $object_id,
 				}
 
 				$_REQUEST[$row['field_id']] = $tmp;
-				$str .= ", `".$row['field_id']."` = '".$_REQUEST[$row['field_id']]."' ";
+				$str .= ", `".$row['field_id']."`='".mysql_real_escape_string($_REQUEST[$row['field_id']])."'";
 				break;
 			case "SKILL_MATRIX":
 				save_skill_matrix_data($row['field_id'], $object_id, $user_id);
-				$str .= ", `".$row['field_id']."` = '".$_REQUEST[$row['field_id']]."' ";
+				$str .= ", `".$row['field_id']."`='".mysql_real_escape_string($_REQUEST[$row['field_id']])."'";
 				break;
 			case "TEXT":
-				$str .= ", `".$row['field_id']."` = '".html_entity_decode($_REQUEST[$row['field_id']])."' ";
+				$str .= ", `".$row['field_id']."`='".mysql_real_escape_string(html_entity_decode($_REQUEST[$row['field_id']]))."'";
 				break;
 			default:
-				$str .= ", `".$row['field_id']."` = '".$_REQUEST[$row['field_id']]."' ";
+				$str .= ", `".$row['field_id']."`='".mysql_real_escape_string($_REQUEST[$row['field_id']])."'";
 				break;
 
 		}
@@ -2179,23 +2335,25 @@ function get_sql_update_values ($form_id, $table_name, $object_name, $object_id,
 
 
 function tag_to_search_init ($form_id) {
+	global $f2;
 
-	$sql = "SELECT *, t2.field_label AS NAME FROM `form_fields` AS t1, `form_field_translations` AS t2 where t1.field_id=t2.field_id AND t1.form_id='$form_id' AND is_in_search ='Y' AND t2.lang='".$_SESSION['MDS_LANG']."' ORDER BY search_sort_order  ";
+	$sql = "SELECT * FROM `form_fields`, `form_field_translations` where form_fields.field_id=form_field_translations.field_id AND form_fields.form_id='".$form_id."' AND is_in_search ='Y' AND form_field_translations.lang='".$_SESSION['MDS_LANG']."' ORDER BY search_sort_order";
 	//echo $sql;
-	$result = mysql_query($sql) or die (mysql_error());
+	
+	$result = mysql_query($sql) or die ("SQL:".$sql."<br />ERROR: ".mysql_error());
 	# do a query for each field
 	while ($fields = mysql_fetch_array($result, MYSQL_ASSOC)) {
 
 		//$form_data = $row[]
-		$tag_to_search[$fields[template_tag]]['field_id'] = $fields[field_id];
-		$tag_to_search[$fields[template_tag]]['field_type'] = $fields[field_type];
-		$tag_to_search[$fields[template_tag]]['field_label'] = $fields[NAME];
-		$tag_to_search[$fields[template_tag]]['field_init'] = $fields[field_init];
-		$tag_to_search[$fields[template_tag]]['category_init_id'] = $fields[category_init_id];
-		$tag_to_search[$fields[template_tag]]['field_height'] = $fields[field_height];
-		$tag_to_search[$fields[template_tag]]['is_cat_multiple'] = $fields[is_cat_multiple];
-		$tag_to_search[$fields[template_tag]]['cat_multiple_rows'] = $fields[cat_multiple_rows];
-		$tag_to_search[$fields[template_tag]]['multiple_sel_all'] = $fields[multiple_sel_all];
+		$tag_to_search[$fields['template_tag']]['field_id'] = $fields['field_id'];
+		$tag_to_search[$fields['template_tag']]['field_type'] = $fields['field_type'];
+		$tag_to_search[$fields['template_tag']]['field_label'] = $fields['field_label'];
+		$tag_to_search[$fields['template_tag']]['field_init'] = $fields['field_init'];
+		$tag_to_search[$fields['template_tag']]['category_init_id'] = $fields['category_init_id'];
+		$tag_to_search[$fields['template_tag']]['field_height'] = $fields['field_height'];
+		$tag_to_search[$fields['template_tag']]['is_cat_multiple'] = $fields['is_cat_multiple'];
+		$tag_to_search[$fields['template_tag']]['cat_multiple_rows'] = $fields['cat_multiple_rows'];
+		$tag_to_search[$fields['template_tag']]['multiple_sel_all'] = $fields['multiple_sel_all'];
 	}
 
 	return $tag_to_search;
@@ -2242,11 +2400,9 @@ function get_tag_to_field_id($form_id) {
 }
 
 #################################################################
-function display_dynamic_search_form ($form_id) {
+/*function display_dynamic_search_form ($form_id) {
 
-	global $label;
-
-	global $search_form_mode;
+	global $f2, $label, $search_form_mode;
 
 	if (func_num_args()>1) {
 		$NO_COLS = func_get_arg(1);
@@ -2259,14 +2415,6 @@ function display_dynamic_search_form ($form_id) {
 	$tag_to_search = get_tag_to_search($form_id);
 	
 	if ($search_form_mode=='') {
-
-		if (!defined('SCW_INCLUDE')) {
-			?>
-			<script type='text/JavaScript' src='<?php echo BASE_HTTP_PATH."scw/scw_js.php?lang=".$_SESSION['MDS_LANG']; ?>'></script>
-			<?php
-			define ('SCW_INCLUDE', 'Y');
-		}
-
 	?>
 	
 	 <form  action="<?php echo htmlentities($_SERVER['PHP_SELF']);?>" method="get" style="margin: 0">
@@ -2391,7 +2539,7 @@ function display_dynamic_search_form ($form_id) {
 							$sql = "SELECT * FROM `codes` WHERE `field_id`='$key_id' ";
 						}
 
-						$result = mysql_query ($sql) or die (mysql_error());
+						$result = mysql_query ($sql) or die ("SQL:".$sql."<br />ERROR: ".mysql_error());
 						while ($row  = mysql_fetch_array($result, MYSQL_ASSOC)) {
 							if ($row['code']== $_REQUEST[$key_id] ) {
 								$checked = ' checked ';
@@ -2408,9 +2556,9 @@ function display_dynamic_search_form ($form_id) {
 						} else {
 							$sql = "SELECT * FROM `codes` WHERE `field_id`='$key_id' ";
 						}
-						$result = mysql_query ($sql) or die (mysql_error());
+						$result = mysql_query ($sql) or die ("SQL:".$sql."<br />ERROR: ".mysql_error());
 						
-				//$row[field_id]."-".$code['code'];
+				//$row['field_id']."-".$code['code'];
 						while ($row  = mysql_fetch_array($result, MYSQL_ASSOC)) {
 							if ($row[code]== $_REQUEST[$tag_to_search[$key]['field_id'].'-'.$row[code]] ) {
 								$checked = ' checked ';
@@ -2427,7 +2575,7 @@ function display_dynamic_search_form ($form_id) {
 						} else {
 							$sql = "SELECT * FROM `codes` WHERE `field_id`='$key_id' ";
 						}
-						$result = mysql_query ($sql) or die (mysql_error());
+						$result = mysql_query ($sql) or die ("SQL:".$sql."<br />ERROR: ".mysql_error());
 						
 				?>
 						<select class='search_input_style'  size='<?php echo $tag_to_search[$key]['field_height']; ?>' name="<?php echo $key_id; ?>">
@@ -2458,7 +2606,7 @@ function display_dynamic_search_form ($form_id) {
 						} else {
 							$sql = "SELECT * FROM `codes` WHERE `field_id`='$key_id' ";
 						}
-						$result = mysql_query ($sql) or die (mysql_error());
+						$result = mysql_query ($sql) or die ("SQL:".$sql."<br />ERROR: ".mysql_error());
 						
 				?>
 						<select class='search_input_style' multiple size='<?php echo $tag_to_search[$key]['field_height']; ?>' name="<?php echo $key_id; ?>[]">
@@ -2581,7 +2729,7 @@ function display_dynamic_search_form ($form_id) {
 
 
 }
-
+*/
 
 
 
@@ -2589,8 +2737,7 @@ function display_dynamic_search_form ($form_id) {
 
 function generate_search_sql($form_id) {
 
-	global $action;
-	global $tag_to_search;
+	global $f2, $action, $tag_to_search;
 	$tag_to_search = get_tag_to_search($form_id);
 
 
@@ -2608,20 +2755,20 @@ function generate_search_sql($form_id) {
 		 //print_r ($tag_to_search);
 
 		 foreach ($tag_to_search as $key => $val) {
-			 $name = $tag_to_search[$key][field_id];
+			 $name = $tag_to_search[$key]['field_id'];
 
-			 switch ($tag_to_search[$key][field_type]) {
+			 switch ($tag_to_search[$key]['field_type']) {
 
 			 case 'CHECK':
 				$tmp=''; $comma='';
 				## process all possible options
 				$sql = "SELECT * from codes where field_id='$name' ";
-				$code_result = mysql_query ($sql) or die (mysql_error());
+				$code_result = mysql_query ($sql) or die ("SQL:".$sql."<br />ERROR: ".mysql_error());
 
 				//echo $sql;
 				$i = 0;
 				while ($code = mysql_fetch_array($code_result, MYSQL_ASSOC)) {
-					$val = $code[field_id]."-".$code['code'];
+					$val = $code['field_id']."-".$code['code'];
 					if ($_SEARCH_INPUT[$val] != '') {
 						if ($i > 0) {$comma = 'OR';}
 						$tmp .= $comma." `$name` LIKE '%".$code['code']."%' ";
@@ -2629,7 +2776,7 @@ function generate_search_sql($form_id) {
 					}
 
 				}
-				//$_REQUEST[$row[field_id]] = $tmp;
+				//$_REQUEST[$row['field_id']] = $tmp;
 				if ($i > 0)
 				$where_sql .= "  AND (".$tmp.") ";
 
@@ -2670,7 +2817,7 @@ function generate_search_sql($form_id) {
 				 } elseif (($_SEARCH_INPUT[$name] != '') && (($_SEARCH_INPUT[$name] != 'all'))) {
 
 					//$sql = "SELECT * from codes where field_id=$name ";
-					//$code_result = mysql_query ($sql) or die (mysql_error());
+					//$code_result = mysql_query ($sql) or die ("SQL:".$sql."<br />ERROR: ".mysql_error());
 
 					$where_sql .= " AND `$name` = '".$_SEARCH_INPUT[$name]."' ";
 
@@ -2731,13 +2878,14 @@ function generate_search_sql($form_id) {
 }
 #############################################
 function is_reserved_field ($field_id) {
+	global $f2;
 
 	if ($field_id==false) {
 		return $field_id;
 	}
 
 	$sql = "SELECT * from `form_fields` WHERE field_id='$field_id' ";
-	$result = mysql_query($sql) or die (mysql_error());
+	$result = mysql_query($sql) or die ("SQL:".$sql."<br />ERROR: ".mysql_error());
 	$row = mysql_fetch_array($result, MYSQL_ASSOC);
 
 	if (is_reserved_template_tag($row['template_tag'])) {	
@@ -2788,16 +2936,22 @@ function get_reserved_tag_description($str) {
 ################################################
 
 function build_sort_fields ($form_id, $section) {
+	global $f2;
 
-	$sql =  "SELECT * FROM form_fields where `form_id`='$form_id' and section='$section' order by  field_sort ASC ";
-	$result = mysql_query($sql) or die (mysql_error());
+	$form_id = $form_id;
+	$section = $section;
+
+	$sql =  "SELECT * FROM form_fields where `form_id`='$form_id' and section='$section' order by field_sort ASC";
+	$result = mysql_query($sql) or die ("SQL:".$sql."<br />ERROR: ".mysql_error());
 	$order = 1;
 	while ($row = mysql_fetch_array($result, MYSQL_ASSOC)) {
 
 		//$fields[$row['field_id']] = $row[''];
-		$sql = "UPDATE form_fields SET `field_sort`='$order' WHERE form_id='$form_id' AND field_id='".$row['field_id']."' ";
+		$field_id = $row['field_id'];
+		$sql = "UPDATE form_fields SET `field_sort`='$order' WHERE form_id='$form_id' AND field_id='".$field_id."' ";
+		
 		//echo $sql." ".$row['field_label']."(".$row['field_sort'].")<br>";
-		mysql_query($sql) or die (mysql_error());
+		mysql_query($sql) or die ("SQL:".$sql."<br />ERROR: ".mysql_error());
 		$order++;
 
 	}
@@ -2823,12 +2977,12 @@ function move_field_up($form_id, $field_id) {
 
 	// top goes to bottom
 	$sql = "UPDATE form_fields SET `field_sort`=field_sort+1 WHERE form_id='$form_id' AND field_sort='".$new_order."' AND `section`='$section' ";
-	mysql_query($sql) or die (mysql_error().$sql);
+	mysql_query($sql) or die ("SQL:".$sql."<br />ERROR: ".mysql_error());
 	
 
 	// field_id moves up
 	$sql = "UPDATE form_fields SET `field_sort`=$new_order WHERE form_id='$form_id' AND field_id='".$field_id."' ";
-	mysql_query($sql) or die (mysql_error().$sql);
+	mysql_query($sql) or die ("SQL:".$sql."<br />ERROR: ".mysql_error());
 	
 
 
@@ -2852,7 +3006,7 @@ function move_field_down($form_id, $field_id) {
 	$new_order = $now_order + 1;
 
 	$sql = "SELECT max(field_sort) as the_max from form_fields where form_id='$form_id' AND section='$section'  ";
-	$result = mysql_query($sql) or die (mysql_error().$sql);
+	$result = mysql_query($sql) or die ("SQL:".$sql."<br />ERROR: ".mysql_error());
 		
 	$row = mysql_fetch_array($result, MYSQL_ASSOC);
 	//echo "the max:".$row['the_max']." new oreer".$new_order;
@@ -2865,12 +3019,12 @@ function move_field_down($form_id, $field_id) {
 	// bottom goes to top
 	$sql = "UPDATE form_fields SET `field_sort`=field_sort-1 WHERE form_id='$form_id' AND field_sort='".$new_order."' AND `section`='$section' ";
 	//echo $sql."<br>";
-	mysql_query($sql) or die (mysql_error().$sql);
+	mysql_query($sql) or die ("SQL:".$sql."<br />ERROR: ".mysql_error());
 
 	// field_id moves up
 	$sql = "UPDATE form_fields SET `field_sort`=$new_order WHERE form_id='$form_id' AND field_id='".$field_id."' ";
 	//echo $sql."<br>";
-	mysql_query($sql) or die (mysql_error().$sql);
+	mysql_query($sql) or die ("SQL:".$sql."<br />ERROR: ".mysql_error());
 	
 }
 
@@ -2879,7 +3033,7 @@ function move_field_down($form_id, $field_id) {
 function get_field_order ($form_id, $field_id) {
 
 		$sql =  "SELECT * from form_fields where `form_id`='$form_id' AND field_id='$field_id' ";
-		$result = mysql_query($sql) or die (mysql_error());
+		$result = mysql_query($sql) or die ("SQL:".$sql."<br />ERROR: ".mysql_error());
 		$row = mysql_fetch_array ($result, MYSQL_ASSOC);
 		return $row['field_sort']; 
 
@@ -2891,7 +3045,7 @@ function get_field_order ($form_id, $field_id) {
 function get_field ($form_id, $field_id) {
 
 		$sql =  "SELECT * from form_fields where `form_id`='$form_id' AND field_id='$field_id' ";
-		$result = mysql_query($sql) or die (mysql_error());
+		$result = mysql_query($sql) or die ("SQL:".$sql."<br />ERROR: ".mysql_error());
 		return mysql_fetch_array ($result, MYSQL_ASSOC);
 		
 }
@@ -2902,7 +3056,7 @@ function is_table_unsaved ($tname) {
 
 	// load cols
 	$sql = " show columns from $tname ";
-	$result = mysql_query($sql) or die (mysql_error());
+	$result = mysql_query($sql) or die ("SQL:".$sql."<br />ERROR: ".mysql_error());
 	while ($row = mysql_fetch_row($result)) {
 		if (preg_match("/^\d+$/", $row[0])) {
 			$cols[$row[0]] = $row[0];
@@ -2922,7 +3076,7 @@ function is_table_unsaved ($tname) {
 	// load fields
 	$sql = "SELECT * FROM `form_fields` where form_id=$form_id AND field_type != 'BLANK' AND field_type !='SEPERATOR' AND field_type !='NOTE'  ";
 	//echo $sql;
-	$result = mysql_query($sql) or die (mysql_error());
+	$result = mysql_query($sql) or die ("SQL:".$sql."<br />ERROR: ".mysql_error());
 
 	while ($row = mysql_fetch_array($result, MYSQL_ASSOC)) {
 		$fields[$row['field_id']]=$row['field_id'];
@@ -2962,7 +3116,7 @@ function generate_template_tag($form_id) { // generate a random template tag. Th
 	$unique = false;
 
 	$sql = "select field_id from form_fields where template_tag='$template_tag' and form_id='$form_id' ";
-	$result = mysql_query($sql)or die ($sql.mysql_error());
+	$result = mysql_query($sql)or die ("SQL:".$sql."<br />ERROR: ".mysql_error());
 	if (mysql_num_rows($result)==0) {
 		$unique = true;
 	}
@@ -2988,16 +3142,16 @@ function generate_template_tag($form_id) { // generate a random template tag. Th
 function fix_form_field_translations() {
 
 	$sql = "DELETE from form_fields WHERE (form_id=4 OR form_id=5) AND section=3 ";
-	mysql_query($sql)or die ($sql.mysql_error());
+	mysql_query($sql)or die ("SQL:".$sql."<br />ERROR: ".mysql_error());
 
 	$sql = "SELECT field_id from form_field_translations";
-	$result = mysql_query($sql)or die ($sql.mysql_error());
+	$result = mysql_query($sql)or die ("SQL:".$sql."<br />ERROR: ".mysql_error());
 	while ($row = mysql_fetch_array($result)) {
 		$sql = "SELECT field_id from form_fields";
-		$result2 = mysql_query($sql)or die ($sql.mysql_error());
+		$result2 = mysql_query($sql)or die ("SQL:".$sql."<br />ERROR: ".mysql_error());
 		if (mysql_num_rows($result2)==0) {
 			$sql = "DELETE FORM form_field_translations WHERE field_id=".$row['field_id'];
-			mysql_query($sql)or die ($sql.mysql_error());
+			mysql_query($sql)or die ("SQL:".$sql."<br />ERROR: ".mysql_error());
 
 		}
 

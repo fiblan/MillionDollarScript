@@ -2,20 +2,20 @@
 /*
  * smtp_message.php
  *
- * @(#) $Header: /home/mlemos/cvsroot/mimemessage/smtp_message.php,v 1.30 2006/06/11 04:21:18 mlemos Exp $
+ * @(#) $Header: /opt2/ena/metal/mimemessage/smtp_message.php,v 1.36 2011/03/09 07:48:52 mlemos Exp $
  *
  *
  */
 
 /*
-{metadocument}<?xml version="1.0" encoding="ISO-8859-1"?>
+{metadocument}<?xml version="1.0" encoding="UTF-8"?>
 <class>
 
 	<package>net.manuellemos.mimemessage</package>
 
 	<name>smtp_message_class</name>
-	<version>@(#) $Id: smtp_message.php,v 1.30 2006/06/11 04:21:18 mlemos Exp $</version>
-	<copyright>Copyright © (C) Manuel Lemos 1999-2004</copyright>
+	<version>@(#) $Id: smtp_message.php 161 2012-10-11 18:09:12Z ryan $</version>
+	<copyright>Copyright (C) Manuel Lemos 1999-2004</copyright>
 	<title>MIME E-mail message composing and sending via SMTP</title>
 	<author>Manuel Lemos</author>
 	<authoraddress>mlemos-at-acm.org</authoraddress>
@@ -58,6 +58,14 @@
 			<integervalue>465</integervalue>.<paragraphbreak />
 			SSL support requires at least PHP 4.3.0 with OpenSSL extension
 			enabled.<paragraphbreak />
+			<b>- Secure SMTP connections starting TLS after connections is established</b><paragraphbreak />
+			Some SMTP servers, like for instance Hotmail, require starting the
+			TLS protocol after the connection is already established to exchange
+			data securely. In that case it is necessary to set the
+			<variablelink>smtp_start_tls</variablelink> variable to
+			<booleanvalue>1</booleanvalue>.<paragraphbreak />
+			Starting TLS protocol on an already established connection requires
+			at least PHP 5.1.0 with OpenSSL extension enabled.<paragraphbreak />
 			<b>- Authentication</b><paragraphbreak />
 			Most servers only allow relaying messages sent by authorized
 			users. If the SMTP server that you want to use requires
@@ -129,6 +137,7 @@ class smtp_message_class extends email_message_class
 
 	var $smtp;
 	var $line_break="\r\n";
+	var $delivery = 0;
 
 	/* Public variables */
 
@@ -136,7 +145,6 @@ class smtp_message_class extends email_message_class
 {metadocument}
 	<variable>
 		<name>localhost</name>
-		<type>STRING</type>
 		<value></value>
 		<documentation>
 			<purpose>Specify the domain name of the computer sending the
@@ -202,6 +210,107 @@ class smtp_message_class extends email_message_class
 {/metadocument}
 */
 	var $smtp_ssl=0;
+
+/*
+{metadocument}
+	<variable>
+		<name>smtp_start_tls</name>
+		<type>BOOLEAN</type>
+		<value>0</value>
+		<documentation>
+			<purpose>Specify whether it should use secure connections starting
+				TLS protocol after connecting to the SMTP server.</purpose>
+			<usage>Certain e-mail services like Hotmail require starting TLS
+				protocol after the connection to the SMTP server is already
+				established.</usage>
+		</documentation>
+	</variable>
+{/metadocument}
+*/
+	var $smtp_start_tls=0;
+
+/*
+{metadocument}
+	<variable>
+		<name>smtp_http_proxy_host_name</name>
+		<type>STRING</type>
+		<value></value>
+		<documentation>
+			<purpose>Specify name of the host when the connection should be
+				routed via an HTTP proxy.</purpose>
+			<usage>Leave empty if no proxy should be used.</usage>
+		</documentation>
+	</variable>
+{/metadocument}
+*/
+	var $smtp_http_proxy_host_name='';
+
+/*
+{metadocument}
+	<variable>
+		<name>smtp_http_proxy_host_port</name>
+		<type>INTEGER</type>
+		<value>3128</value>
+		<documentation>
+			<purpose>Specify proxy port when the connection should be routed via
+				an HTTP proxy.</purpose>
+			<usage>Change this variable if you need to use a proxy with a
+				specific port.</usage>
+		</documentation>
+	</variable>
+{/metadocument}
+*/
+	var $smtp_http_proxy_host_port=3128;
+
+/*
+{metadocument}
+	<variable>
+		<name>smtp_socks_host_name</name>
+		<type>STRING</type>
+		<value></value>
+		<documentation>
+			<purpose>Specify name of the host when the connection should be
+				routed via a SOCKS protocol proxy.</purpose>
+			<usage>Leave empty if no proxy should be used.</usage>
+		</documentation>
+	</variable>
+{/metadocument}
+*/
+	var $smtp_socks_host_name = '';
+
+/*
+{metadocument}
+	<variable>
+		<name>smtp_socks_host_port</name>
+		<type>INTEGER</type>
+		<value>1080</value>
+		<documentation>
+			<purpose>Specify proxy port when the connection should be routed via
+				a SOCKS protocol proxy.</purpose>
+			<usage>Change this variable if you need to use a proxy with a
+				specific port.</usage>
+		</documentation>
+	</variable>
+{/metadocument}
+*/
+	var $smtp_socks_host_port = 1080;
+
+/*
+{metadocument}
+	<variable>
+		<name>smtp_socks_version</name>
+		<type>STRING</type>
+		<value></value>
+		<documentation>
+			<purpose>Specify protocol version when the connection should be
+				routed via a SOCKS protocol proxy.</purpose>
+			<usage>Change this variable if you need to use a proxy with a
+				specific SOCKS protocol version.</usage>
+		</documentation>
+	</variable>
+{/metadocument}
+*/
+	var $smtp_socks_version = '5';
 
 /*
 {metadocument}
@@ -310,6 +419,26 @@ class smtp_message_class extends email_message_class
 {/metadocument}
 */
 	var $smtp_workstation="";
+
+/*
+{metadocument}
+	<variable>
+		<name>smtp_authentication_mechanism</name>
+		<type>STRING</type>
+		<value></value>
+		<documentation>
+			<purpose>Specify the user authentication mechanism that should be
+				used when authenticating with the SMTP server.</purpose>
+			<usage>Set this variable if you need to force the SMTP connection to
+				authenticate with a specific authentication mechanism. Leave this
+				variable with an empty string if you want the authentication
+				mechanism be determined automatically from the list of mechanisms
+				supported by the server.</usage>
+		</documentation>
+	</variable>
+{/metadocument}
+*/
+	var $smtp_authentication_mechanism="";
 
 /*
 {metadocument}
@@ -436,7 +565,7 @@ class smtp_message_class extends email_message_class
 {metadocument}
 	<variable>
 		<name>mailer_delivery</name>
-		<value>smtp $Revision: 1.30 $</value>
+		<value>smtp $Revision: 161 $</value>
 		<documentation>
 			<purpose>Specify the text that is used to identify the mail
 				delivery class or sub-class. This text is appended to the
@@ -447,7 +576,27 @@ class smtp_message_class extends email_message_class
 	</variable>
 {/metadocument}
 */
-	var $mailer_delivery='smtp $Revision: 1.30 $';
+	var $mailer_delivery='smtp $Revision: 161 $';
+
+/*
+{metadocument}
+	<variable>
+		<name>maximum_bulk_deliveries</name>
+		<type>INTEGER</type>
+		<value>100</value>
+		<documentation>
+			<purpose>Specify the number of consecutive bulk mail deliveries
+				without disconnecting.</purpose>
+			<usage>Lower this value if you have enabled the bulk mail mode but
+				the SMTP server does not accept sending more than a number of
+				messages within the same SMTP connection.<paragraphbreak />
+				Set this value to <integervalue>0</integervalue> to never
+				disconnect during bulk mail mode unless an error occurs.</usage>
+		</documentation>
+	</variable>
+{/metadocument}
+*/
+	var $maximum_bulk_deliveries=100;
 
 	Function SetRecipients(&$recipients,&$valid_recipients)
 	{
@@ -462,6 +611,20 @@ class smtp_message_class extends email_message_class
 		return(1);
 	}
 
+	Function ResetConnection($error)
+	{
+		if(IsSet($this->smtp))
+		{
+			if(!$this->smtp->Disconnect()
+			&& strlen($error) == 0)
+				$error = $this->smtp->error;
+			UnSet($this->smtp);
+		}
+		if(strlen($error))
+			$this->OutputError($error);
+		return($error);
+	}
+
 	Function StartSendingMessage()
 	{
 		if(function_exists("class_exists")
@@ -474,6 +637,12 @@ class smtp_message_class extends email_message_class
 		$this->smtp->host_name=$this->smtp_host;
 		$this->smtp->host_port=$this->smtp_port;
 		$this->smtp->ssl=$this->smtp_ssl;
+		$this->smtp->start_tls=$this->smtp_start_tls;
+		$this->smtp->http_proxy_host_name=$this->smtp_http_proxy_host_name;
+		$this->smtp->http_proxy_host_port=$this->smtp_http_proxy_host_port;
+		$this->smtp->socks_host_name=$this->smtp_socks_host_name;
+		$this->smtp->socks_host_port=$this->smtp_socks_host_port;
+		$this->smtp->socks_version=$this->smtp_socks_version;
 		$this->smtp->timeout=$this->timeout;
 		$this->smtp->debug=$this->smtp_debug;
 		$this->smtp->html_debug=$this->smtp_html_debug;
@@ -484,13 +653,15 @@ class smtp_message_class extends email_message_class
 		$this->smtp->user=$this->smtp_user;
 		$this->smtp->realm=$this->smtp_realm;
 		$this->smtp->workstation=$this->smtp_workstation;
+		$this->smtp->authentication_mechanism=$this->smtp_authentication_mechanism;
 		$this->smtp->password=$this->smtp_password;
 		$this->smtp->esmtp=$this->esmtp;
 		if($this->smtp->Connect())
+		{
+			$this->delivery = 0;
 			return("");
-		$error=$this->smtp->error;
-		UnSet($this->smtp);
-		return($this->OutputError($error));
+		}
+		return($this->ResetConnection($this->smtp->error));
 	}
 
 	Function SendMessageHeaders($headers)
@@ -529,23 +700,25 @@ class smtp_message_class extends email_message_class
 					break;
 			}
 			if(strcmp($error,""))
-				return($this->OutputError($error));
+				return($this->ResetConnection($error));
 			if(strtolower($header_name)=="bcc")
 				continue;
 			$header_data.=$this->FormatHeader($header_name,$headers[$header_name])."\r\n";
 		}
 		if(count($from)==0)
-			return($this->OutputError("it was not specified a valid From header"));
-		if(count($to)==0)
-			return($this->OutputError("it was not specified a valid To header"));
+			return($this->ResetConnection("it was not specified a valid From header"));
 		Reset($return_path);
 		Reset($from);
 		$this->invalid_recipients=array();
-		if(!$this->smtp->MailFrom(count($return_path) ? Key($return_path) : Key($from))
-		|| !$this->SetRecipients($to,$valid_recipients))
-			return($this->OutputError($this->smtp->error));
-		if($valid_recipients==0)
-			return($this->OutputError("it were not specified any valid recipients"));
+		if(!$this->smtp->MailFrom(count($return_path) ? Key($return_path) : Key($from)))
+			return($this->ResetConnection($this->smtp->error));
+		$r = 0;
+		if(count($to))
+		{
+			if(!$this->SetRecipients($to,$valid_recipients))
+				return($this->ResetConnection($this->smtp->error));
+			$r += $valid_recipients;
+		}
 		if(!$date_set)
 			$header_data.="Date: ".$date."\r\n";
 		if(!$message_id_set
@@ -554,32 +727,39 @@ class smtp_message_class extends email_message_class
 			$sender=(count($return_path) ? Key($return_path) : Key($from));
 			$header_data.=$this->GenerateMessageID($sender)."\r\n";
 		}
-		if(!$this->SetRecipients($recipients,$valid_recipients)
-		|| !$this->smtp->StartData()
+		if(count($recipients))
+		{
+			if(!$this->SetRecipients($recipients,$valid_recipients))
+				return($this->ResetConnection($this->smtp->error));
+			$r += $valid_recipients;
+		}
+		if($r==0)
+			return($this->ResetConnection("it were not specified any valid recipients"));
+		if(!$this->smtp->StartData()
 		|| !$this->smtp->SendData($header_data."\r\n"))
-			return($this->OutputError($this->smtp->error));
+			return($this->ResetConnection($this->smtp->error));
 		return("");
 	}
 
 	Function SendMessageBody($data)
 	{
-		$this->smtp->PrepareData($data,$output);
-		return($this->smtp->SendData($output) ? "" : $this->OutputError($this->smtp->error));
+		return($this->smtp->SendData($this->smtp->PrepareData($data)) ? "" : $this->ResetConnection($this->smtp->error));
 	}
 
 	Function EndSendingMessage()
 	{
-		return($this->smtp->EndSendingData() ? "" : $this->OutputError($this->smtp->error));
+		return($this->smtp->EndSendingData() ? "" : $this->ResetConnection($this->smtp->error));
 	}
 
 	Function StopSendingMessage()
 	{
+		++$this->delivery;
 		if($this->bulk_mail
-		&& !$this->smtp_direct_delivery)
+		&& !$this->smtp_direct_delivery
+		&& ($this->maximum_bulk_deliveries == 0
+		|| $this->delivery < $this->maximum_bulk_deliveries))
 			return("");
-		$error=($this->smtp->Disconnect() ? "" : $this->OutputError($this->smtp->error));
-		UnSet($this->smtp);
-		return($error);
+		return($this->ResetConnection(''));
 	}
 
 	Function ChangeBulkMail($on)
@@ -587,9 +767,7 @@ class smtp_message_class extends email_message_class
 		if($on
 		|| !IsSet($this->smtp))
 			return(1);
-		$error=($this->smtp->Disconnect() ? "" : $this->OutputError($this->smtp->error));
-		UnSet($this->smtp);
-		return(strlen($error)==0);
+		return($this->smtp->Disconnect() ? "" : $this->ResetConnection($this->smtp->error));
 	}
 };
 

@@ -1,0 +1,571 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<HTML>
+<HEAD>
+	<TITLE>"PHPresolver" - PHP DNS resolver library</TITLE>
+	<META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<LINK rel="stylesheet" href="ref.css">
+</HEAD>
+<BODY>
+<!-- HEADER -->
+	<DIV class="header">
+		"PHPresolver" - PHP DNS resolver library
+	</DIV>
+<!-- TITLE -->
+	<H1>PHPresolver class library reference</H1>
+	version 1.1<BR>
+	Copyright(c) 2001, 2002 Moriyoshi Koizumi. All Rights Reserved.<BR>
+	<BR>
+<!-- table of contents -->
+	<P>
+		<UL>
+			<LI><A href="#class_DNSResolver">class DNSResolver</A></LI>
+			<LI><A href="#class_DNSName">class DNSName</A></LI>
+			<LI><A href="#class_DNSRecord">class DNSRecord</A></LI>
+			<LI><A href="#class_DNSQuery">class DNSQuery</A></LI>
+			<LI><A href="#class_DNSAnswer">class DNSAnswer</A></LI>
+		</UL>
+	</P>
+	<BR>
+<!-- descriptions of classes -->
+<!-- class DNSResolver -->
+	<HR>
+	<A name="class_DNSResolver"></A>
+	<DIV class="class">
+		<H2 class="class">class DNSResolver</H2>
+		DNS resolver object. <BR>
+		<BR>
+		<H3 class="class">constructor</H3>
+		<DIV class="func">
+		<H3 class="func">DNSResolver( <CODE class="func">string</CODE> nameserver [, <CODE class="func">int</CODE> port] [, <CODE class="func">int</CODE> timeout] )</H3>
+			
+			<DL class="func">
+				<DT class="func">[parameters]</DT>
+				<DD class="func">
+					<DL class="desc">
+						<DT class="desc"><VAR class="param">nameserver</VAR></DT>
+						<DD class="desc">
+							specifies a domain name or an IP address of the domain name server(DNS) used for domain name resolution.<BR>
+						</DD>
+						<DT class="desc"><VAR class="param">port</VAR> <SPAN class="note">(optional)</SPAN></DT>
+						<DD class="desc">
+							specifies the number of the port that accepts DNS service. Default value is 53.<BR>
+						</DD>
+						<DT class="desc"><VAR class="param">timeout</VAR> <SPAN class="note">(optional)</SPAN></DT>
+						<DD class="desc">
+							specifies the connection timeout in nano seconds. default value is 10000000 (1 second).<BR>
+						</DD>
+					</DL>
+				</DD>
+			</DL>
+		</DIV>
+		<H3 class="class">methods</H3>
+		<DIV class="func">
+		<A name="class_DNSResolver_sendQuery"></A>
+		<H3 class="func"><A href="#class_DNSAnswer"><CODE class="func">DNSAnswer</CODE></A> sendQuery( <A href="#class_DNSQuery"><CODE class="func">DNSQuery</CODE></A> dnsquery [, <CODE class="func">boolean</CODE> useTCP] )</H3>
+			<DL class="func">
+				<DT class="func">[parameters]</DT>
+				<DD class="func">
+					<DL class="desc">
+						<DT class="desc"><VAR class="param">dnsquery</VAR></DT>
+						<DD class="desc">
+							specifies an <A href="#class_DNSQuery"><CODE class="func">DNSQuery</CODE></A> object which contains information to query to the name server.<BR>
+						</DD>
+						<DT class="desc"><VAR class="param">useTCP</VAR> <SPAN class="note">(optional)</SPAN></DT>
+						<DD class="desc">
+							This flag forces the resolver to use TCP connection for querying a server. By default it uses UDP connection and switches to use TCP when it is necessary.<BR>
+						</DD>
+					</DL>
+				</DD>
+				<DT class="func">[return value]</DT>
+				<DD class="func">
+					A <A href="#class_DNSAnswer"><CODE class="func">DNSAnswer</CODE></A> Object
+				</DD>
+			</DL>
+		</DIV>
+	</DIV>
+<!-- class DNSName -->
+	<HR>
+	<A name="class_DNSName"></A>
+	<DIV class="class">
+		<H2 class="class">class DNSName</H2>
+		The object that holds a series of subdomains, i.e. a domain name.<BR>
+		<BR>
+		<H3 class="class">constructor</H3>
+		<DIV class="func">
+		<H3 class="func">DNSName( <CODE class="func">array</CODE> labels )</H3>
+			<DL class="func">
+				<DT class="func">[parameters]</DT>
+				<DD class="func">
+					<DL class="desc">
+						<DT class="desc"><VAR class="param">labels</VAR></DT>
+						<DD class="desc">
+							An array of sub-domain strings. For example, domain name "a.b.c" is represented as:<BR>
+							<DIV class="example">
+							array[0] => 'a'<BR>
+							array[1] => 'b'<BR>
+							array[2] => 'c'<BR>
+							array[3] => '' (void string)<BR>
+							</DIV>
+						</DD>
+					</DL>
+				</DD>
+				<DT class="func">[note]</DT>
+				<DD class="func">
+					Literal IP addresses should be represented as
+					subdomains of ARPA domain.<BR>
+				</DD>
+			</DL>
+		</DIV>
+		<H3 class="class">methods</H3>
+		<DIV class="func">
+		<H3 class="func"><A href="#class_DNSName"><code class="func">DNSName</code></A> DNSName::newFromString( <CODE class="func">string</CODE> domainname )</H3>
+			<DL class="func">
+				<DT class="func">[parameters]</DT>
+				<DD class="func">
+					<DL class="desc">
+						<DT class="desc"><VAR class="param">domainname</VAR></DT>
+						<DD class="desc">
+							specifies a domain name which will be converted into an DNSName object.<BR>
+							Acceptable formats are listed below;<BR>
+							<DIV class="example">
+								<SPAN class="inetaddr">192.168.0.1</SPAN> (literal IPv4 address format)<BR>
+								<SPAN class="inetaddr">1.0.168.192.IN-ADDR.ARPA</SPAN> (defined in <A href="http://www.rfc-editor.org/rfc/rfc1035.txt">RFC1035</A>; the value is same as above)<BR>
+								<SPAN class="inetaddr">www.example.com</SPAN> (generic domain name)<BR>
+								<SPAN class="inetaddr">ffff:0:4567:89ab:fdfa:132:0:413</SPAN> (literal IPv6 address format)<BR>
+								<SPAN class="inetaddr">3.1.4.0.0.0.0.0.a.f.d.f.b.a.9.8.7.6.5.4.3.2.1.0.f.f.f.f.IP6.ARPA</SPAN> (defined in <A href="http://www.rfc-editor.org/rfc/rfc1886.txt">RFC1886</A>; same as above)<BR>
+								<SPAN class="inetaddr">ffff::192.168.0.1</SPAN> (literal IPv6 address format)<BR>
+							</DIV>
+							<BR>
+							and those formats are currently unsupported;
+							<DIV class="example">
+								<SPAN class="inetaddr">\[xffff0123456789abfdfa013200000413/128].IP6.ARPA</SPAN> (defined in <A href="http://www.rfc-editor.org/rfc/rfc2874.txt">RFC2874</A>)<BR>
+								<SPAN class="inetaddr">\[x89abfdfa013200000413/80].\[xffff01234567/48].IP6.ARPA</SPAN> (same as above)<BR>
+							</DIV>
+						</DD>
+					</DL>
+				</DD>
+				<DT class="func">[return value]</DT>
+				<DD class="func">
+					an <A href="#class_DNSName"><CODE class="func">DNSName</CODE></A> Object
+				</DD>
+			</DL>
+		</DIV>
+		<DIV class="func">
+		<H3 class="func"><CODE class="func">boolean</CODE> isRealDomainName()</H3>
+			<DL class="func">
+				<DT class="func">[parameters]</DT>
+				<DD class="func">
+					none
+				</DD>
+				<DT class="func">[return value]</DT>
+				<DD class="func">
+					true if the domain name this object represents does not belong to ARPA domain.
+				</DD>
+			</DL>
+		</DIV>
+		<DIV class="func">
+		<H3 class="func"><CODE class="func">string</CODE> asOctets()</H3>
+			<DL class="func">
+				<DT class="func">[parameters]</DT>
+				<DD class="func">
+					None
+				</DD>
+				<DT class="func">[return value]</DT>
+				<DD class="func">
+					Binary representation of sub-domains.
+				</DD>
+			</DL>
+		</DIV>
+		<DIV class="func">
+		<H3 class="func"><CODE class="func">string</CODE> getCanonicalName()</H3>
+			<DL class="func">
+				<DT class="func">[parameters]</DT>
+				<DD class="func">
+					None
+				</DD>
+				<DT class="func">[return value]</DT>
+				<DD class="func">
+					String representation of sub-domains.
+				</DD>
+			</DL>
+		</DIV>
+	</DIV>
+<!-- class DNSAnswer -->
+	<HR>
+	<A name="class_DNSAnswer"></A>
+	<DIV class="class">
+		<H2 class="class">class DNSAnswer</H2>
+		The object that holds responses from the name server.<BR>
+		<BR>
+		<H3 class="class">constructor</H3>
+		<DIV class="func">
+		<H3 class="func">DNSAnswer( <CODE class="func">int</CODE> stream, <CODE class="func">int</CODE> limit )</H3>
+			<DL class="func">
+				<DT class="func">[parameters]</DT>
+				<DD class="func">
+					<DL class="desc">
+						<DT class="desc"><VAR class="param">stream</VAR></DT>
+						<DD class="desc">
+							specifies file pointer returned by <CODE class="func">fsockopen</CODE>.<BR>
+						</DD>
+						<DT class="desc"><VAR class="param">limit</VAR></DT>
+						<DD class="desc">
+							specifies the maximum number of bytes to read from the stream.<BR>
+						</DD>
+					</DL>
+				</DD>
+				<DT class="func">[note]</DT>
+				<DD class="func">
+					This object should be created via <A href="#class_DNSResolver_sendQuery"><CODE class="func">DNSResolver::sendQuery()</CODE></A> method. To directly instantiate this object with a new operator is not a generic way.<BR>
+					If the actual message length is found exceeding the limit length while reading the response message stream, the rest would be ignored and the parser would return an error status.<BR>
+				</DD>
+			</DL>
+		</DIV>
+		<H3 class="class">fields</H3>
+		<DIV class="fields">
+			<DL class="desc">
+				<DT class="desc"><VAR class="param">result_code</VAR></DT>
+				<DD class="desc">
+					result code returned by the name server. the value has following meanings: (mostly cited from <A href="http://www.rfc-editor.org/rfc/rfc1035.txt">RFC1035</A>)<BR>
+					<TABLE border="2">
+						<TR>
+							<TH>value</TH>
+							<TH>meaning</TH>
+							<TH>description</TH>
+						</TR>
+						<TR>
+							<TD>0</TD>
+							<TD>
+								no error condition<BR>
+							</TD>
+							<TD>
+								The query was successfully accepted and interpreted by the name server.<BR>
+							</TD>
+						</TR>
+						<TR>
+							<TD>1</TD>
+							<TD>
+								format error
+							</TD>
+							<TD>
+								The name server was unable to interpret the query.<BR>
+							</TD>
+						</TR>
+						<TR>
+							<TD>2</TD>
+							<TD>
+								server failure<BR>
+							</TD>
+							<TD>
+								The name server was unable to process this query due to a problem with the name server.<BR>
+							</TD>
+						</TR>
+						<TR>
+							<TD>3</TD>
+							<TD>
+								name error<BR>
+							</TD>
+							<TD>
+								Meaningful only for responses from an authoritative name server, this code signifies that the domain name referenced in the query does not exist.<BR>
+							</TD>
+						</TR>
+						<TR>
+							<TD>4</TD>
+							<TD>
+								not implemented<BR>
+							</TD>
+							<TD>
+								The name server does not support the requested kind of query.<BR>
+							</TD>
+						</TR>
+						<TR>
+							<TD>5</TD>
+							<TD>
+								refused<BR>
+							</TD>
+							<TD>
+								The name server refuses to perform the specified operation for policy reasons.  For example, a name server may not wish to provide the information to the particular requester, or a name server may not wish to perform a particular operation (e.g., zone transfer) for particular data.<BR>
+							</TD>
+						</TR>
+						<TR>
+							<TD>6-15</TD>
+							<TD>reserved</TD>
+							<TD>Reserved for future use.</TD>
+						</TR>
+					</TABLE>
+				</DD>
+				<DT class="desc"><VAR class="param">flags</VAR></DT>
+				<DD class="desc">
+					flags.<BR>
+				</DD>
+				<DT class="desc"><VAR class="param">rec_query</VAR></DT>
+				<DD class="desc">
+					an array of <A href="#class_DNSRecord"><CODE>DNSRecord</CODE></A> objects that hold the same query record as given to <A href="#class_DNSQuery"><CODE>DNSQuery</CODE></A> object.<BR>
+				</DD>
+				<DT class="desc"><VAR class="param">rec_answer</VAR></DT>
+				<DD class="desc">
+					an array of <A href="#class_DNSRecord"><CODE>DNSRecord</CODE></A> objects that hold ANSWER records returned by the name server.<BR>
+				</DD>
+				<DT class="desc"><VAR class="param">rec_authority</VAR></DT>
+				<DD class="desc">
+					an array of <A href="#class_DNSRecord"><CODE>DNSRecord</CODE></A> objects that hold AUTHORITY records returned by the name server.<BR>
+				</DD>
+				<DT class="desc"><VAR class="param">rec_additional</VAR></DT>
+				<DD class="desc">
+					an array of <A href="#class_DNSRecord"><CODE>DNSRecord</CODE></A> objects that hold ADDITIONAL records returned by the name server.<BR>
+				</DD>
+			</DL>
+		</DIV>
+	</DIV>
+
+<!-- class DNSQuery -->
+	<HR>
+	<A name="class_DNSQuery"></A>
+	<DIV class="class">
+		<H2 class="class">class DNSQuery</H2>
+		The object that holds a query to ask the name server.<BR>
+		<BR>
+		<H3 class="class">constructor</H3>
+		<DIV class="func">
+		<H3 class="func">DNSQuery( <A href="#class_DNSRecord"><CODE class="func">DNSRecord</CODE></A> dnsrecord [, <CODE class="func">int</CODE> flags ] )</H3>
+			<DL class="func">
+				<DT class="func">[parameters]</DT>
+				<DD class="func">
+					<DL class="desc">
+						<DT class="desc"><VAR class="param">dnsrecord</VAR></DT>
+						<DD class="desc">
+							specifies a query to ask the name server that is described by a <A href="#class_DNSRecord"><CODE class="func">DNSRecord</CODE></A> object.<BR>
+						</DD>
+						<DT class="desc"><VAR class="param">flag</VAR></DT>
+						<DD class="desc">
+							specifies the quering option flags. The flags consists of following bitfields:<BR>
+							<TABLE border="2">
+								<TR>
+									<TH>name</TH>
+									<TH>description</TH>
+								</TR>
+								<TR>
+									<TD>
+										<CODE class="func">DNS_HEADERSPEC_RECURSION_DESIRED</CODE> <SPAN class="note">(default)</SPAN>
+									</TD>
+									<TD>
+										If set, it directs the name server to pursue the query recursively over the reachable name servers. This bit is copied into the query record of response message.
+								</TR>
+							</TABLE>
+						</DD>
+					</DL>
+				</DD>
+			</DL>
+		</DIV>
+		<H3 class="class">methods</H3>
+		<DIV class="func">
+		<H3 class="func"><CODE class="func">string</CODE> asOctets()</H3>
+			<DL class="func">
+				<DT class="func">[parameters]</DT>
+				<DD class="func">
+					none
+				</DD>
+				<DT class="func">[return value]</DT>
+				<DD class="func">
+					binary representation of the query.
+				</DD>
+			</DL>
+		</DIV>
+	</DIV>
+
+<!-- class DNSRecord -->
+	<HR>
+	<A name="class_DNSRecord"></A>
+	<DIV class="class">
+		<H2 class="class">class DNSRecord</H2>
+		The object that represents a RECORD, a unit of meaningful information to be exchanged between the name server and the client.<BR>
+		<BR>
+		<H3 class="class">constructor</H3>
+		<DIV class="func">
+		<H3 class="func">DNSRecord( <A href="#class_DNSName"><CODE class="func">DNSName</CODE></A> name, <CODE class="func">int</CODE> type [, <CODE class="func">int</CODE> dclass] [, <CODE class="func">int</CODE> ttl] [, <CODE class="func">array</CODE> specific_fields] )</H3>
+			<DL class="func">
+				<DT class="func">[parameters]</DT>
+				<DD class="func">
+					<DL class="desc">
+						<DT class="desc"><VAR class="param">name</VAR></DT>
+						<DD class="desc"><A href="#class_DNSName"><CODE>DNSName</CODE></A> object for a domain name
+						</DD>
+						<DT class="desc"><VAR class="param">type</VAR></DT>
+						<DD class="desc">DNS record type.
+							<TABLE border="2">
+								<TR>
+									<TH>value</TH>
+									<TH>meaning</TH>
+								</TR>
+								<TR>
+									<TD><CODE>DNS_RECORDTYPE_A</CODE></TD>
+									<TD>a host address</TD>
+								</TR>
+									<TD><CODE>DNS_RECORDTYPE_NS</CODE></TD>
+									<TD>an authoritative name server</TD>
+								</TR>
+								<TR>
+									<TD><CODE>DNS_RECORDTYPE_CNAME</CODE></TD>
+									<TD>an alias</TD>
+								</TR>
+								<TR>
+									<TD><CODE>DNS_RECORDTYPE_SOA</CODE></TD>
+									<TD>start of authority zone</TD>
+								</TR>
+								<TR>
+									<TD><CODE>DNS_RECORDTYPE_PTR</CODE></TD>
+									<TD>a domain name pointer</TD>
+								</TR>
+								<TR>
+									<TD><CODE>DNS_RECORDTYPE_MX</CODE></TD>
+									<TD>mail exchange</TD>
+								</TR>
+								<TR>
+									<TD><CODE>DNS_RECORDTYPE_AAAA</CODE></TD>
+									<TD>a IPv6 host address</TD>
+								</TR>
+								<TR>
+									<TD><CODE>DNS_RECORDTYPE_ANY</CODE></TD>
+									<TD>(used only for querying) to retrieve any records associated with the name</TD>
+								</TR>
+							</TABLE>
+						</DD>
+						<DT class="desc"><VAR class="param">dclass</VAR> <SPAN class="note">(optional)</SPAN></DT>
+						<DD class="desc">This must be the value of <CODE>DNS_CLASS_INTERNET</CODE>.
+						</DD>
+						<DT class="desc"><VAR class="param">ttl</VAR> <SPAN class="note">(optional)</SPAN></DT>
+						<DD class="desc">(abbreviation for time-to-live) The period in seconds during which the (retrieved) information should be cached. the value 0 means that no cache is to be performed.
+						</DD>
+						<DT class="desc"><VAR class="param">specific_fields</VAR> <SPAN class="note">(optional)</SPAN></DT>
+						<DD class="desc">Type-specific fields.</DD>
+					</DL>
+				</DD>
+			</DL>
+		</DIV>
+		<H3 class="class">fields</H3>
+		<DIV class="fields">
+			<DL class="desc">
+				<DT class="desc"><VAR class="param">name</VAR></DT>
+				<DT class="desc"><VAR class="param">type</VAR></DT>
+				<DT class="desc"><VAR class="param">dclass</VAR></DT>
+				<DT class="desc"><VAR class="param">ttl</VAR></DT>
+				<DD class="desc">see the "constructor" section.</DD>
+				<DT class="desc"><VAR class="param">specific_fields</VAR></DT>
+				<DD class="desc">An associative array of type-specific fields.
+					<TABLE border="2">
+					  <TR>
+					    <TH>key name</TH>
+					    <TH>type</TH>
+					    <TH>value</TH>
+					  </TR>
+						<TR>
+							<TD>address</TD>
+							<TD>
+								<CODE>DNS_RECORDTYPE_A</CODE><BR>
+								<CODE>DNS_RECORDTYPE_AAAA</CODE><BR>
+							</TD>
+							<TD>A <A href="#class_DNSName"><CODE>DNSName</CODE></A> object that represents an IP address.</TD>
+						</TR>
+						<TR>
+							<TD>dname</TD>
+							<TD>
+								<CODE>DNS_RECORDTYPE_PTR</CODE><BR>
+								<CODE>DNS_RECORDTYPE_NS</CODE><BR>
+								<CODE>DNS_RECORDTYPE_CNAME</CODE><BR>
+							</TD>
+							<TD>A <A href="#class_DNSName"><CODE>DNSName</CODE></A> object that represents a domain name.</TD>
+						</TR>
+						<TR>
+							<TD>preference</TD>
+							<TD>
+								<CODE>DNS_RECORDTYPE_MX</CODE>
+							</TD>
+							<TD>An integer value that specifies how much preferred the host is for mail exchange among others. The lower value means the stronger preference.</TD>
+						</TR>
+						<TR>
+							<TD>exchange</TD>
+							<TD>
+								<CODE>DNS_RECORDTYPE_MX</CODE>
+							</TD>
+							<TD>A <A href="#class_DNSName"><CODE>DNSName</CODE></A> object that represents the domain name of the host to use for mail exchange.</TD>
+						</TR>
+						<TR>
+							<TD>resp_person</TD>
+							<TD>
+								<CODE>DNS_RECORDTYPE_SOA</CODE>
+							</TD>
+							<TD>The mail address of the person responsible for this zone.</TD>
+						</TR>
+						<TR>
+							<TD>source</TD>
+							<TD>
+								<CODE>DNS_RECORDTYPE_SOA</CODE>
+							</TD>
+							<TD>A <A href="#class_DNSName"><CODE>DNSName</CODE></A> object that specifies the domain name of the master name server, from which the zone information is transferred.</TD>
+						</TR>
+						<TR>
+							<TD>serial</TD>
+							<TD>
+								<CODE>DNS_RECORDTYPE_SOA</CODE>
+							</TD>
+							<TD>An integer value with which the slave(secondary)  server identifies the revision of the zone information transferred from the master(primary) name server.</TD>
+						</TR>
+						<TR>
+							<TD>refresh</TD>
+							<TD>
+								<CODE>DNS_RECORDTYPE_SOA</CODE>
+							</TD>
+							<TD>An integer value that specifies in seconds the interval after which the slaveserver tries to check the master name server for the updated zone information.</TD>
+						</TR>
+						<TR>
+							<TD>retry</TD>
+							<TD>
+								<CODE>DNS_RECORDTYPE_SOA</CODE>
+							</TD>
+							<TD>An integer value that specifies in seconds the interval after which the slave server retries zone transfer when the previous try failed.</TD>
+						</TR>
+						<TR>
+							<TD>expire</TD>
+							<TD>
+								<CODE>DNS_RECORDTYPE_SOA</CODE>
+							</TD>
+							<TD>An integer value that specifies in seconds the period during which the slave server sees the zone information is valid. After the expiry, the server will stop sending any records of the zone in response to the queries until the entire zone information is updated.
+						</TR>
+						<TR>
+							<TD>minttl</TD>
+							<TD>
+								<CODE>DNS_RECORDTYPE_SOA</CODE>
+							</TD>
+							<TD>An integer value that specifies in seconds the minimum time the DNS records should be cached for.
+						</TR>
+					</TABLE>
+				</DD>
+			</DL>
+		</DIV>
+		<H3 class="class">methods</H3>
+		<DIV class="func">
+		<H3 class="func"><CODE class="func">mixed</CODE> getTypeSpecificField( <CODE class="func">string</CODE> name )</H3>
+			<DL class="func">
+				<DT class="func">[parameters]</DT>
+				<DD class="func">
+					<DL class="desc">
+						<DT class="desc"><VAR class="param">name</VAR></DT>
+						<DD class="desc">
+							specifies a field name. The acceptable names depend on the record type.
+						</DD>
+					</DL>
+				</DD>
+				<DT class="func">[return value]</DT>
+				<DD class="func">
+					Value of the field.
+				</DD>
+			</DL>
+		</DIV>
+	</DIV>
+
+<!-- FOOTER -->
+	<DIV class="footer">
+		"PHPresolver" - PHP DNS resolver library
+	</DIV>
+</BODY>
+</HTML>

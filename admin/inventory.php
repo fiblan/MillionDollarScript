@@ -1,4 +1,34 @@
 <?php
+/**
+ * @version		$Id: inventory.php 165 2013-01-09 02:07:08Z ryan $
+ * @package		mds
+ * @copyright	(C) Copyright 2010 Ryan Rhode, All rights reserved.
+ * @author		Ryan Rhode, ryan@milliondollarscript.com
+ * @license		This program is free software; you can redistribute it and/or modify
+ *		it under the terms of the GNU General Public License as published by
+ *		the Free Software Foundation; either version 3 of the License, or
+ *		(at your option) any later version.
+ *
+ *		This program is distributed in the hope that it will be useful,
+ *		but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License along
+ *		with this program;  If not, see http://www.gnu.org/licenses/gpl-3.0.html.
+ *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ *		Million Dollar Script
+ *		A pixel script for selling pixels on your website.
+ *
+ *		For instructions see README.txt
+ *
+ *		Visit our website for FAQs, documentation, a list team members,
+ *		to post any bugs or feature requests, and a community forum:
+ * 		http://www.milliondollarscript.com/
+ *
+ */
 
 require("../config.php");
 require ('admin_common.php');
@@ -8,9 +38,7 @@ require ('admin_common.php');
 
 
 ?>
-
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<?php echo $f2->get_doc(); ?>
 
 <title>Grid Admin</title>
 
@@ -66,7 +94,7 @@ function display_reset_link($BID, $image_name) {
 function is_allowed_grid_file($image_name) {
 
 	$ALLOWED_EXT= 'png';
-	$parts = split ('\.', $_FILES[$image_name]['name']);
+	$parts = explode ('.', $_FILES[$image_name]['name']);
 	$ext = strtolower(array_pop($parts));
 	$ext_list = preg_split ("/[\s,]+/i", ($ALLOWED_EXT));	
 	if (!in_array($ext, $ext_list)) {
@@ -304,12 +332,13 @@ if ($_REQUEST['submit']!='') {
 		$image_sql_values = get_banner_image_sql_values($_REQUEST['banner_id']);
 		$now = (gmdate("Y-m-d H:i:s"));
 
-
 		$sql = "REPLACE INTO `banners` ( `banner_id` , `grid_width` , `grid_height` , `days_expire` , `price_per_block`, `name`, `currency`, `max_orders`, `block_width`, `block_height`, `max_blocks`, `min_blocks`, `date_updated`, `bgcolor`, `auto_publish`, `auto_approve` $image_sql_fields ) VALUES ('".$_REQUEST['banner_id']."', '".$_REQUEST['grid_width']."', '".$_REQUEST['grid_height']."', '".$_REQUEST['days_expire']."', '".$_REQUEST['price_per_block']."', '".$_REQUEST['name']."', '".$_REQUEST['currency']."', '".$_REQUEST['max_orders']."', '".$_REQUEST['block_width']."', '".$_REQUEST['block_height']."', '".$_REQUEST['max_blocks']."', '".$_REQUEST['min_blocks']."', '".$now."', '".$_REQUEST['bgcolor']."', '".$_REQUEST['auto_publish']."', '".$_REQUEST['auto_approve']."' $image_sql_values);";
-
-//echo "<p>$sql</p>";
 		mysql_query ($sql) or die (mysql_error());
 
+		// TODO: Add individual order expiry dates
+		$sql = "UPDATE `orders` SET days_expire=".(int)$_REQUEST['days_expire']." WHERE banner_id=".(int)$_REQUEST['banner_id'];
+		mysql_query ($sql) or die (mysql_error());
+		
 		$_REQUEST['new'] ='';
 	//	$_REQUEST['action'] = '';
 	

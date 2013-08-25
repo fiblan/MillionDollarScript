@@ -1,28 +1,41 @@
 <?php
-/*
-COPYRIGHT 2008 - see www.milliondollarscript.com for a list of authors
-
-This file is part of the Million Dollar Script.
-
-Million Dollar Script is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-Million Dollar Script is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with the Million Dollar Script.  If not, see <http://www.gnu.org/licenses/>.
-
-*/
-
+/**
+ * @version		$Id: package_functions.php 137 2011-04-18 19:48:11Z ryan $
+ * @package		mds
+ * @copyright	(C) Copyright 2010 Ryan Rhode, All rights reserved.
+ * @author		Ryan Rhode, ryan@milliondollarscript.com
+ * @license		This program is free software; you can redistribute it and/or modify
+ *		it under the terms of the GNU General Public License as published by
+ *		the Free Software Foundation; either version 3 of the License, or
+ *		(at your option) any later version.
+ *
+ *		This program is distributed in the hope that it will be useful,
+ *		but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License along
+ *		with this program;  If not, see http://www.gnu.org/licenses/gpl-3.0.html.
+ *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ *		Million Dollar Script
+ *		A pixel script for selling pixels on your website.
+ *
+ *		For instructions see README.txt
+ *
+ *		Visit our website for FAQs, documentation, a list team members,
+ *		to post any bugs or feature requests, and a community forum:
+ * 		http://www.milliondollarscript.com/
+ *
+ */
 
 # Lists pacakes for advertiser to choose
 function display_package_options_table($banner_id, $selected='', $selection_ability) {
-	global $label;
+	global $label, $f2;
+	echo $banner_id;
+	$banner_id = $banner_id;
+	
 	$sql = "SELECT * FROM packages WHERE banner_id='$banner_id' ORDER BY price ASC ";
 	$result = mysql_query($sql) or die (mysql_error());
 
@@ -64,7 +77,8 @@ function display_package_options_table($banner_id, $selected='', $selection_abil
 					$sel ='';
 				}
 
-			} else { // make sure the fisrt item is selected by default.
+			} else { 
+			// make sure the first item is selected by default.
 				if ($first_sel == false) {
 					$sel = 'checked';
 					$first_sel = true;
@@ -131,7 +145,7 @@ $pack['days_expire']
 function get_package($package_id) {
 
 	$sql = "SELECT * FROM packages where package_id='$package_id'";
-	$result = mysql_query($sql);
+	$result = mysql_query($sql) or die(mysql_error().$sql);
 	$row = mysql_fetch_array($result);
 
 	$pack['max_orders'] = $row['max_orders'];
@@ -155,7 +169,7 @@ function can_user_get_package($user_id, $package_id) {
 
 
 	$sql = "SELECT max_orders, banner_id FROM packages WHERE package_id='".$package_id."'";
-	$result = mysql_query($sql) or die(mysql_error());
+	$result = mysql_query($sql) or die(mysql_error().$sql);
 	$p_row = mysql_fetch_array($result);
 //echo $sql;
 	if ($p_row['max_orders']==0) {
@@ -168,7 +182,7 @@ function can_user_get_package($user_id, $package_id) {
 
 	$sql = "SELECT count(*) AS order_count, banner_id FROM orders WHERE status <> 'deleted' AND status <> 'new' AND package_id='".$package_id."' AND user_id='$user_id' GROUP BY user_id LIMIT 1";
 	//echo " $sql ";
-	$result = mysql_query($sql) or die(mysql_error());
+	$result = mysql_query($sql) or die(mysql_error().$sql);
 	$u_row = mysql_fetch_array($result);
 
 	if ($u_row['order_count'] < $p_row['max_orders']) {
@@ -190,22 +204,27 @@ return True or False
 
 */
 function banner_get_packages($banner_id) {
+	global $f2;
+	$banner_id = $f2->bid($banner_id);
+
 	$sql = "SELECT * FROM packages WHERE banner_id=$banner_id";
-	$result = mysql_query($sql) or die (mysql_error());
+	$result = mysql_query($sql) or die (mysql_error().$sql);
 	if (mysql_num_rows($result)>0) {
 		return $result;
-	} else {
-		return false;
 	}
-
+		
+	return false;
 }
 
 
 ##############################################
 
 function get_default_package($banner_id) {
+	global $f2;
+	$banner_id = $f2->bid($banner_id);
+	
 	$sql = "SELECT package_id FROM packages WHERE banner_id=$banner_id AND is_default='Y' ";
-	$result = mysql_query($sql) or die (mysql_error());
+	$result = mysql_query($sql) or die (mysql_error().$sql);
 	$row = mysql_fetch_array($result);
 	return $row['package_id'];
 
@@ -221,7 +240,7 @@ function add_package_to_order($order_id, $package_id) {
 	//user_id, order_id, blocks, status, order_date, price, quantity, banner_id, currency, days_expire, date_stam
 
 	$sql = "SELECT * FROM orders WHERE order_id='$order_id'";
-	$result = mysql_query($sql) or die (mysql_error());
+	$result = mysql_query($sql) or die (mysql_error().$sql);
 	$row = mysql_fetch_array($result);
 
 	$total = ($row['quantity'] / 100) * $pack['price'];

@@ -1,56 +1,39 @@
 <?php
-/*
-COPYRIGHT 2008 - see www.milliondollarscript.com for a list of authors
-
-This file is part of the Million Dollar Script.
-
-Million Dollar Script is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-Million Dollar Script is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with the Million Dollar Script.  If not, see <http://www.gnu.org/licenses/>.
-
-*/
-
-define ('MDS_DEBUG', false);
-define ('MDS_DEBUG_LOG', '');
-$old_log_req;
-function mds_log($line) {
-	global $old_log_req;
-	if (MDS_DEBUG===true) {
-
-		$now = date('r');
-
-		foreach ($_REQUEST as $key=>$val) {
-			$str = $str." $key=>$val | ";
-		}
-		if ($old_log_req!=$str) {
-			$old_log_req = $str;
-		} else {
-			$str = '';
-		}
-
-		$entry_line =  "$now - $entry_line | _REQUEST: $str \r\n "; 
-		$log_fp = fopen(MDS_DEBUG_LOG, "a"); 
-		fputs($log_fp, $entry_line); 
-		fclose($log_fp);
-
-	}
-
-}
+/**
+ * @version		$Id: functions.php 155 2012-09-10 22:27:46Z ryan $
+ * @package		mds
+ * @copyright	(C) Copyright 2010 Ryan Rhode, All rights reserved.
+ * @author		Ryan Rhode, ryan@milliondollarscript.com
+ * @license		This program is free software; you can redistribute it and/or modify
+ *		it under the terms of the GNU General Public License as published by
+ *		the Free Software Foundation; either version 3 of the License, or
+ *		(at your option) any later version.
+ *
+ *		This program is distributed in the hope that it will be useful,
+ *		but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License along
+ *		with this program;  If not, see http://www.gnu.org/licenses/gpl-3.0.html.
+ *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ *		Million Dollar Script
+ *		A pixel script for selling pixels on your website.
+ *
+ *		For instructions see README.txt
+ *
+ *		Visit our website for FAQs, documentation, a list team members,
+ *		to post any bugs or feature requests, and a community forum:
+ * 		http://www.milliondollarscript.com/
+ *
+ */
 
 require_once('area_map_functions.php');
 require_once('package_functions.php');
 require_once('banner_functions.php');
 require_once('image_functions.php');
-
 
 if (!defined('UPLOAD_PATH')) {
 	$dir = dirname(__FILE__);
@@ -133,19 +116,19 @@ function expire_orders() {
 			$result = @mysql_query($sql) or $DB_ERROR = mysql_error();
 		}
 
-
-		return; // this function is already executing in another process.
+		// this function is already executing in another process.
+		return;
 	}
 
 
-
-	if ($unix_time > $t_row['val']+60) { // did 1 minute elapse since last run?
+	// did 1 minute elapse since last run?
+	if ($unix_time > $t_row['val']+60) {
 
 		// Delete Temp Orders
 
-		$session_duration = ini_get ("session.gc_maxlifetime");
+		$session_duration = ini_get("session.gc_maxlifetime");
 		
-		$sql = "SELECT session_id,  order_date FROM `temp_orders` WHERE  DATE_SUB('$now', INTERVAL $session_duration SECOND) >= temp_orders.order_date AND session_id <> '".addslashes(session_id())."' ";
+		$sql = "SELECT session_id, order_date FROM `temp_orders` WHERE  DATE_SUB('$now', INTERVAL $session_duration SECOND) >= temp_orders.order_date AND session_id <> '".addslashes(session_id())."' ";
 
 		$result=mysql_query($sql);
 		
@@ -158,7 +141,7 @@ function expire_orders() {
 
 		// COMPLTED Orders
 
-		$sql = "SELECT *, banners.banner_id as BID from orders, banners where status='completed' and orders.banner_id=banners.banner_id AND orders.days_expire <> 0 AND DATE_SUB('$now', INTERVAL orders.days_expire DAY) >= orders.date_published AND orders.date_published IS NOT NULL ";
+		$sql = "SELECT *, banners.banner_id as BID from orders, banners where status='completed' and orders.banner_id=banners.banner_id AND orders.days_expire <> 0 AND DATE_SUB('$now', INTERVAL orders.days_expire DAY) >= orders.date_published AND orders.date_published IS NOT NULL";
 
 		//echo $sql;
 
@@ -200,7 +183,8 @@ function expire_orders() {
 
 				$sql = "delete from orders where order_id='".$row['order_id']."'";
 				@mysql_query ($sql);
-				mds_log("Deleted unconfirmed order - ".$sql);
+				global $f2;
+				$f2->debug("Deleted unconfirmed order - ".$sql);
 
 			}
 
@@ -208,13 +192,13 @@ function expire_orders() {
 		}
 
 		// unpaid Orders
-		if (DAYS_CONFIRMED!=0) { 
+		if (DAYS_CONFIRMED!=0) {
 			$sql = "SELECT * from orders where (status='new' OR status='confirmed') AND DATE_SUB('$now',INTERVAL ".DAYS_CONFIRMED." DAY) >= date_stamp AND date_stamp IS NOT NULL ";
-
-			$result = @mysql_query ($sql);
+			
+			$result = @mysql_query($sql);
 
 			while ($row=@mysql_fetch_array($result)) {
-				expire_order ($row['order_id']) ;
+				expire_order($row['order_id']) ;
 
 			}
 
@@ -224,12 +208,12 @@ function expire_orders() {
 
 		if (DAYS_RENEW!=0) { 
 
-			$sql = "SELECT * from orders where status='expired'  AND DATE_SUB('$now',INTERVAL ".DAYS_RENEW." DAY) >= date_stamp AND date_stamp IS NOT NULL ";
+			$sql = "SELECT * from orders where status='expired' AND DATE_SUB('$now',INTERVAL ".DAYS_RENEW." DAY) >= date_stamp AND date_stamp IS NOT NULL";
 
-			$result = @mysql_query ($sql);
+			$result = @mysql_query($sql);
 
 			while ($row=@mysql_fetch_array($result)) {
-				cancel_order ($row['order_id']) ;
+				cancel_order($row['order_id']) ;
 
 			}
 
@@ -414,6 +398,8 @@ function complete_order ($user_id, $order_id) {
 			$order_row[days_expire]=$label['advertiser_ord_never'];
 		}
 
+		$label_reset = $label["order_completed_email_template"];
+		
 		$label["order_completed_email_template"] = str_replace ("%SITE_NAME%", SITE_NAME, $label["order_completed_email_template"]);
 		$label["order_completed_email_template"] = str_replace ("%FNAME%", $user_row['FirstName'], $label["order_completed_email_template"]);
 		$label["order_completed_email_template"] = str_replace ("%LNAME%", $user_row['LastName'], $label["order_completed_email_template"]);
@@ -428,6 +414,7 @@ function complete_order ($user_id, $order_id) {
 		$to = trim($user_row['Email']);
 		$subject = $label['order_completed_email_subject'];
 		
+		$label["order_completed_email_template"] = $label_reset;
 	
 		if (EMAIL_USER_ORDER_COMPLETED=='YES') {
 
@@ -515,6 +502,7 @@ function confirm_order ($user_id, $order_id) {
 			$row[days_expire]=$label['advertiser_ord_never'];
 		}
 
+		$label_reset = $label["order_confirmed_email_template"];
 
 		$label["order_confirmed_email_template"] = str_replace ("%SITE_NAME%", SITE_NAME, $label["order_confirmed_email_template"]);
 		$label["order_confirmed_email_template"] = str_replace ("%FNAME%", $row[FirstName], $label["order_confirmed_email_template"]);
@@ -529,7 +517,7 @@ function confirm_order ($user_id, $order_id) {
 		$to = trim($row['Email']);
 		$subject = $label['order_confirmed_email_subject'];
 		
-	
+		$label["order_confirmed_email_template"] = $label_reset;
 
 		if (EMAIL_USER_ORDER_CONFIRMED=='YES') {
 
@@ -594,6 +582,7 @@ function pend_order ($user_id, $order_id) {
 			$row[days_expire]=$label['advertiser_ord_never'];
 		}
 
+		$label_reset = $label["order_pending_email_template"];
 	
 		$label["order_pending_email_template"] = str_replace ("%SITE_NAME%", SITE_NAME, $label["order_pending_email_template"]);
 		$label["order_pending_email_template"] = str_replace ("%FNAME%", $row[FirstName], $label["order_pending_email_template"]);
@@ -608,6 +597,7 @@ function pend_order ($user_id, $order_id) {
 		$to = trim($row['Email']);
 		$subject = $label['order_pending_email_subject'];
 		
+		$label["order_pending_email_template"] = $label_reset;		
 		
 		if (EMAIL_USER_ORDER_PENDED=='YES') {
 			if (USE_SMTP=='YES') {
@@ -710,6 +700,8 @@ function expire_order ($order_id) {
 			$row[days_expire]=$label['advertiser_ord_never'];
 		}
 
+		$label_reset = $label["order_expired_email_template"];
+
 		$label["order_expired_email_template"] = str_replace ("%SITE_NAME%", SITE_NAME, $label["order_expired_email_template"]);
 		$label["order_expired_email_template"] = str_replace ("%FNAME%", $row[FirstName], $label["order_expired_email_template"]);
 		$label["order_expired_email_template"] = str_replace ("%LNAME%", $row[LastName], $label["order_expired_email_template"]);
@@ -722,6 +714,8 @@ function expire_order ($order_id) {
 		$message = $label["order_expired_email_template"];
 		$to = trim($row['Email']);
 		$subject = $label['order_expired_email_subject'];
+
+		$label["order_expired_email_template"] = $label_reset;
 		
 		
 		if (EMAIL_USER_ORDER_EXPIRED=='YES') {
@@ -991,6 +985,8 @@ function complete_renew_order ($order_id) {
 		if ($order_row['days_expire']==0) {
 			$order_row['days_expire']=$label['advertiser_ord_never'];
 		}
+		
+		$label_reset = $label["order_completed_renewal_email_template"];
 
 		$label["order_completed_renewal_email_template"] = str_replace ("%SITE_NAME%", SITE_NAME, $label["order_completed_renewal_email_template"]);
 		$label["order_completed_renewal_email_template"] = str_replace ("%FNAME%", $user_row[FirstName], $label["order_completed_renewal_email_template"]);
@@ -1007,6 +1003,7 @@ function complete_renew_order ($order_id) {
 		$to = trim($user_row['Email']);
 		$subject = $label['order_completed_email_subject'];
 		
+		$label["order_completed_renewal_email_template"] = $label_reset;
 	
 		if (EMAIL_USER_ORDER_COMPLETED=='YES') {
 
@@ -1059,7 +1056,8 @@ function send_confirmation_email($email) {
 	$code = substr(md5($row['Email'].$row['Password']),0, 8);
 
 	$verify_url = BASE_HTTP_PATH."users/validate.php?email=".$row['Email']."&code=$code";
-
+	
+	$label_reset = $label["confirmation_email_templaltev2"];
 	
 	$label["confirmation_email_templaltev2"] = str_replace ("%FNAME%", $row[FirstName], $label["confirmation_email_templaltev2"]);
 	$label["confirmation_email_templaltev2"] = str_replace ("%LNAME%", $row[LastName], $label["confirmation_email_templaltev2"]);
@@ -1077,10 +1075,11 @@ function send_confirmation_email($email) {
 	$html_msg = str_replace ("%VERIFY_URL%", $verify_url, $html_msg);
 	$html_msg = str_replace ("%VALIDATION_CODE%", $code, $html_msg);
 
-
 	$to = trim($row['Email']);
 
 	$subject = $label['confirmation_email_subject'];
+	
+	$label["confirmation_email_templaltev2"] = $label_reset;
 		
 	if (USE_SMTP=='YES') {
 		$mail_id = queue_mail(addslashes($to), addslashes($row[FirstName]." ".$row[LastName]), addslashes(SITE_CONTACT_EMAIL), addslashes(SITE_NAME), addslashes($subject), addslashes($message), addslashes($html_msg), 5);
@@ -1100,11 +1099,6 @@ function send_confirmation_email($email) {
 
 
 	}
-
-
-
-
-	
 
 }
 
@@ -1133,7 +1127,6 @@ function send_published_pixels_notification($user_id, $BID) {
 		$url_list .= $row['url']." - ".$row['alt_text']."\n";
 
 	}
-
 	
 	$arr = explode ("/",SERVER_PATH_TO_ADMIN);
 	$admin_folder = array_pop($arr);
@@ -1146,8 +1139,6 @@ function send_published_pixels_notification($user_id, $BID) {
 	$msg = str_replace ("%MEMBERID%", $u_row['Username'], $msg);
 	$msg = str_replace ("%URL_LIST%", $url_list, $msg);
 	$msg = str_replace ("%VIEW_URL%", $view_url, $msg);
-
-	
 
 	$html_msg = str_replace ("%SITE_NAME%", SITE_NAME, $label['publish_pixels_html_email_template']);
 	$html_msg = str_replace ("%GRID_NAME%", $b_row['name'], $html_msg);
@@ -1162,16 +1153,11 @@ function send_published_pixels_notification($user_id, $BID) {
 		send_email( SITE_CONTACT_EMAIL, 'Admin', SITE_CONTACT_EMAIL, SITE_NAME, $subject, $msg, $html_msg, 7);
 	}
 
-
-
-
 }
 
 #########################################################
 
 function send_expiry_reminder($order_id) {
-
-
 
 }
 
@@ -1233,7 +1219,10 @@ function display_order ($order_id, $BID) {
 # Contributed by viday
 function display_packages ($order_id, $BID) {
 
-	global $label;
+	global $f2, $label;
+
+	$order_id 	= $order_id;
+	$BID 		= $BID;
 
 	$sql = "select * from banners where banner_id='$BID'";
 	$result = mysql_query ($sql) or die (mysql_error().$sql);
@@ -1446,10 +1435,8 @@ $html_message='', $template_id=0) {
   $headers .= "From: ".SITE_NAME." <".SITE_CONTACT_EMAIL.">\n";
   $headers .= "MIME-Version: 1.0\n";
   $headers .= "Content-Type: text/plain; charset=UTF-8\r\n"; 
-  
 
 	return mail($to_address, $subject, $message, $headers);
-	
 
 }
 
@@ -1477,7 +1464,6 @@ function move_uploaded_image ($img_key) {
 
 	move_uploaded_file ($img_tmp, $new_name);
 	chmod($new_name, 0666);
-	
 
 	return $new_name;
 
@@ -1488,8 +1474,7 @@ function move_uploaded_image ($img_key) {
 
 function nav_pages_struct(&$result, $q_string, $count, $REC_PER_PAGE) {
  
-	global $label;
-	global $list_mode;
+	global $f2, $label, $list_mode;
 	
 	if ($list_mode=='PREMIUM') {
 		$page = 'hot.php';		
@@ -1559,8 +1544,7 @@ function nav_pages_struct(&$result, $q_string, $count, $REC_PER_PAGE) {
 
 function render_nav_pages (&$nav_pages_struct, $LINKS, $q_string='') {
 
-	global $list_mode;
-	global $label;
+	global $f2, $list_mode, $label;
 
 	if ($list_mode=='PREMIUM') {
 		$page = 'hot.php';
@@ -1635,11 +1619,7 @@ function do_log_entry ($entry_line) {
 
 function select_block ($map_x, $map_y) {
 
-	global $BID;
-	global $b_row;
-	global $label;
-
-	global $order_id;
+	global $f2, $BID, $b_row, $label, $order_id;
 
 	// calculate clicked block from co-ords.
 
@@ -1895,6 +1875,8 @@ shows an error if pixels were not reserved.
 
 function reserve_pixels_for_temp_order($temp_order_row) {
 
+	global $f2;
+
 	// check if the user can get the order
 	if (!can_user_order(load_banner_row($temp_order_row['banner_id']), $_SESSION['MDS_ID'], $temp_order_row['package_id'])) {
 		echo 'can\'t touch this<br>';
@@ -1973,7 +1955,9 @@ function reserve_pixels_for_temp_order($temp_order_row) {
 		
 	$result = mysql_query ($sql) or die (mysql_error().$sql);
 	$order_id = mysql_insert_id(); 
-	mds_log("Changed temp order to a real order - ".$sql);
+	
+	global $f2;
+	$f2->debug("Changed temp order to a real order - ".$sql);
 //echo "<hr>";echo $sql; echo "<hr>";
 	
 	$sql = "UPDATE ads SET user_id='".$_SESSION['MDS_ID']."', order_id='".$order_id."' where ad_id='".$temp_order_row['ad_id']."' ";
@@ -1996,7 +1980,9 @@ function reserve_pixels_for_temp_order($temp_order_row) {
 
 		$sql = "REPLACE INTO `blocks` ( `block_id` , `user_id` , `status` , `x` , `y` , `image_data` , `url` , `alt_text`, `approved`, `banner_id`, `currency`, `price`, `order_id`, `ad_id`) VALUES ('".$key."',  '".$_SESSION['MDS_ID']."' , 'reserved' , '".($block['map_x'])."' , '".($block['map_y'])."' , '".$block['image_data']."' , '".addslashes($url)."' , '".addslashes($alt_text)."', '".$approved."', '".$temp_order_row['banner_id']."', '".get_default_currency()."', '".$block['price']."', '".$order_id."', '".$temp_order_row['ad_id']."')";
 //echo $sql."<br>";
-		mds_log("Updated block - ".$sql);
+		
+		global $f2;
+		$f2->debug("Updated block - ".$sql);
 		mysql_query ($sql) or die (mysql_error().$sql);
 
 
@@ -2119,7 +2105,9 @@ function move_block($block_from, $block_to, $banner_id) {
 
 //echo "<p>$sql</p>";
 
-	mds_log("Moved Block - ".$sql);
+	
+	global $f2;
+	$f2->debug("Moved Block - ".$sql);
 
 	mysql_query ($sql) or die(mysql_error());
 
@@ -2128,7 +2116,8 @@ function move_block($block_from, $block_to, $banner_id) {
 	$sql = "DELETE from blocks WHERE block_id='".$block_from."' AND banner_id='".$banner_id."' ";
 //echo "<p>$sql</p>";
 	mysql_query ($sql) or die(mysql_error());
-	mds_log("Deleted block_from - ".$sql);
+	
+	$f2->debug("Deleted block_from - ".$sql);
 
 	// Update the order record
 
@@ -2151,7 +2140,8 @@ function move_block($block_from, $block_to, $banner_id) {
 	$sql = "UPDATE orders set blocks='".implode(',', $new_blocks)."' WHERE order_id='".$source_block['order_id']."' ";
 	# update the customer's order
 	mysql_query($sql) or die(mysql_error());
-	mds_log("Updated order - ".$sql);
+	
+	$f2->debug("Updated order - ".$sql);
 
 	return true;
 
@@ -2298,7 +2288,6 @@ then check how many orders the user had.
 function can_user_order($b_row, $user_id, $package_id=0) {
 	// check rank
 
-
 	$sql = "select Rank from users where ID='".$user_id."'";
 	$result = mysql_query ($sql) or die (mysql_error().$sql);
 	$u_row = mysql_fetch_array($result);
@@ -2309,7 +2298,11 @@ function can_user_order($b_row, $user_id, $package_id=0) {
 
 	}
 	
-	if (banner_get_packages($b_row['banner_id'])) { // if user has package, check if the user can order this package
+
+	global $f2;
+	$BID = $b_row['banner_id'];
+	
+	if (banner_get_packages($BID)) { // if user has package, check if the user can order this package
 		if ($package_id==0) { // don't know the package id, assume true.
 		
 			return true;
@@ -2460,6 +2453,8 @@ function get_definition($field_type) {
 
 function saveImage($field_id) {
 
+	global $f2;
+
 	if (IMG_MAX_WIDTH=='IMG_MAX_WIDTH' ) {
 
 		$max_width = '150';
@@ -2483,7 +2478,10 @@ function saveImage($field_id) {
 
 	}
     //echo "<b>NAMEis:[$name]</b>";
-	$name = ereg_replace("[ '\"]+", "_", $name); // strip quotes, spaces
+
+	//$name = ereg_replace("[ '\"]+", "_", $name); 
+	// strip quotes, spaces
+	$name = preg_replace('/[^0-9a-zа-яіїё\`\~\!\@\#\$\%\^\*\(\)\; \,\.\'\/\_\-]/i', ' ',$name); 
 	
 	$new_name = $name.time().".".$ext;
 	$uploadfile = $uploaddir . $new_name; //$uploaddir . $file_name;
@@ -2573,6 +2571,12 @@ function saveImage($field_id) {
 			case "image/jpeg":
 			case "image/pjpeg":
 				touch ($filename);
+
+				//error_reporting(E_ALL);
+				//ini_set('display_errors', 0);
+
+				//register_shutdown_function('shutdown');
+
 				$uploaded_img = imagecreatefromjpeg($filename);
 				imagecopyresampled($image_p, $uploaded_img, 0, 0, 0, 0, $width, $height, $width_orig, $height_orig);
 				unlink ($filename); // delete original file 
@@ -2627,6 +2631,8 @@ function deleteImage($table_name, $object_name, $object_id, $field_id) {
 ##########################################################
 
 function saveFile($field_id) {
+
+	global $f2;
 
 	$uploaddir = UPLOAD_PATH.'docs/';
 			
@@ -3083,20 +3089,41 @@ function js_out_prep($str) {
 
 function echo_copyright() {
 
-	/*
-	This software is free on the condition that you do not remove 
-	any copyright messages as part of the license. 
-	
-	If you want to remove these, 
-	please see http://www.milliondollarscript.com/remove.html 
-	*/
-
 	?>
 
-	<div style="font-size:xx-small; text-align:center">Powered By <a target="_blank" style="font-size:7pt;color:black" href="http://www.milliondollarscript.com/">Million Dollar Script</a> (c) 2008</div>
+	<div style="font-size:xx-small; text-align:center">Powered By <a target="_blank" style="font-size:7pt;color:black" href="http://www.milliondollarscript.com/">Million Dollar Script</a> Copyright &copy; 2011</div>
 
 	<?php
 
 }
+
+// catch errors
+function shutdown(){
+    $isError = false;
+    if ($error = error_get_last()){
+	switch($error['type']){
+	    case E_ERROR:
+	    case E_CORE_ERROR:
+	    case E_COMPILE_ERROR:
+	    case E_USER_ERROR:
+		$isError = true;
+		break;
+	}
+    }
+
+    if ($isError){
+	echo "Script execution halted ({$error['message']})";
+
+	// php memory error
+	if (substr_count($error['message'], 'Allowed memory size')) {
+		echo "<br />Try increasing your PHP memory limit and restarting the web server.";
+	}
+
+
+    } else {
+	echo "Script completed";
+    }
+}
+
 
 ?>

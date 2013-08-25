@@ -1,59 +1,123 @@
+.clear {
+	clear:both;
+}
+
+body.main {
+	margin: 0px;
+	font-family:Arial;
+	font-size: 12px;
+}
+
+.outer {
+	margin:0px;
+	padding:0px;
+	border:0px;
+	width:100%;
+}
+.inner {
+	margin:0px auto;
+	width:auto;
+}
+
+/*
+Heading bar
+*/
+.heading {
+	background: #fff;
+}
+
+.logo {
+	width:410px;;
+	float:left;
+}
+.slogan {
+	padding-top:35px;
+	width:350px;
+	float:left;
+	font-weight:bold;
+}
 
 /*
 controls the look and feel of the 'pixels-sold/available' box:
 */
-.status {	
-		width:134px;
-		height:43;
-		border:0;
-		padding: 5 0 0 0;
-		background: url(s_bg.gif) no-repeat #D7D7D7;
-		font-size: 12px;
-		font-family: Arial;
-		text-align:center;
-		line-height:16px;
-	}
+.status_outer {
+	float:right;
+	width:149px;
+	margin:5px 5px 0px 0px;
+	background: #fff url(s_bg.gif) no-repeat 5px 0px;
+}
 
 .status_body {
-
 	margin:0px; 
-	background-color: #D7D7D7;
-
+	background-color: transparent;
 }
-/*
-Table cells (inside tables)
-*/
-	TD {
 
-		font-size: 12px;
+.status {
+	float:right;
+	width:144px;
+	height:53px;
+	border:0px;
+	padding: 10px 0px 0px 0px;
+	font-size: 12px;
+	font-family: Arial;
+	text-align:center;
+	line-height:16px;
+}
 
-
-	}
-/*
-Heading bar
-*/
-	.heading_bar {
-		background: #D7D7D7;
-
-
-	}
 /*
 Menu bar (section at the top where the navigational links are placed)
 */
-	.menu_bar  {
-	
-		background: #fff  url(grgrad.gif) repeat-x;
-		color: white;
-		font-weight: bold;
-		text-align: center;
-		font-size: 13px;
+.menu_outer {
+	clear:both;
+	background: #fff  url(grgrad.gif) repeat-x;
+	height:53px;
+}
+.menu_bar  {
+	color: white;
+	font-weight: bold;
+	text-align: center;
+	font-size: 13px;
+	width:auto;
+	margin:0px auto;
+	height:53px;
+}
+ul.menu {
+	width:1001px;
+	margin:5px auto 0px auto;
+}
+ul.menu li {
+	background:url(button.gif) no-repeat;
+	display:block;
+	float:left;
+	height:43px;
+	line-height:43px;
+	width:134px;
+	margin:0px 2px 0px 0px;
+}
 
-
-	}
 /*
 Links in the menu bar
 */
-	A.menu_bar {
-		color: white;
+.menu_bar a:link, .menu_bar a:visited {
+	color: #000;
+	display:block;
+	float:left;
+	height:43px;
+	line-height:43px;
+	width:134px;
+	text-decoration:none;
+}
+.menu_bar a:hover {
+	color: #004042;
+}
 
-	}
+.container {
+	width:1001px;
+	margin:0 auto;
+	text-align:center;
+}
+
+.footer {
+	padding:10px;
+	text-align:center;
+}

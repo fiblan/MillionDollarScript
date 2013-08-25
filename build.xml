@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * @version	$Id$
+ * @package	mds
+ * @copyright	(C) Copyright 2010 Ryan Rhode, All rights reserved.
+ * @license	This program is free software; you can redistribute it and/or modify
+ *		it under the terms of the GNU General Public License as published by
+ *		the Free Software Foundation; either version 3 of the License, or
+ *		(at your option) any later version.
+ *
+ *		This program is distributed in the hope that it will be useful,
+ *		but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License along
+ *		with this program;  If not, see http://www.gnu.org/licenses/gpl-3.0.html.
+ 
+ 
+ HOW TO
+ ======
+ 
+ Add this to header of files:
+ 
+/**
+ * @version		$Id$
+ * @package		#@#PACKAGE#@#
+ * @copyright	#@#COPYRIGHT#@#
+ * @author		#@#AUTHOR#@#
+ * @license		#$#LICENSEFILE#$#
+ */
+ 
+ Leave only one tab after the @identifier
+ 
+ #@#LICENSESHORT#@# can be #$#LICENSEFILE#$# to replace with contents of LICENSEFILE.txt
+
+ Add SVN Property svn:keywords with value Id
+
+ Commit - Update to HEAD - Build
+ Then re-commit if was the first build because it just replaced your headers
+ 
+-->
+<project name="mds" default="cleanup">
+
+	<property name="ver.major" value="2." />
+	<property name="ver.minor" value="1" />
+
+	<property name="installxml" value="mds.xml" />
+	<property name="dest" value=".build" />
+	<property name="copyright" value="(C) Copyright 2010 Ryan Rhode, All rights reserved." />
+	<property name="author" value="Ryan Rhode, ryan@milliondollarscript.com" />
+	<property name="licenseshort" value="GNU/GPL - See LICENSE.txt" />
+
+	<property name="src" value="${project.basedir}" />
+	
+	<php expression="intval(shell_exec('svn info ${project.basedir} | grep Revision | sed \'s/Revision: //g\''))" returnProperty="svn.revision" />    
+	<property name="version" value="&lt;version&gt;${ver.major}${ver.minor}${svn.revision}&lt;/version&gt;" />
+	<property name="creationDate" value="&lt;creationDate&gt;${phing.startTime}&lt;/creationDate&gt;" />
+
+    <!-- ============================================  -->
+    <!-- Target: prepare                               -->
+    <!-- ============================================  -->
+    <target name="prepare">
+		<echo>Deleting ${dest}</echo>
+		<delete dir="${dest}" quiet="true" />
+		<echo>Making directory ${dest}</echo>
+		<mkdir dir="${dest}" />
+    </target>
+
+    <!-- Fileset for all files -->
+    <fileset dir="${src}" id="allfiles">
+		<include name="admin/**/**" />
+		<include name="ckeditor/**/**" />
+		<include name="include/**/**" />
+		<include name="html**/**" />
+		<include name="lang/**/**" />
+		<include name="library/**/**" />
+		<include name="mail/**/**" />
+		<include name="overlib/**/**" />
+		<include name="payment/**/**" />
+		<include name="pixels/**/**" />
+		<include name="upload_files/**/**" />
+		<include name="users/**/**" />
+        <include name="bg-main.gif" />
+        <include name="CHANGELOG" />
+        <include name="click.php" />
+        <include name="config-default.php" />
+        <include name="COPYING.txt" />
+        <include name="display_map.php" />
+        <include name="display_stats.php" />
+        <include name="index.php" />
+        <include name="list.php" />
+        <include name="ga.php" />
+        <include name="grgrad.gif" />
+        <include name="index.html" />
+        <include name="LICENSE.txt" />
+        <include name="logo.gif" />
+        <include name="main.css" />
+        <include name="mouseover_box.htm" />
+        <include name="periods.gif" />
+        <include name="README.txt" />
+        <include name="s_bg.gif" />
+        <include name="top_ads_js.php" />
+        <include name="UPGRADE.txt" />
+	</fileset>
+
+    <!-- Fileset for all files in dest -->
+    <fileset dir="${src}" id="cleanup_files">
+        <include name="${dest}/**" />
+        <exclude name="${dest}/${phing.project.name}.zip" />
+	</fileset>
+
+    <!-- ============================================  -->
+    <!-- Target: build                                 -->
+    <!-- ============================================  -->
+    <target name="build" depends="prepare">
+    	<!-- Replace tokens -->
+		<reflexive>
+			<fileset dir="${src}">
+				<include pattern="**/**" />
+				<exclude name="build.xml" />
+			</fileset>
+			<filterchain>
+				<replacetokens begintoken="#@#" endtoken="#@#">
+					<token key="PACKAGE" value="${phing.project.name}" />
+					<token key="COPYRIGHT" value="${copyright}" />
+					<token key="AUTHOR" value="${author}" />
+					<token key="LICENSESHORT" value="${licenseshort}" />
+				</replacetokens>
+			</filterchain>
+		</reflexive>
+    	<!-- Replace license token with contents of a file -->
+		<reflexive>
+			<fileset dir="${src}">
+				<include pattern="**/**" />
+				<exclude name="build.xml" />
+			</fileset>
+			<filterchain>
+			  <filterreader classname="phing.filter.ReplaceTokensWithFile">
+			    <param name="begintoken" value="#$#" />
+			    <param name="endtoken" value="#$#" />
+			    <param name="dir" value="${src}/" />
+			    <param name="postfix" value=".txt" />		
+			  </filterreader>
+			</filterchain>
+		</reflexive>
+    	<!-- Update Version - Commit all then UPDATE from SVN for correct version # -->
+		<!-- <reflexive>
+			<fileset dir="${src}">
+				<include pattern="**/${installxml}" />
+			</fileset>
+			<filterchain>
+			  <replaceregexp>
+				<regexp pattern="\&lt;version\b[^\&gt;]*\&gt;(.*?)\&lt;/version\&gt;" replace="${version}" ignoreCase="true" />
+				<regexp pattern="\&lt;creationDate\b[^\&gt;]*\&gt;(.*?)\&lt;/creationDate\&gt;" replace="${creationDate}" ignoreCase="true" />
+			  </replaceregexp>
+			</filterchain>
+		</reflexive> -->
+        <echo>Copying files to build directory...</echo>
+        <copy todir="${dest}">
+            <fileset refid="allfiles" />
+        </copy>
+    </target>
+
+    <!-- ============================================  -->
+    <!-- (DEFAULT)  Target: main                       --> 
+    <!-- ============================================  -->
+    <target name="main" depends="build">
+        <echo>Creating archive...</echo>
+        <zip destfile="${dest}/${phing.project.name}.zip">
+            <fileset refid="allfiles" />
+        </zip>
+        <echo>Created ${dest}/${phing.project.name}.zip</echo>
+    </target>
+	
+    <!-- ============================================  -->
+    <!-- Target: clean up                              -->
+    <!-- ============================================  -->
+    <target name="cleanup" depends="main">
+		<echo>Deleting ${dest}</echo>
+		<delete includeemptydirs="true">
+			<fileset refid="cleanup_files" />
+		</delete>
+    </target>
+</project>

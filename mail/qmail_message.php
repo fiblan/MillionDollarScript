@@ -2,20 +2,20 @@
 /*
  * qmail_message.php
  *
- * @(#) $Header: /home/mlemos/cvsroot/mimemessage/qmail_message.php,v 1.10 2006/05/04 01:24:35 mlemos Exp $
+ * @(#) $Header: /opt2/ena/metal/mimemessage/qmail_message.php,v 1.11 2009/07/27 22:07:23 mlemos Exp $
  *
  *
  */
 
 /*
-{metadocument}<?xml version="1.0" encoding="ISO-8859-1"?>
+{metadocument}<?xml version="1.0" encoding="UTF-8"?>
 <class>
 
 	<package>net.manuellemos.mimemessage</package>
 
 	<name>qmail_message_class</name>
-	<version>@(#) $Id: qmail_message.php,v 1.10 2006/05/04 01:24:35 mlemos Exp $</version>
-	<copyright>Copyright © (C) Manuel Lemos 2001-2004</copyright>
+	<version>@(#) $Id: qmail_message.php 161 2012-10-11 18:09:12Z ryan $</version>
+	<copyright>Copyright (C) Manuel Lemos 2001-2004</copyright>
 	<title>MIME E-mail message composing and sending using Qmail</title>
 	<author>Manuel Lemos</author>
 	<authoraddress>mlemos-at-acm.org</authoraddress>
@@ -68,7 +68,7 @@ class qmail_message_class extends email_message_class
 {metadocument}
 	<variable>
 		<name>mailer_delivery</name>
-		<value>qmail $Revision: 1.10 $</value>
+		<value>qmail $Revision: 161 $</value>
 		<documentation>
 			<purpose>Specify the text that is used to identify the mail
 				delivery class or sub-class. This text is appended to the
@@ -79,13 +79,13 @@ class qmail_message_class extends email_message_class
 	</variable>
 {/metadocument}
 */
-	var $mailer_delivery='qmail $Revision: 1.10 $';
+	var $mailer_delivery='qmail $Revision: 161 $';
 
 	Function SendMail($to,$subject,$body,$headers,$return_path)
 	{
 		$command=$this->qmail_path."/qmail-inject";
 		if(strcmp($return_path,""))
-			$command.=" '".ereg_replace("'", "'\\''","-f$return_path")."'";
+			$command.=" '".preg_replace("/'/", "'\\''","-f$return_path")."'";
 		if(!($pipe=@popen($command,"w")))
 			return($this->OutputPHPError("it was not possible to open qmail-inject input pipe", $php_errormsg));
 		if(strlen($headers))

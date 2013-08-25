@@ -1,5 +1,38 @@
+<?php
+/**
+ * @version		$Id: config_form.php 154 2012-09-10 22:10:51Z ryan $
+ * @package		mds
+ * @copyright	(C) Copyright 2010 Ryan Rhode, All rights reserved.
+ * @author		Ryan Rhode, ryan@milliondollarscript.com
+ * @license		This program is free software; you can redistribute it and/or modify
+ *		it under the terms of the GNU General Public License as published by
+ *		the Free Software Foundation; either version 3 of the License, or
+ *		(at your option) any later version.
+ *
+ *		This program is distributed in the hope that it will be useful,
+ *		but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License along
+ *		with this program;  If not, see http://www.gnu.org/licenses/gpl-3.0.html.
+ *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *
+ *		Million Dollar Script
+ *		A pixel script for selling pixels on your website.
+ *
+ *		For instructions see README.txt
+ *
+ *		Visit our website for FAQs, documentation, a list team members,
+ *		to post any bugs or feature requests, and a community forum:
+ * 		http://www.milliondollarscript.com/
+ *
+ */
+?>
 <form method="POST" name="form1">
-  <p>&nbsp;</p>
+  <p><input type="submit" value="Save Configuration" name="save"></p>
+  <input name="version_info" type="hidden" value="<?php echo VERSION_INFO; ?>" />
   <table border="0" cellpadding="5" cellspacing="2" style="border-style:groove" id="AutoNumber1" width="100%" bgcolor="#FFFFFF">
     <tr >
       <td colspan="2" bgcolor="#e6f2ea">
@@ -8,7 +41,12 @@
     <tr>
       <td width="20%" bgcolor="#e6f2ea"><font face="Verdana" size="1">Site Name</font></td>
       <td bgcolor="#e6f2ea"><font face="Verdana" size="1">
-      <input type="text" name="site_name" size="29" value="<?php echo stripslashes(htmlentities(SITE_NAME)); ?>"/></font></td>
+      <input type="text" name="site_name" size="49" value="<?php echo stripslashes(htmlentities(SITE_NAME)); ?>"/></font></td>
+    </tr>
+    <tr>
+      <td width="20%" bgcolor="#e6f2ea"><font face="Verdana" size="1">Site Slogan</font></td>
+      <td bgcolor="#e6f2ea"><font face="Verdana" size="1">
+      <input type="text" name="site_slogan" size="49" value="<?php echo stripslashes(htmlentities(SITE_SLOGAN)); ?>"/></font></td>
     </tr>
     <tr>
       <td bgcolor="#e6f2ea"><font face="Verdana" size="1">Site Logo URL</font></td>
@@ -218,7 +256,7 @@ NOTES<br>
 	
 	
 	
-	</taBLE>
+	</table>
 
    <p>&nbsp;</p>
     <table border="0" cellpadding="5" cellspacing="2" style="border-style:groove" id="AutoNumber1" width="100%" bgcolor="#FFFFFF">
@@ -254,14 +292,14 @@ NOTES<br>
 	<tr>
       <td  bgcolor="#e6f2ea"><font face="Verdana" size="1">Pixel Selection Method</font></td>
       <td  bgcolor="#e6f2ea"><font size="1" face="Verdana">
-	  <input type="radio" name="use_ajax" value="SIMPLE"  <?php if (USE_AJAX=='SIMPLE') { echo " checked "; } ?> ><font face="Verdana" size="1" color='red'><b>NEW! </b></font> Simple (Upload whole image at a time, users can start ordering without logging in. Uses AJAX. Recommended.) <br>
+	  <input type="radio" name="use_ajax" value="SIMPLE"  <?php if (USE_AJAX=='SIMPLE') { echo " checked "; } ?> >Simple (Upload whole image at a time, users can start ordering without logging in. Uses AJAX. Recommended.) <br>
       <input type="radio" name="use_ajax" value="YES"  <?php if (USE_AJAX=='YES') { echo " checked "; } ?> >Advanced (Select individual blocks. Uses AJAX) <br>
 	  <input type="radio" name="use_ajax" value="NO"  <?php if (USE_AJAX=='NO') { echo " checked "; } ?> >Advanced, no AJAX<br>
 	  </font></td>
     </tr>
 	<tr>
       <td bgcolor="#e6f2ea" width="20%"><font face="Verdana" size="1"> 
-       Resize uploaded pixels automatically?</font> <font face="Verdana" size="1" color='red'><b>NEW! </b></font></td>
+       Resize uploaded pixels automatically?</td>
       <td bgcolor="#e6f2ea"><font face="Verdana" size="1">
 	   <input type="radio" name="mds_resize" size="49" value="YES" <?php if (MDS_RESIZE=='YES') { echo " checked "; } ?> > Yes. Uploaded pixels will be resized to fit in to the blocks<br>
 	   <input type="radio" name="mds_resize" value="NO" <?php if (MDS_RESIZE=='NO') { echo " checked "; } ?> >No
